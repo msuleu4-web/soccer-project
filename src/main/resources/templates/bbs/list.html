@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掲示板 - 海外サッカーニュース</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- ヘッダー -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">⚽ 海外サッカー掲示板</h1>
+                <nav class="space-x-4">
+                    <a href="/" class="hover:underline">ニュース</a>
+                    <a href="/bbs" class="hover:underline font-bold">掲示板</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- フラッシュメッセージ -->
+        <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- メインコンテンツ -->
+            <div class="lg:col-span-3">
+                <!-- 操作バー -->
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                    <div class="flex flex-wrap gap-4 items-center justify-between">
+                        <!-- カテゴリフィルタ -->
+                        <div class="flex flex-wrap gap-2">
+                            <a th:each="cat : ${categories}" 
+                               th:href="@{/bbs(category=${cat})}"
+                               th:classappend="${selectedCategory == cat} ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+                               class="px-3 py-1 rounded text-sm font-medium transition">
+                                <span th:text="${cat}"></span>
+                            </a>
+                        </div>
+                        
+                        <!-- 新規スレッド作成ボタン -->
+                        <a href="/bbs/new" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold transition">
+                            ✏️ 新規スレッド作成
+                        </a>
+                    </div>
+                    
+                    <!-- 検索フォーム -->
+                    <form method="get" action="/bbs" class="mt-4">
+                        <div class="flex gap-2">
+                            <input type="text" name="keyword" th:value="${keyword}" 
+                                   placeholder="キーワード検索..." 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium transition">
+                                🔍 検索
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- スレッド一覧 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <!-- ヘッダー -->
+                    <div class="bg-gray-100 border-b border-gray-300 px-4 py-2 text-sm font-bold text-gray-700 grid grid-cols-12 gap-2">
+                        <div class="col-span-6">タイトル</div>
+                        <div class="col-span-2 text-center">投稿者</div>
+                        <div class="col-span-1 text-center">レス</div>
+                        <div class="col-span-1 text-center">閲覧</div>
+                        <div class="col-span-1 text-center">👍</div>
+                        <div class="col-span-1 text-center">日時</div>
+                    </div>
+
+                    <!-- スレッド一覧 -->
+                    <div th:if="${posts.isEmpty()}" class="p-8 text-center text-gray-500">
+                        スレッドがありません
+                    </div>
+                    
+                    <div th:each="post : ${posts.content}" 
+                         class="border-b border-gray-200 hover:bg-gray-50 transition">
+                        <a th:href="@{/bbs/{id}(id=${post.id})}" 
+                           class="px-4 py-3 grid grid-cols-12 gap-2 items-center text-sm">
+                            <!-- タイトル -->
+                            <div class="col-span-6">
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2" 
+                                      th:text="${post.category}"></span>
+                                <span class="font-medium text-gray-900 hover:text-blue-600" 
+                                      th:text="${post.title}"></span>
+                            </div>
+                            
+                            <!-- 投稿者 -->
+                            <div class="col-span-2 text-center text-gray-600" th:text="${post.author}"></div>
+                            
+                            <!-- レス数 -->
+                            <div class="col-span-1 text-center">
+                                <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold" 
+                                      th:text="${post.commentCount}"></span>
+                            </div>
+                            
+                            <!-- 閲覧数 -->
+                            <div class="col-span-1 text-center text-gray-600" th:text="${post.viewCount}"></div>
+                            
+                            <!-- おすすめ数 -->
+                            <div class="col-span-1 text-center">
+                                <span class="text-red-600 font-bold" th:text="${post.recommendCount}"></span>
+                            </div>
+                            
+                            <!-- 日時 -->
+                            <div class="col-span-1 text-center text-gray-500 text-xs" 
+                                 th:text="${#temporals.format(post.createdAt, 'MM/dd HH:mm')}"></div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ページネーション -->
+                <div th:if="${totalPages > 1}" class="mt-4 flex justify-center gap-2">
+                    <a th:if="${currentPage > 0}" 
+                       th:href="@{/bbs(page=${currentPage - 1}, category=${selectedCategory}, keyword=${keyword})}"
+                       class="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 transition">
+                        ← 前へ
+                    </a>
+                    
+                    <span class="px-4 py-2 bg-blue-600 text-white rounded font-bold">
+                        <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span>
+                    </span>
+                    
+                    <a th:if="${currentPage < totalPages - 1}" 
+                       th:href="@{/bbs(page=${currentPage + 1}, category=${selectedCategory}, keyword=${keyword})}"
+                       class="px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 transition">
+                        次へ →
+                    </a>
+                </div>
+            </div>
+
+            <!-- サイドバー -->
+            <div class="lg:col-span-1">
+                <!-- 人気スレッド -->
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-4">
+                    <h3 class="font-bold text-lg mb-3 text-gray-800 border-b pb-2">🔥 人気スレッド</h3>
+                    <div class="space-y-2">
+                        <a th:each="topPost : ${topPosts}" 
+                           th:href="@{/bbs/{id}(id=${topPost.id})}"
+                           class="block p-2 hover:bg-gray-50 rounded transition">
+                            <div class="text-sm font-medium text-gray-900 truncate" th:text="${topPost.title}"></div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                👍 <span th:text="${topPost.recommendCount}"></span> | 
+                                💬 <span th:text="${topPost.commentCount}"></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 掲示板ガイド -->
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <h3 class="font-bold text-lg mb-3 text-gray-800 border-b pb-2">📌 掲示板ガイド</h3>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li>• ログイン不要で投稿可能</li>
+                        <li>• 削除用パスワードを設定</li>
+                        <li>• 誹謗中傷は禁止</li>
+                        <li>• サッカー関連の話題を</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>&copy; 2026 海外サッカーニュース掲示板</p>
+    </footer>
+</body>
+</html>

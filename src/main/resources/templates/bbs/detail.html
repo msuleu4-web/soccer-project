@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${post.title} + ' - 海外サッカー掲示板'">スレッド詳細</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+        }
+        .post-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- ヘッダー -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">⚽ 海外サッカー掲示板</h1>
+                <nav class="space-x-4">
+                    <a href="/" class="hover:underline">ニュース</a>
+                    <a href="/bbs" class="hover:underline font-bold">掲示板</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6">
+        <!-- フラッシュメッセージ -->
+        <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- パンくずリスト -->
+        <div class="mb-4 text-sm text-gray-600">
+            <a href="/bbs" class="hover:underline">掲示板トップ</a> 
+            <span class="mx-2">›</span>
+            <span th:text="${post.category}"></span>
+        </div>
+
+        <!-- スレッド本文 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-medium" 
+                              th:text="${post.category}"></span>
+                        <h1 class="text-2xl font-bold text-gray-900" th:text="${post.title}"></h1>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                        <span>👤 <span th:text="${post.author}"></span></span>
+                        <span>📅 <span th:text="${#temporals.format(post.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></span></span>
+                        <span>👁️ <span th:text="${post.viewCount}"></span></span>
+                        <span>💬 <span th:text="${post.commentCount}"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t pt-4 mb-4">
+                <div class="post-content text-gray-800 leading-relaxed" th:text="${post.content}"></div>
+            </div>
+
+            <!-- アクションボタン -->
+            <div class="flex gap-2 border-t pt-4">
+                <!-- おすすめボタン -->
+                <form th:action="@{/bbs/{id}/recommend(id=${post.id})}" method="post" class="inline">
+                    <button type="submit" 
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium transition">
+                        👍 おすすめ (<span th:text="${post.recommendCount}"></span>)
+                    </button>
+                </form>
+
+                <!-- 削除ボタン（モーダル表示） -->
+                <button onclick="showDeleteModal()" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium transition">
+                    🗑️ 削除
+                </button>
+            </div>
+        </div>
+
+        <!-- コメント一覧 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+                💬 コメント (<span th:text="${comments.size()}"></span>)
+            </h2>
+
+            <div th:if="${comments.isEmpty()}" class="text-center text-gray-500 py-8">
+                まだコメントがありません
+            </div>
+
+            <!-- コメント一覧 -->
+            <div th:each="comment, iterStat : ${comments}" 
+                 class="border-b border-gray-200 py-4 last:border-b-0">
+                <div class="flex items-start gap-4">
+                    <!-- コメント番号 -->
+                    <div class="flex-shrink-0 w-12 text-center">
+                        <span class="inline-block bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm font-bold" 
+                              th:text="${comment.commentNumber}"></span>
+                    </div>
+
+                    <!-- コメント内容 -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2 text-sm text-gray-600">
+                            <span class="font-medium text-gray-900" th:text="${comment.author}"></span>
+                            <span th:text="${#temporals.format(comment.createdAt, 'yyyy/MM/dd HH:mm:ss')}"></span>
+                        </div>
+                        <div class="post-content text-gray-800" th:text="${comment.content}"></div>
+                    </div>
+
+                    <!-- 削除ボタン -->
+                    <button th:onclick="'showCommentDeleteModal(' + ${comment.id} + ')'" 
+                            class="flex-shrink-0 text-gray-400 hover:text-red-600 transition">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- コメント投稿フォーム -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold mb-4 text-gray-800">✏️ コメントを投稿</h3>
+            <form th:action="@{/bbs/{id}/comment(id=${post.id})}" method="post">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">名前</label>
+                        <input type="text" name="author" required maxlength="50"
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="匿名さん">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">コメント</label>
+                        <textarea name="content" required rows="4" maxlength="2000"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="コメントを入力してください..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">削除用パスワード</label>
+                        <input type="password" name="password" required minlength="4" maxlength="20"
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="4文字以上">
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-bold transition">
+                            💬 投稿する
+                        </button>
+                        <a href="/bbs" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded font-bold transition">
+                            一覧に戻る
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- スレッド削除モーダル -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-bold mb-4">スレッドを削除</h3>
+            <form th:action="@{/bbs/{id}/delete(id=${post.id})}" method="post">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">削除用パスワード</label>
+                    <input type="password" name="password" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold transition">
+                        削除する
+                    </button>
+                    <button type="button" onclick="hideDeleteModal()" 
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded font-bold transition">
+                        キャンセル
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- コメント削除モーダル -->
+    <div id="commentDeleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-bold mb-4">コメントを削除</h3>
+            <form id="commentDeleteForm" method="post">
+                <input type="hidden" name="postId" th:value="${post.id}">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">削除用パスワード</label>
+                    <input type="password" name="password" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold transition">
+                        削除する
+                    </button>
+                    <button type="button" onclick="hideCommentDeleteModal()" 
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded font-bold transition">
+                        キャンセル
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>&copy; 2026 海外サッカーニュース掲示板</p>
+    </footer>
+
+    <script>
+        function showDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+        
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+        
+        function showCommentDeleteModal(commentId) {
+            const form = document.getElementById('commentDeleteForm');
+            form.action = '/bbs/comment/' + commentId + '/delete';
+            document.getElementById('commentDeleteModal').classList.remove('hidden');
+        }
+        
+        function hideCommentDeleteModal() {
+            document.getElementById('commentDeleteModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

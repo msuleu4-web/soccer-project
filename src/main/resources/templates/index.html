@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${タイトル}">海外サッカーニュース</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
+            background: #F5F5F7;
+            color: #333333;
+            line-height: 1.7;
+        }
+        
+        /* ヘッダー */
+        header {
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E5E5;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .site-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .site-logo span {
+            font-size: 1.3rem;
+        }
+        
+        nav {
+            display: flex;
+            gap: 24px;
+        }
+        
+        nav a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: #0056b3;
+        }
+        
+        /* メインコンテンツ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #0056b3;
+        }
+        
+        /* ニュースリスト */
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .news-item {
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            padding: 20px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .news-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #D0D0D0;
+        }
+        
+        .news-thumbnail {
+            flex-shrink: 0;
+            width: 180px;
+            height: 120px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .news-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .news-thumbnail img:hover {
+            transform: scale(1.05);
+        }
+        
+        .news-thumbnail-placeholder {
+            font-size: 3rem;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .news-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .news-meta-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .news-source {
+            color: #0056b3;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .news-date {
+            color: #999999;
+            font-size: 0.85rem;
+        }
+        
+        .news-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .news-summary {
+            color: #555555;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* スケルトンローダー */
+        .skeleton-summary {
+            background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s ease-in-out infinite;
+            border-radius: 4px;
+            height: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .skeleton-summary:last-child {
+            width: 70%;
+        }
+        
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        
+        .news-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .news-link {
+            color: #0056b3;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .news-link:hover {
+            text-decoration: underline;
+        }
+        
+        .news-details {
+            margin-top: 12px;
+        }
+        
+        .news-details summary {
+            color: #666666;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .news-details summary::-webkit-details-marker {
+            display: none;
+        }
+        
+        .news-details summary:hover {
+            color: #0056b3;
+        }
+        
+        .news-details[open] summary {
+            margin-bottom: 12px;
+        }
+        
+        .news-original-text {
+            color: #666666;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            padding: 12px;
+            background: #F9F9F9;
+            border-left: 3px solid #E5E5E5;
+            border-radius: 4px;
+        }
+        
+        /* ステータスメッセージ */
+        .status-message {
+            text-align: center;
+            padding: 60px 20px;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            color: #666666;
+        }
+        
+        .status-message.error {
+            border-color: #FFD4D4;
+            background: #FFF5F5;
+            color: #D32F2F;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #E5E5E5;
+            border-radius: 50%;
+            border-top-color: #0056b3;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-text {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* 再取得ボタン */
+        .refresh-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #E5E5E5;
+        }
+        
+        .refresh-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0056b3;
+            color: #FFFFFF;
+            padding: 12px 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,86,179,0.2);
+        }
+        
+        .refresh-button:hover {
+            background: #004494;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,86,179,0.3);
+        }
+        
+        .refresh-button:active {
+            transform: translateY(0);
+        }
+        
+        /* フッター */
+        footer {
+            background: #FFFFFF;
+            border-top: 1px solid #E5E5E5;
+            margin-top: 60px;
+            padding: 40px 20px 20px;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: #0056b3;
+        }
+        
+        .footer-tech {
+            color: #999999;
+            font-size: 0.8rem;
+            padding-top: 20px;
+            border-top: 1px solid #F0F0F0;
+        }
+        
+        .footer-copyright {
+            color: #999999;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .header-container {
+                height: 56px;
+            }
+            
+            .site-logo {
+                font-size: 1.3rem;
+            }
+            
+            nav {
+                gap: 16px;
+            }
+            
+            nav a {
+                font-size: 0.85rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .news-item {
+                flex-direction: column;
+                padding: 16px;
+            }
+            
+            .news-thumbnail {
+                width: 100%;
+                height: 160px;
+            }
+            
+            .news-title {
+                font-size: 1.1rem;
+            }
+            
+            .news-summary {
+                font-size: 0.9rem;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <div class="header-container">
+            <a href="/" class="site-logo">
+                <span>⚽</span>
+                <span th:text="${タイトル}">海外サッカーニュース</span>
+            </a>
+            <nav>
+                <a href="/">ホーム</a>
+                <a href="/bbs">掲示板</a>
+                <a href="/refresh">最新</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <h1 class="page-title">最新ニュース</h1>
+        
+        <!-- エラーメッセージ表示 -->
+        <div th:if="${エラーメッセージ}" class="status-message error">
+            <p class="status-text" th:text="${エラーメッセージ}">エラーメッセージ</p>
+        </div>
+        
+        <!-- ローディング表示（記事がない場合） -->
+        <div th:if="${記事リスト == null or 記事リスト.isEmpty()}" class="status-message">
+            <div class="loading-spinner"></div>
+            <p class="status-text">
+                BBC Sport Footballからニュースを取得中です...<br>
+                しばらくお待ちください
+            </p>
+        </div>
+        
+        <!-- ニュース一覧表示エリア -->
+        <div th:if="${記事リスト != null and !記事リスト.isEmpty()}">
+            <div class="news-list">
+                <!-- 記事アイテム（繰り返し） -->
+                <article th:each="記事, iterStat : ${記事リスト}" class="news-item">
+                    <div class="news-thumbnail">
+                        <!-- カテゴリー別の有名選手画像を表示 -->
+                        <img th:if="${記事.画像URL != null and 記事.画像URL != ''}" 
+                             th:src="${記事.画像URL}" 
+                             th:alt="${記事.タイトル}"
+                             th:attr="data-title=${記事.タイトル}"
+                             onerror="this.onerror=null; this.src=getCategoryImage(this.getAttribute('data-title'));">
+                        <img th:if="${記事.画像URL == null or 記事.画像URL == ''}"
+                             th:attr="data-title=${記事.タイトル}"
+                             th:alt="${記事.タイトル}"
+                             onload="this.src=getCategoryImage(this.getAttribute('data-title'));"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="news-thumbnail-placeholder" 
+                             style="display:none;">
+                            ⚽
+                        </div>
+                    </div>
+                    
+                    <div class="news-content">
+                        <div class="news-meta-top">
+                            <span class="news-source" th:text="${記事.ソース名}">BBC Sport Football</span>
+                            <span class="news-date" th:text="${#temporals.format(記事.取得日時, 'yyyy年MM月dd日 HH:mm')}">2026年01月28日</span>
+                        </div>
+                        
+                        <h2 class="news-title" th:text="${記事.タイトル}">ニュースタイトル</h2>
+                        
+                        <!-- 記事本文のプレビュー表示 -->
+                        <div th:if="${記事.本文 != null and 記事.本文 != ''}">
+                            <p class="news-summary" th:text="${#strings.abbreviate(記事.本文, 200)}">記事本文のプレビュー</p>
+                        </div>
+                        
+                        <div class="news-actions">
+                            <a th:href="${記事.URL}" target="_blank" class="news-link">
+                                記事を読む →
+                            </a>
+                            
+                            <!-- 本文プレビュー（折りたたみ） -->
+                            <details class="news-details">
+                                <summary>原文を表示</summary>
+                                <div class="news-original-text" th:text="${記事.本文}">
+                                    元の英語記事本文
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            
+            <!-- 再取得ボタン -->
+            <div class="refresh-section">
+                <a href="/refresh" class="refresh-button">
+                    <span>🔄</span>
+                    <span>ニュースを更新</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- フッター -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="/">ホーム</a>
+                <a href="/bbs">掲示板</a>
+                <a href="/refresh">最新ニュース</a>
+                <a href="https://www.bbc.com/sport/football" target="_blank">BBC Sport Football</a>
+            </div>
+            
+            <p class="footer-copyright">
+                © 2026 海外サッカーニュース. All rights reserved.
+            </p>
+            
+            <p class="footer-tech">
+                Powered by Spring Boot 3.4 · Java 21 Virtual Threads · Jsoup
+            </p>
+        </div>
+    </footer>
+    
+    <script th:inline="javascript">
+        // カテゴリー別の有名選手画像URLを返す関数
+        function getCategoryImage(title) {
+            if (!title) return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=300&fit=crop';
+            
+            const titleLower = title.toLowerCase();
+            
+            // Premier League Top Scorers - Erling Haaland (Manchester City)
+            if (titleLower.includes('premier league') || titleLower.includes('top scorer') || titleLower.includes('haaland')) {
+                return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=300&fit=crop';
+            }
+            
+            // Women's Football - High quality women's football image
+            if (titleLower.includes('women') || titleLower.includes('wsl') || titleLower.includes('female') || titleLower.includes('ladies')) {
+                return 'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=400&h=300&fit=crop';
+            }
+            
+            // European Football / Champions League - High quality stadium image
+            if (titleLower.includes('european') || titleLower.includes('champions league') || titleLower.includes('uefa') || titleLower.includes('europa')) {
+                return 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop';
+            }
+            
+            // Real Madrid
+            if (titleLower.includes('real madrid') || titleLower.includes('madrid')) {
+                return 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=400&h=300&fit=crop';
+            }
+            
+            // Barcelona
+            if (titleLower.includes('barcelona') || titleLower.includes('barça') || titleLower.includes('barca')) {
+                return 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop';
+            }
+            
+            // Manchester United
+            if (titleLower.includes('manchester united') || titleLower.includes('man utd') || titleLower.includes('man united')) {
+                return 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop';
+            }
+            
+            // Liverpool
+            if (titleLower.includes('liverpool')) {
+                return 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop';
+            }
+            
+            // Arsenal
+            if (titleLower.includes('arsenal')) {
+                return 'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=400&h=300&fit=crop';
+            }
+            
+            // Chelsea
+            if (titleLower.includes('chelsea')) {
+                return 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=400&h=300&fit=crop';
+            }
+            
+            // Manchester City
+            if (titleLower.includes('manchester city') || titleLower.includes('man city')) {
+                return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=300&fit=crop';
+            }
+            
+            // Transfer news
+            if (titleLower.includes('transfer') || titleLower.includes('sign') || titleLower.includes('deal')) {
+                return 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=300&fit=crop';
+            }
+            
+            // Match/Game related
+            if (titleLower.includes('match') || titleLower.includes('game') || titleLower.includes('win') || titleLower.includes('lose') || titleLower.includes('draw')) {
+                return 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=400&h=300&fit=crop';
+            }
+            
+            // Default - Generic high-quality football action image
+            return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=300&fit=crop';
+        }
+        
+        // ページ読み込み時に画像URLが空の場合、カテゴリー画像を設定
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.news-thumbnail img[data-title]');
+            images.forEach(function(img) {
+                if (!img.src || img.src === window.location.href) {
+                    const title = img.getAttribute('data-title');
+                    img.src = getCategoryImage(title);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

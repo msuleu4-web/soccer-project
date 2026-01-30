@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規スレッド作成 - 海外サッカー掲示板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- ヘッダー -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">⚽ 海外サッカー掲示板</h1>
+                <nav class="space-x-4">
+                    <a href="/" class="hover:underline">ニュース</a>
+                    <a href="/bbs" class="hover:underline font-bold">掲示板</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <!-- フラッシュメッセージ -->
+        <div th:if="${success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- パンくずリスト -->
+        <div class="mb-4 text-sm text-gray-600">
+            <a href="/bbs" class="hover:underline">掲示板トップ</a> 
+            <span class="mx-2">›</span>
+            <span>新規スレッド作成</span>
+        </div>
+
+        <!-- 新規スレッド作成フォーム -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">✏️ 新規スレッド作成</h1>
+
+            <form action="/bbs/create" method="post" th:action="@{/bbs/create}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="space-y-5">
+                    <!-- カテゴリ選択 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            カテゴリ <span class="text-red-500">*</span>
+                        </label>
+                        <select name="category" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                        </select>
+                    </div>
+
+                    <!-- タイトル -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            タイトル <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="title" required maxlength="200"
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="スレッドのタイトルを入力してください">
+                        <p class="text-xs text-gray-500 mt-1">最大200文字</p>
+                    </div>
+
+                    <!-- 本文 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            本文 <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="content" required rows="10" maxlength="5000"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  placeholder="スレッドの内容を入力してください"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">最大5000文字</p>
+                    </div>
+
+                    <!-- 投稿者名 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            名前 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="author" required maxlength="50"
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="匿名さん">
+                        <p class="text-xs text-gray-500 mt-1">最大50文字</p>
+                    </div>
+
+                    <!-- 削除用パスワード -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            削除用パスワード <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" name="password" required minlength="4" maxlength="20"
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="4文字以上20文字以内">
+                        <p class="text-xs text-gray-500 mt-1">後でスレッドを削除する際に必要です</p>
+                    </div>
+
+                    <!-- 注意事項 -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-4">
+                        <h3 class="font-bold text-sm text-yellow-800 mb-2">⚠️ 投稿前の注意事項</h3>
+                        <ul class="text-xs text-yellow-700 space-y-1">
+                            <li>• 誹謗中傷、差別的な発言は禁止です</li>
+                            <li>• 個人情報の投稿は控えてください</li>
+                            <li>• サッカーに関連する話題を投稿してください</li>
+                            <li>• 削除用パスワードは忘れないようにしてください</li>
+                        </ul>
+                    </div>
+
+                    <!-- ボタン -->
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" 
+                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded font-bold transition">
+                            📝 スレッドを作成
+                        </button>
+                        <a href="/bbs" 
+                           class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded font-bold text-center transition">
+                            キャンセル
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- フッター -->
+    <footer class="bg-gray-800 text-white text-center py-6 mt-12">
+        <p>&copy; 2026 海外サッカーニュース掲示板</p>
+    </footer>
+</body>
+</html>

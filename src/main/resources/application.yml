@@ -1,0 +1,88 @@
+# Spring Boot アプリケーション設定ファイル
+# 海外サッカーニュースプラットフォーム
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+
+spring:
+  application:
+    name: soccer-news-summary
+  
+  # Java 21 가상 스레드 활성화 (성능 향상)
+  threads:
+    virtual:
+      enabled: true
+  
+  # Thymeleaf テンプレートエンジン設定
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+
+# アプリケーション固有の設定
+soccer-news:
+  # スクレイピング対象のサッカーメディア
+  sources:
+    - name: "BBC Sport Football"
+      url: "https://www.bbc.com/sport/football"
+      enabled: true
+    - name: "Sky Sports Football"
+      url: "https://www.skysports.com/football"
+      enabled: true
+    - name: "The Guardian Football"
+      url: "https://www.theguardian.com/football"
+      enabled: true
+  
+  # スクレイピング設定
+  scraping:
+    timeout-seconds: 10
+    user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    max-articles-per-source: 10
+  
+  # AI要約設定
+  summarization:
+    provider: anthropic
+    max-length: 200
+    language: ja
+
+# データベース設定 (H2インメモリDB)
+  datasource:
+    url: jdbc:h2:mem:soccerdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # JPA/Hibernate設定
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  
+  # H2コンソール設定（開発用）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# ログ設定
+logging:
+  level:
+    com.soccer.news: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.ai.anthropic: DEBUG
+    org.springframework.orm.jpa: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.jsoup: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
