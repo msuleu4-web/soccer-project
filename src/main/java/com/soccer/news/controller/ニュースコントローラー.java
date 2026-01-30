@@ -2,11 +2,14 @@ package com.soccer.news.controller;
 
 import com.soccer.news.model.ニュース記事;
 import com.soccer.news.service.スクレイピングサービス;
+import com.soccer.news.service.JapanesePlayerUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -20,6 +23,7 @@ import java.util.List;
 public class ニュースコントローラー {
 
     private final スクレイピングサービス スクレイピングサービス;
+    private final JapanesePlayerUpdateService playerUpdateService;
 
     /**
      * トップページ - ニュース一覧表示
@@ -66,5 +70,25 @@ public class ニュースコントローラー {
     public String ニュース再取得(Model model) {
         log.info("ニュース再取得リクエスト");
         return "redirect:/";
+    }
+    
+    /**
+     * 日本人選手情報を手動更新
+     * 管理者が最新情報を即座に反映したい場合に使用
+     */
+    @PostMapping("/api/players/update")
+    public String 選手情報更新(RedirectAttributes redirectAttributes) {
+        log.info("日本人選手情報の手動更新リクエスト");
+        
+        try {
+            playerUpdateService.updatePlayerStatsManually();
+            redirectAttributes.addFlashAttribute("successMessage", "日本人選手情報を最新に更新しました！");
+            log.info("日本人選手情報の手動更新が完了しました");
+        } catch (Exception e) {
+            log.error("日本人選手情報の更新中にエラーが発生しました", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "選手情報の更新に失敗しました: " + e.getMessage());
+        }
+        
+        return "redirect:/players";
     }
 }

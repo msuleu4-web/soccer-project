@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * コメント（レス）エンティティ
@@ -53,4 +57,27 @@ public class Comment {
     /** コメント番号（スレッド内での連番） */
     @Column(name = "comment_number")
     private Integer commentNumber;
+    
+    /** このコメントに対するリアクション一覧 */
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Reaction> reactions = new ArrayList<>();
+    
+    /**
+     * リアクションタイプ別のカウントを取得
+     */
+    public Map<Reaction.ReactionType, Long> getReactionCounts() {
+        return reactions.stream()
+                .collect(Collectors.groupingBy(
+                        Reaction::getReactionType,
+                        Collectors.counting()
+                ));
+    }
+    
+    /**
+     * 総リアクション数を取得
+     */
+    public int getTotalReactions() {
+        return reactions != null ? reactions.size() : 0;
+    }
 }

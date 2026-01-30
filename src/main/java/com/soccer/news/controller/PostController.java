@@ -1,8 +1,11 @@
 package com.soccer.news.controller;
 
-import com.soccer.news.model.Comment;
-import com.soccer.news.model.Post;
+import com.soccer.news.model.*;
+import com.soccer.news.service.JapanesePlayerService;
+import com.soccer.news.service.PollService;
 import com.soccer.news.service.PostService;
+import com.soccer.news.service.ReactionService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,6 +28,9 @@ import java.util.Optional;
 public class PostController {
     
     private final PostService postService;
+    private final ReactionService reactionService;
+    private final PollService pollService;
+    private final JapanesePlayerService japanesePlayerService;
     
     // カテゴリ一覧（定数）
     private static final String[] CATEGORIES = {
@@ -61,8 +67,12 @@ public class PostController {
         // 人気スレッド（サイドバー用）
         List<Post> topPosts = postService.getTopRecommendedPosts(5);
         
+        // 日本人選手情報（サイドバー用）
+        List<JapanesePlayer> topPlayers = japanesePlayerService.getTopPlayers(5);
+        
         model.addAttribute("posts", posts);
         model.addAttribute("topPosts", topPosts);
+        model.addAttribute("topPlayers", topPlayers);
         model.addAttribute("categories", CATEGORIES);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", posts.getTotalPages());
@@ -85,8 +95,16 @@ public class PostController {
         Post post = postOpt.get();
         List<Comment> comments = postService.getCommentsByPostId(id);
         
+        // アンケート情報を取得
+        Optional<Poll> poll = pollService.getPollByPostId(id);
+        
+        // リアクションタイプ一覧
+        Reaction.ReactionType[] reactionTypes = Reaction.ReactionType.values();
+        
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
+        model.addAttribute("poll", poll.orElse(null));
+        model.addAttribute("reactionTypes", reactionTypes);
         model.addAttribute("categories", CATEGORIES);
         
         return "bbs/detail";
@@ -235,5 +253,79 @@ public class PostController {
         }
         
         return "redirect:/bbs/" + postId;
+    }
+    
+    /**
+     * リアクション追加処理
+     */
+    @PostMapping("/comment/{commentId}/reaction")
+    public String addReaction(
+            @PathVariable Long commentId,
+            @RequestParam String reactionType,
+            @RequestParam Long postId,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        
+        try {
+            String userIp = getClientIp(request);
+            Reaction.ReactionType type = Reaction.ReactionType.valueOf(reactionType);
+            
+            boolean success = reactionService.addReaction(commentId, type, userIp);
+            
+            if (success) {
+                redirectAttributes.addFlashAttribute("success", "リアクションしました");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "リアクションに失敗しました");
+            }
+            
+        } catch (Exception e) {
+            log.error("リアクション追加エラー", e);
+            redirectAttributes.addFlashAttribute("error", "リアクションに失敗しました");
+        }
+        
+        return "redirect:/bbs/" + postId;
+    }
+    
+    /**
+     * アンケート投票処理
+     */
+    @PostMapping("/poll/{optionId}/vote")
+    public String votePoll(
+            @PathVariable Long optionId,
+            @RequestParam Long postId,
+            RedirectAttributes redirectAttributes) {
+        
+        try {
+            boolean success = pollService.vote(optionId);
+            
+            if (success) {
+                redirectAttributes.addFlashAttribute("success", "投票しました");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "投票に失敗しました");
+            }
+            
+        } catch (Exception e) {
+            log.error("投票エラー", e);
+            redirectAttributes.addFlashAttribute("error", "投票に失敗しました");
+        }
+        
+        return "redirect:/bbs/" + postId;
+    }
+    
+    /**
+     * クライアントIPアドレスを取得
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
 }

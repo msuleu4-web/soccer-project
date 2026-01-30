@@ -433,6 +433,7 @@
             </a>
             <nav>
                 <a href="/">ホーム</a>
+                <a href="/players">日本人選手</a>
                 <a href="/bbs">掲示板</a>
                 <a href="/refresh">最新</a>
             </nav>
@@ -442,6 +443,16 @@
     <!-- メインコンテンツ -->
     <div class="container">
         <h1 class="page-title">最新ニュース</h1>
+        
+        <!-- 成功メッセージ表示 -->
+        <div th:if="${successMessage}" class="status-message" style="border-color: #C8E6C9; background: #F1F8E9; color: #2E7D32; margin-bottom: 20px;">
+            <p class="status-text" th:text="${successMessage}">成功メッセージ</p>
+        </div>
+        
+        <!-- エラーメッセージ表示 -->
+        <div th:if="${errorMessage}" class="status-message error" style="margin-bottom: 20px;">
+            <p class="status-text" th:text="${errorMessage}">エラーメッセージ</p>
+        </div>
         
         <!-- エラーメッセージ表示 -->
         <div th:if="${エラーメッセージ}" class="status-message error">
@@ -516,6 +527,14 @@
                     <span>🔄</span>
                     <span>ニュースを更新</span>
                 </a>
+                
+                <!-- 日本人選手情報更新ボタン -->
+                <form action="/api/players/update" method="post" style="display: inline-block; margin-left: 16px;">
+                    <button type="submit" class="refresh-button" style="background: #2E7D32; border: none; cursor: pointer;">
+                        <span>⚽</span>
+                        <span>日本人選手情報を更新</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -525,6 +544,7 @@
         <div class="footer-container">
             <div class="footer-links">
                 <a href="/">ホーム</a>
+                <a href="/players">日本人選手</a>
                 <a href="/bbs">掲示板</a>
                 <a href="/refresh">最新ニュース</a>
                 <a href="https://www.bbc.com/sport/football" target="_blank">BBC Sport Football</a>

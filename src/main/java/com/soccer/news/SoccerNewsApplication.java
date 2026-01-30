@@ -2,6 +2,7 @@ package com.soccer.news;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 海外サッカーニュースアプリケーションのメインクラス
@@ -11,8 +12,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * - 海外サッカーメディアからのニュース自動収集 (Jsoup)
  * - LLMによる高度なニュース要約 (Spring AI)
  * - Virtual Threadsによる高速並行処理 (Java 21)
+ * - 日本人選手情報の自動更新 (Scheduled Tasks)
  */
 @SpringBootApplication
+@EnableScheduling
 public class SoccerNewsApplication {
 
     public static void main(String[] args) {

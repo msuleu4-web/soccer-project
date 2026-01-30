@@ -68,7 +68,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**")  // H2コンソールはCSRF除外
+                .ignoringRequestMatchers("/h2-console/**", "/api/players/update")  // H2コンソールと選手更新APIはCSRF除外
             )
             .headers(headers -> headers
                 .frameOptions(frame -> frame.sameOrigin())  // H2コンソール用
