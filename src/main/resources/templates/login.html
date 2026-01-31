@@ -13,21 +13,46 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('/images/login.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 背景のオーバーレイ */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
         }
         
         .login-container {
-            background: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: rgba(10, 20, 35, 0.92);
+            border: 3px solid #d4af37;
+            border-radius: 16px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(212, 175, 55, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             padding: 40px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
         }
         
         .login-header {
@@ -36,25 +61,34 @@
         }
         
         .login-logo {
-            font-size: 3rem;
-            margin-bottom: 10px;
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
         
         .login-title {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #d4af37;
             margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .login-subtitle {
-            color: #666666;
+            color: #a8d5ba;
             font-size: 0.95rem;
+            font-weight: 500;
         }
         
         .pilot-notice {
-            background: #FFF3CD;
-            border: 1px solid #FFE69C;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.4);
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 24px;
@@ -62,9 +96,18 @@
         }
         
         .pilot-notice-text {
-            color: #856404;
-            font-size: 0.9rem;
+            color: #d4af37;
+            font-size: 0.85rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .pilot-notice-text::before {
+            content: '✓';
+            font-size: 1rem;
         }
         
         .login-form {
@@ -82,49 +125,92 @@
         .form-label {
             font-size: 0.9rem;
             font-weight: 600;
-            color: #333333;
+            color: #a8d5ba;
         }
         
         .form-input {
             padding: 12px 16px;
-            border: 2px solid #E5E5E5;
+            border: 2px solid rgba(168, 213, 186, 0.3);
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input::placeholder {
+            color: rgba(168, 213, 186, 0.5);
         }
         
         .form-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #d4af37;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
         }
         
         .login-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #FFFFFF;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+            color: #1a4d2e;
             padding: 14px;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
             margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
         
         .login-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+        }
+        
+        .login-button:hover::before {
+            width: 300px;
+            height: 300px;
         }
         
         .login-button:active {
             transform: translateY(0);
         }
         
+        .login-button-text {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-button-icon {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2rem;
+        }
+        
         .success-message {
-            background: #D4EDDA;
-            border: 1px solid #C3E6CB;
-            color: #155724;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #a8d5ba;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -133,9 +219,9 @@
         }
         
         .error-message {
-            background: #F8D7DA;
-            border: 1px solid #F5C6CB;
-            color: #721C24;
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #ffcdd2;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -149,14 +235,56 @@
         }
         
         .back-link a {
-            color: #667eea;
+            color: #d4af37;
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
+            transition: color 0.3s ease;
         }
         
         .back-link a:hover {
+            color: #f4d03f;
             text-decoration: underline;
+        }
+        
+        /* キラキラエフェクト */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #d4af37;
+            border-radius: 50%;
+            opacity: 0;
+            animation: sparkle 2s infinite;
+        }
+        
+        .sparkle:nth-child(1) {
+            top: 20%;
+            right: 15%;
+            animation-delay: 0s;
+        }
+        
+        .sparkle:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            animation-delay: 0.5s;
+        }
+        
+        .sparkle:nth-child(3) {
+            top: 40%;
+            left: 12%;
+            animation-delay: 1s;
+        }
+        
+        .sparkle:nth-child(4) {
+            top: 75%;
+            left: 18%;
+            animation-delay: 1.5s;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
         }
         
         @media (max-width: 480px) {
@@ -167,11 +295,22 @@
             .login-title {
                 font-size: 1.5rem;
             }
+            
+            body::after {
+                width: 200px;
+                height: 200px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
+        <!-- キラキラエフェクト -->
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        
         <div class="login-header">
             <div class="login-logo">⚽</div>
             <h1 class="login-title">Please sign in</h1>
@@ -180,7 +319,7 @@
         
         <!-- パイロットプロジェクト通知 -->
         <div class="pilot-notice">
-            <p class="pilot-notice-text">🚀 パイロットプロジェクト: 任意の値でログイン可能</p>
+            <p class="pilot-notice-text">パイロットプロジェクト: 任意の値でログイン可能</p>
         </div>
         
         <!-- 成功メッセージ -->
@@ -219,7 +358,10 @@
             <!-- CSRF Token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             
-            <button type="submit" class="login-button">Sign in</button>
+            <button type="submit" class="login-button">
+                <span class="login-button-text">Sign in</span>
+                <span class="login-button-icon">⚽</span>
+            </button>
         </form>
         
         <div class="back-link">
