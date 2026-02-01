@@ -12,7 +12,7 @@ spring:
   application:
     name: soccer-news-summary
   
-  # Java 21 가상 스레드 활성화 (성능 향상)
+  # Java 21 가상 스레드 활성화 (성능 향上)
   threads:
     virtual:
       enabled: true
@@ -24,6 +24,29 @@ spring:
     mode: HTML
     prefix: classpath:/templates/
     suffix: .html
+  
+  # データベース設定 (H2インメモリDB)
+  datasource:
+    url: jdbc:h2:mem:soccerdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # JPA/Hibernate設定
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  
+  # H2コンソール設定（開発用）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
 
 # アプリケーション固有の設定
 soccer-news:
@@ -54,29 +77,6 @@ soccer-news:
 # Football-Data.org API設定
 football-data:
   api-token: 509f31a084f34d09bddc39a7660a0e49
-
-# データベース設定 (H2インメモリDB)
-  datasource:
-    url: jdbc:h2:mem:soccerdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
-  
-  # JPA/Hibernate設定
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-  
-  # H2コンソール設定（開発用）
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
 
 # ログ設定
 logging:

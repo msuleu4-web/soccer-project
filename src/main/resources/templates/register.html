@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログイン - 海外サッカーニュース</title>
+    <title>会員登録 - 海外サッカーニュース</title>
     <style>
         * {
             margin: 0;
@@ -39,7 +39,7 @@
             z-index: 1;
         }
         
-        .login-container {
+        .register-container {
             background: rgba(10, 20, 35, 0.92);
             border: 3px solid #d4af37;
             border-radius: 16px;
@@ -49,18 +49,18 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
             padding: 40px;
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
             position: relative;
             z-index: 10;
             backdrop-filter: blur(10px);
         }
         
-        .login-header {
+        .register-header {
             text-align: center;
             margin-bottom: 30px;
         }
         
-        .login-logo {
+        .register-logo {
             font-size: 3.5rem;
             margin-bottom: 15px;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
@@ -73,7 +73,7 @@
             50% { transform: translateY(-10px); }
         }
         
-        .login-title {
+        .register-title {
             font-size: 1.8rem;
             font-weight: 700;
             color: #d4af37;
@@ -81,40 +81,16 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
-        .login-subtitle {
+        .register-subtitle {
             color: #a8d5ba;
             font-size: 0.95rem;
             font-weight: 500;
         }
         
-        .pilot-notice {
-            background: rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        
-        .pilot-notice-text {
-            color: #d4af37;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .pilot-notice-text::before {
-            content: '✓';
-            font-size: 1rem;
-        }
-        
-        .login-form {
+        .register-form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
         }
         
         .form-group {
@@ -127,6 +103,11 @@
             font-size: 0.9rem;
             font-weight: 600;
             color: #a8d5ba;
+        }
+        
+        .form-label .required {
+            color: #ff6b6b;
+            margin-left: 4px;
         }
         
         .form-input {
@@ -150,7 +131,13 @@
             box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
         }
         
-        .login-button {
+        .password-hint {
+            font-size: 0.8rem;
+            color: rgba(168, 213, 186, 0.7);
+            margin-top: -4px;
+        }
+        
+        .register-button {
             background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
             color: #1a4d2e;
             padding: 14px;
@@ -170,7 +157,7 @@
             gap: 10px;
         }
         
-        .login-button::before {
+        .register-button::before {
             content: '';
             position: absolute;
             top: 50%;
@@ -183,26 +170,26 @@
             transition: width 0.6s, height 0.6s;
         }
         
-        .login-button:hover {
+        .register-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
         }
         
-        .login-button:hover::before {
+        .register-button:hover::before {
             width: 300px;
             height: 300px;
         }
         
-        .login-button:active {
+        .register-button:active {
             transform: translateY(0);
         }
         
-        .login-button-text {
+        .register-button-text {
             position: relative;
             z-index: 1;
         }
         
-        .login-button-icon {
+        .register-button-icon {
             position: relative;
             z-index: 1;
             font-size: 1.2rem;
@@ -230,20 +217,27 @@
             font-size: 0.9rem;
         }
         
-        .back-link {
+        .login-link {
             text-align: center;
             margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(168, 213, 186, 0.2);
         }
         
-        .back-link a {
+        .login-link-text {
+            color: #a8d5ba;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .login-link a {
             color: #d4af37;
             text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: color 0.3s ease;
         }
         
-        .back-link a:hover {
+        .login-link a:hover {
             color: #f4d03f;
             text-decoration: underline;
         }
@@ -289,82 +283,103 @@
         }
         
         @media (max-width: 480px) {
-            .login-container {
+            .register-container {
                 padding: 30px 20px;
             }
             
-            .login-title {
+            .register-title {
                 font-size: 1.5rem;
-            }
-            
-            body::after {
-                width: 200px;
-                height: 200px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="register-container">
         <!-- キラキラエフェクト -->
         <div class="sparkle"></div>
         <div class="sparkle"></div>
         <div class="sparkle"></div>
         <div class="sparkle"></div>
         
-        <div class="login-header">
-            <div class="login-logo">⚽</div>
-            <h1 class="login-title">Please sign in</h1>
-            <p class="login-subtitle">海外サッカーニュース</p>
+        <div class="register-header">
+            <div class="register-logo">⚽</div>
+            <h1 class="register-title">会員登録</h1>
+            <p class="register-subtitle">海外サッカーニュース</p>
         </div>
         
         <!-- 成功メッセージ -->
         <div th:if="${success}" class="success-message" th:text="${success}"></div>
         
-        <div th:if="${param.logout}" class="success-message">
-            ✓ ログアウトしました
-        </div>
-        
         <!-- エラーメッセージ -->
-        <div th:if="${param.error}" class="error-message">
-            ✗ ログインに失敗しました
-        </div>
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
         
-        <!-- ログインフォーム -->
-        <form th:action="@{/login}" method="post" class="login-form">
+        <!-- 会員登録フォーム -->
+        <form th:action="@{/register}" method="post" class="register-form">
             <div class="form-group">
-                <label for="username" class="form-label">Username</label>
+                <label for="username" class="form-label">
+                    ユーザー名<span class="required">*</span>
+                </label>
                 <input type="text" 
                        id="username" 
                        name="username" 
                        class="form-input" 
                        placeholder="ユーザー名を入力"
                        required
-                       autofocus>
+                       autofocus
+                       maxlength="50">
             </div>
             
             <div class="form-group">
-                <label for="password" class="form-label">Password</label>
+                <label for="email" class="form-label">
+                    メールアドレス<span class="required">*</span>
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-input" 
+                       placeholder="example@email.com"
+                       required
+                       maxlength="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">
+                    パスワード<span class="required">*</span>
+                </label>
                 <input type="password" 
                        id="password" 
                        name="password" 
                        class="form-input" 
                        placeholder="パスワードを入力"
-                       required>
+                       required
+                       minlength="6">
+                <p class="password-hint">※ 6文字以上で入力してください</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="displayName" class="form-label">
+                    表示名（任意）
+                </label>
+                <input type="text" 
+                       id="displayName" 
+                       name="displayName" 
+                       class="form-input" 
+                       placeholder="表示名を入力（省略可）"
+                       maxlength="50">
             </div>
             
             <!-- CSRF Token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             
-            <button type="submit" class="login-button">
-                <span class="login-button-text">Sign in</span>
-                <span class="login-button-icon">⚽</span>
+            <button type="submit" class="register-button">
+                <span class="register-button-text">登録する</span>
+                <span class="register-button-icon">✓</span>
             </button>
         </form>
         
-        <div class="back-link">
-            <p style="color: #a8d5ba; font-size: 0.9rem; margin-bottom: 8px;">アカウントをお持ちでない方</p>
-            <a href="/register">新規登録はこちら →</a>
+        <div class="login-link">
+            <p class="login-link-text">既にアカウントをお持ちの方</p>
+            <a href="/login">ログインはこちら →</a>
         </div>
     </div>
 </body>

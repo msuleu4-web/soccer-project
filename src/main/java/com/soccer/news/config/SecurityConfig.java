@@ -4,16 +4,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * セキュリティ設定
- * パイロットプロジェクト: 任意の認証情報でログイン可能
+ * ログイン・会員登録機能を提供
  */
 @Configuration
 @EnableWebSecurity
@@ -29,33 +25,15 @@ public class SecurityConfig {
     }
     
     /**
-     * パイロットプロジェクト用のカスタムUserDetailsService
-     * 任意のユーザー名/パスワードでログインを許可
-     */
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            // パイロットプロジェクト: 任意のユーザー名を受け入れる
-            // パスワードは空文字列でエンコード（実際のパスワードチェックは後で無効化）
-            UserDetails user = User.builder()
-                .username(username)
-                .password(passwordEncoder().encode(""))  // ダミーパスワード
-                .roles("USER")
-                .build();
-            return user;
-        };
-    }
-    
-    /**
      * セキュリティフィルタチェーン設定
-     * - ログインページ以外は認証が必要
-     * - パイロットプロジェクト: 任意の認証情報を受け入れる
+     * - ログイン・会員登録ページは認証不要
+     * - その他のページは認証が必要
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()  // ログインページと静的リソースは許可
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()  // ログイン・登録ページと静的リソースは許可
                 .anyRequest().authenticated()  // その他は認証が必要
             )
             .formLogin(form -> form
@@ -72,25 +50,7 @@ public class SecurityConfig {
             )
             .headers(headers -> headers
                 .frameOptions(frame -> frame.sameOrigin())  // H2コンソール用
-            )
-            // パイロットプロジェクト: パスワード検証を無効化
-            .authenticationProvider(new org.springframework.security.authentication.dao.DaoAuthenticationProvider() {
-                {
-                    setUserDetailsService(userDetailsService());
-                    setPasswordEncoder(new org.springframework.security.crypto.password.PasswordEncoder() {
-                        @Override
-                        public String encode(CharSequence rawPassword) {
-                            return "";
-                        }
-                        
-                        @Override
-                        public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                            // パイロットプロジェクト: 常にtrueを返す（任意のパスワードを受け入れる）
-                            return true;
-                        }
-                    });
-                }
-            });
+            );
         
         return http.build();
     }
