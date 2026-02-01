@@ -13,11 +13,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
-            background-image: url('/images/login.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #0f4c81 0%, #1e5a8e 25%, #2d6fa3 50%, #c94e4e 75%, #e67e22 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -27,94 +23,115 @@
             overflow: hidden;
         }
         
-        /* 背景のオーバーレイ */
+        /* 抽象的な背景装飾 */
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
+            top: -20%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
             z-index: 1;
         }
         
-        .login-container {
-            background: rgba(10, 20, 35, 0.92);
-            border: 3px solid #d4af37;
+        body::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+        
+        .login-wrapper {
+            display: flex;
+            background: #ffffff;
             border-radius: 16px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(212, 175, 55, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 900px;
             width: 100%;
-            max-width: 420px;
             position: relative;
             z-index: 10;
-            backdrop-filter: blur(10px);
+        }
+        
+        /* 左側：イラストエリア */
+        .login-illustration {
+            flex: 1;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .illustration-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(52, 152, 219, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .illustration-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+        
+        .illustration-icon {
+            font-size: 8rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+        }
+        
+        .illustration-text {
+            font-size: 1.1rem;
+            color: #5a6c7d;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+        
+        /* 右側：ログインフォームエリア */
+        .login-container {
+            flex: 1;
+            padding: 60px 50px;
+            background: #ffffff;
         }
         
         .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .login-logo {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-            animation: float 3s ease-in-out infinite;
-            color: #ffffff;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            margin-bottom: 36px;
         }
         
         .login-title {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
-            color: #d4af37;
+            color: #2c3e50;
             margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.5px;
         }
         
         .login-subtitle {
-            color: #a8d5ba;
+            color: #7f8c8d;
             font-size: 0.95rem;
-            font-weight: 500;
-        }
-        
-        .pilot-notice {
-            background: rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        
-        .pilot-notice-text {
-            color: #d4af37;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .pilot-notice-text::before {
-            content: '✓';
-            font-size: 1rem;
+            font-weight: 400;
         }
         
         .login-form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
         
         .form-group {
@@ -126,93 +143,139 @@
         .form-label {
             font-size: 0.9rem;
             font-weight: 600;
-            color: #a8d5ba;
+            color: #2c3e50;
         }
         
         .form-input {
-            padding: 12px 16px;
-            border: 2px solid rgba(168, 213, 186, 0.3);
+            padding: 14px 16px;
+            border: 1.5px solid #dfe6e9;
             border-radius: 8px;
             font-size: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #2c3e50;
+            transition: all 0.2s ease;
         }
         
         .form-input::placeholder {
-            color: rgba(168, 213, 186, 0.5);
+            color: #b2bec3;
         }
         
         .form-input:focus {
             outline: none;
-            border-color: #d4af37;
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -8px;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .remember-me input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .remember-me label {
+            font-size: 0.875rem;
+            color: #5a6c7d;
+            cursor: pointer;
+        }
+        
+        .forgot-password {
+            font-size: 0.875rem;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .forgot-password:hover {
+            color: #2980b9;
+            text-decoration: underline;
         }
         
         .login-button {
-            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
-            color: #1a4d2e;
-            padding: 14px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: #ffffff;
+            padding: 16px;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .login-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
         }
         
         .login-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
-        }
-        
-        .login-button:hover::before {
-            width: 300px;
-            height: 300px;
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
         }
         
         .login-button:active {
             transform: translateY(0);
         }
         
-        .login-button-text {
-            position: relative;
-            z-index: 1;
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
         }
         
-        .login-button-icon {
-            position: relative;
-            z-index: 1;
-            font-size: 1.2rem;
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: #dfe6e9;
+        }
+        
+        .divider-text {
+            color: #95a5a6;
+            font-size: 0.875rem;
+        }
+        
+        .google-signin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px;
+            border: 1.5px solid #dfe6e9;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .google-signin:hover {
+            background: #f8f9fa;
+            border-color: #b2bec3;
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
         }
         
         .success-message {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid rgba(76, 175, 80, 0.5);
-            color: #a8d5ba;
-            padding: 12px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
@@ -220,72 +283,91 @@
         }
         
         .error-message {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid rgba(244, 67, 54, 0.5);
-            color: #ffcdd2;
-            padding: 12px;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
             font-size: 0.9rem;
         }
         
-        .back-link {
+        .register-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 24px;
         }
         
-        .back-link a {
-            color: #d4af37;
-            text-decoration: none;
+        .register-link-text {
+            color: #7f8c8d;
             font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.3s ease;
         }
         
-        .back-link a:hover {
-            color: #f4d03f;
+        .register-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        
+        .register-link a:hover {
+            color: #2980b9;
             text-decoration: underline;
         }
         
-        /* キラキラエフェクト */
-        .sparkle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #d4af37;
-            border-radius: 50%;
-            opacity: 0;
-            animation: sparkle 2s infinite;
+        .footer-links {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #ecf0f1;
         }
         
-        .sparkle:nth-child(1) {
-            top: 20%;
-            right: 15%;
-            animation-delay: 0s;
+        .footer-links-list {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
         }
         
-        .sparkle:nth-child(2) {
-            top: 60%;
-            right: 10%;
-            animation-delay: 0.5s;
+        .footer-links-list a {
+            color: #7f8c8d;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s ease;
         }
         
-        .sparkle:nth-child(3) {
-            top: 40%;
-            left: 12%;
-            animation-delay: 1s;
+        .footer-links-list a:hover {
+            color: #3498db;
         }
         
-        .sparkle:nth-child(4) {
-            top: 75%;
-            left: 18%;
-            animation-delay: 1.5s;
+        .footer-description {
+            color: #95a5a6;
+            font-size: 0.8rem;
+            margin-top: 8px;
         }
         
-        @keyframes sparkle {
-            0%, 100% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1); }
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .login-wrapper {
+                flex-direction: column;
+            }
+            
+            .login-illustration {
+                padding: 40px 30px;
+            }
+            
+            .illustration-icon {
+                font-size: 5rem;
+            }
+            
+            .login-container {
+                padding: 40px 30px;
+            }
+            
+            .login-title {
+                font-size: 1.6rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -294,77 +376,120 @@
             }
             
             .login-title {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
             }
             
-            body::after {
-                width: 200px;
-                height: 200px;
+            .footer-links-list {
+                flex-direction: column;
+                gap: 8px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <!-- キラキラエフェクト -->
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        
-        <div class="login-header">
-            <div class="login-logo">⚽</div>
-            <h1 class="login-title">Please sign in</h1>
-            <p class="login-subtitle">海外サッカーニュース</p>
+    <div class="login-wrapper">
+        <!-- 左側：イラストエリア -->
+        <div class="login-illustration">
+            <div class="illustration-bg"></div>
+            <div class="illustration-content">
+                <div class="illustration-icon">⚽</div>
+                <p class="illustration-text">
+                    海外サッカーの最新ニュース、<br>
+                    試合日程、詳細データを<br>
+                    お届けします
+                </p>
+            </div>
         </div>
         
-        <!-- 成功メッセージ -->
-        <div th:if="${success}" class="success-message" th:text="${success}"></div>
-        
-        <div th:if="${param.logout}" class="success-message">
-            ✓ ログアウトしました
-        </div>
-        
-        <!-- エラーメッセージ -->
-        <div th:if="${param.error}" class="error-message">
-            ✗ ログインに失敗しました
-        </div>
-        
-        <!-- ログインフォーム -->
-        <form th:action="@{/login}" method="post" class="login-form">
-            <div class="form-group">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" 
-                       id="username" 
-                       name="username" 
-                       class="form-input" 
-                       placeholder="ユーザー名を入力"
-                       required
-                       autofocus>
+        <!-- 右側：ログインフォーム -->
+        <div class="login-container">
+            <div class="login-header">
+                <h1 class="login-title">WELCOME BACK</h1>
+                <p class="login-subtitle">アカウント情報を入力してください</p>
             </div>
             
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       class="form-input" 
-                       placeholder="パスワードを入力"
-                       required>
+            <!-- 成功メッセージ -->
+            <div th:if="${success}" class="success-message" th:text="${success}"></div>
+            
+            <div th:if="${param.logout}" class="success-message">
+                ✓ ログアウトしました
             </div>
             
-            <!-- CSRF Token -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <!-- エラーメッセージ -->
+            <div th:if="${param.error}" class="error-message">
+                ✗ ログインに失敗しました。ユーザー名またはパスワードをご確認ください。
+            </div>
             
-            <button type="submit" class="login-button">
-                <span class="login-button-text">Sign in</span>
-                <span class="login-button-icon">⚽</span>
+            <!-- ログインフォーム -->
+            <form th:action="@{/login}" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Email</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           class="form-input" 
+                           placeholder="メールアドレスを入力"
+                           required
+                           autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="form-input" 
+                           placeholder="パスワードを入力"
+                           required>
+                </div>
+                
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">ログイン状態を保持</label>
+                    </div>
+                    <a href="#" class="forgot-password">パスワードを忘れた方</a>
+                </div>
+                
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                
+                <button type="submit" class="login-button">
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span class="divider-text">または</span>
+                <div class="divider-line"></div>
+            </div>
+            
+            <button class="google-signin" onclick="alert('Google認証は準備中です')">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
             </button>
-        </form>
-        
-        <div class="back-link">
-            <p style="color: #a8d5ba; font-size: 0.9rem; margin-bottom: 8px;">アカウントをお持ちでない方</p>
-            <a href="/register">新規登録はこちら →</a>
+            
+            <div class="register-link">
+                <span class="register-link-text">アカウントをお持ちでない方は </span>
+                <a href="/register">新規登録</a>
+            </div>
+            
+            <div class="footer-links">
+                <div class="footer-links-list">
+                    <a href="#">利用規約</a>
+                    <span style="color: #dfe6e9;">|</span>
+                    <a href="#">プライバシーポリシー</a>
+                    <span style="color: #dfe6e9;">|</span>
+                    <a href="#">お問い合わせ</a>
+                </div>
+                <p class="footer-description">海外サッカーのニュース・試合日程・データ提供サービス</p>
+            </div>
         </div>
     </div>
 </body>
