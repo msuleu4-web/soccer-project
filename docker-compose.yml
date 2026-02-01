@@ -1,48 +1,10 @@
 version: '3.8'
-
 services:
-  # Ollama - ローカルLLMサーバー (オプション)
-  ollama:
-    image: ollama/ollama:latest
-    container_name: soccer-news-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    networks:
-      - soccer-news-network
-    restart: unless-stopped
-    # 初回起動時にモデルをダウンロード
-    # docker exec -it soccer-news-ollama ollama pull llama2
-
-  # Spring Boot アプリケーション (開発用)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: soccer-news-app
     ports:
-      - "8080:8080"
+      - "80:8080"
     environment:
-      # OpenAI API設定 (本番環境用)
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      # Ollama接続設定 (ローカルLLM使用時)
-      - OLLAMA_BASE_URL=http://ollama:11434
       - SPRING_PROFILES_ACTIVE=docker
-    depends_on:
-      - ollama
-    networks:
-      - soccer-news-network
-    restart: unless-stopped
-    volumes:
-      - ./logs:/app/logs
-
-volumes:
-  ollama-data:
-    driver: local
-
-networks:
-  soccer-news-network:
-    driver: bridge
+    restart: always
