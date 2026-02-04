@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI要約 - 海外サッカーニュース</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
+            background: #F5F5F7;
+            color: #333333;
+            line-height: 1.7;
+        }
+        
+        /* ヘッダー */
+        header {
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E5E5;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .site-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .site-logo span {
+            font-size: 1.3rem;
+        }
+        
+        nav {
+            display: flex;
+            gap: 24px;
+        }
+        
+        nav a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: #0056b3;
+        }
+        
+        nav a.active {
+            color: #0056b3;
+            font-weight: 600;
+        }
+        
+        /* メインコンテンツ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        
+        .page-description {
+            color: #666666;
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #0056b3;
+        }
+        
+        /* AI要約エリア */
+        .ai-section {
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .input-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            border: 2px solid #E5E5E5;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        .input-textarea:focus {
+            outline: none;
+            border-color: #0056b3;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .btn {
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #0056b3;
+            color: #FFFFFF;
+            box-shadow: 0 2px 4px rgba(0,86,179,0.2);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #004494;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,86,179,0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #F0F0F0;
+            color: #666666;
+        }
+        
+        .btn-secondary:hover {
+            background: #E0E0E0;
+        }
+        
+        /* 結果表示エリア */
+        .result-section {
+            display: none;
+            background: #F9F9F9;
+            border-left: 4px solid #0056b3;
+            border-radius: 6px;
+            padding: 20px;
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #0056b3;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .result-content {
+            color: #333333;
+            font-size: 1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        
+        /* ローディング */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #E5E5E5;
+            border-radius: 50%;
+            border-top-color: #0056b3;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #666666;
+            font-size: 0.95rem;
+        }
+        
+        /* エラー表示 */
+        .error-section {
+            display: none;
+            background: #FFF5F5;
+            border-left: 4px solid #D32F2F;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        
+        .error-section.show {
+            display: block;
+        }
+        
+        .error-title {
+            font-weight: 600;
+            color: #D32F2F;
+            margin-bottom: 8px;
+        }
+        
+        .error-content {
+            color: #666666;
+            font-size: 0.9rem;
+        }
+        
+        /* フッター */
+        footer {
+            background: #FFFFFF;
+            border-top: 1px solid #E5E5E5;
+            margin-top: 60px;
+            padding: 40px 20px 20px;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: #666666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a:hover {
+            color: #0056b3;
+        }
+        
+        .footer-copyright {
+            color: #999999;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+        
+        .footer-tech {
+            color: #999999;
+            font-size: 0.8rem;
+            padding-top: 20px;
+            border-top: 1px solid #F0F0F0;
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .header-container {
+                height: 56px;
+            }
+            
+            .site-logo {
+                font-size: 1.3rem;
+            }
+            
+            nav {
+                gap: 16px;
+            }
+            
+            nav a {
+                font-size: 0.85rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .ai-section {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <div class="header-container">
+            <a href="/" class="site-logo">
+                <span>⚽</span>
+                <span>海外サッカーニュース</span>
+            </a>
+            <nav>
+                <a href="/">ホーム</a>
+                <a href="/players">日本人選手</a>
+                <a href="/bbs">掲示板</a>
+                <a href="/gemini" class="active">AI要約</a>
+                <a href="/refresh">最新</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <h1 class="page-title">🤖 AI要約機能</h1>
+        <p class="page-description">
+            Gemini AIを使って、サッカーニュースを「なんJ」風の口調で3行要約します。
+            ニュース記事のテキストを入力して、「要約する」ボタンをクリックしてください。
+        </p>
+        
+        <div class="ai-section">
+            <div class="input-group">
+                <label class="input-label" for="newsText">
+                    📰 ニュース記事のテキストを入力
+                </label>
+                <textarea 
+                    id="newsText" 
+                    class="input-textarea" 
+                    placeholder="例：Manchester United signed a new striker from Real Madrid for £80 million. The player is expected to make his debut next week..."
+                ></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button id="summarizeBtn" class="btn btn-primary">
+                    <span>✨</span>
+                    <span>要約する</span>
+                </button>
+                <button id="clearBtn" class="btn btn-secondary">
+                    <span>🗑️</span>
+                    <span>クリア</span>
+                </button>
+            </div>
+            
+            <!-- ローディング表示 -->
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">AIが要約を生成中です...</p>
+            </div>
+            
+            <!-- 結果表示エリア -->
+            <div id="resultSection" class="result-section">
+                <h3 class="result-title">📝 なんJ風要約結果</h3>
+                <div id="resultContent" class="result-content"></div>
+            </div>
+            
+            <!-- エラー表示エリア -->
+            <div id="errorSection" class="error-section">
+                <h3 class="error-title">⚠️ エラーが発生しました</h3>
+                <p id="errorContent" class="error-content"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- フッター -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="/">ホーム</a>
+                <a href="/players">日本人選手</a>
+                <a href="/bbs">掲示板</a>
+                <a href="/gemini">AI要約</a>
+                <a href="/refresh">最新ニュース</a>
+            </div>
+            
+            <p class="footer-copyright">
+                © 2026 海外サッカーニュース. All rights reserved.
+            </p>
+            
+            <p class="footer-tech">
+                Powered by Spring Boot 3.4 · Java 21 · Gemini AI
+            </p>
+        </div>
+    </footer>
+    
+    <script>
+        const newsTextArea = document.getElementById('newsText');
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const loading = document.getElementById('loading');
+        const resultSection = document.getElementById('resultSection');
+        const resultContent = document.getElementById('resultContent');
+        const errorSection = document.getElementById('errorSection');
+        const errorContent = document.getElementById('errorContent');
+        
+        // 要約ボタンのクリックイベント
+        summarizeBtn.addEventListener('click', async () => {
+            const text = newsTextArea.value.trim();
+            
+            if (!text) {
+                showError('ニュース記事のテキストを入力してください。');
+                return;
+            }
+            
+            // UI状態をリセット
+            hideError();
+            hideResult();
+            showLoading();
+            summarizeBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/gemini/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(text)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー: ${response.status}`);
+                }
+                
+                const data = await response.text();
+                
+                // Gemini APIのレスポンスをパース
+                try {
+                    const jsonData = JSON.parse(data);
+                    
+                    if (jsonData.error) {
+                        throw new Error(jsonData.error);
+                    }
+                    
+                    // Gemini APIのレスポンス構造から要約テキストを抽出
+                    if (jsonData.candidates && jsonData.candidates.length > 0) {
+                        const summaryText = jsonData.candidates[0].content.parts[0].text;
+                        showResult(summaryText);
+                    } else {
+                        throw new Error('要約結果が取得できませんでした。');
+                    }
+                } catch (parseError) {
+                    // JSONパースに失敗した場合は、そのままテキストとして表示
+                    showResult(data);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`要約の生成に失敗しました: ${error.message}`);
+            } finally {
+                hideLoading();
+                summarizeBtn.disabled = false;
+            }
+        });
+        
+        // クリアボタンのクリックイベント
+        clearBtn.addEventListener('click', () => {
+            newsTextArea.value = '';
+            hideResult();
+            hideError();
+        });
+        
+        // 結果表示
+        function showResult(text) {
+            resultContent.textContent = text;
+            resultSection.classList.add('show');
+        }
+        
+        function hideResult() {
+            resultSection.classList.remove('show');
+        }
+        
+        // エラー表示
+        function showError(message) {
+            errorContent.textContent = message;
+            errorSection.classList.add('show');
+        }
+        
+        function hideError() {
+            errorSection.classList.remove('show');
+        }
+        
+        // ローディング表示
+        function showLoading() {
+            loading.classList.add('show');
+        }
+        
+        function hideLoading() {
+            loading.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

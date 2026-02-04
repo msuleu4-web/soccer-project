@@ -3,51 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログイン - 海外サッカーニュース</title>
+    <title>ログイン - Goal Labo</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* --- 1. 基本設定 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Meiryo, sans-serif;
             background: linear-gradient(135deg, #0f4c81 0%, #1e5a8e 25%, #2d6fa3 50%, #c94e4e 75%, #e67e22 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            position: relative;
             overflow: hidden;
         }
-        
-        /* 抽象的な背景装飾 */
-        body::before {
-            content: '';
-            position: absolute;
-            top: -20%;
-            left: -10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            z-index: 1;
-        }
-        
-        body::after {
-            content: '';
-            position: absolute;
-            bottom: -20%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            z-index: 1;
-        }
-        
+
         .login-wrapper {
             display: flex;
             background: #ffffff;
@@ -56,441 +27,192 @@
             overflow: hidden;
             max-width: 900px;
             width: 100%;
-            position: relative;
-            z-index: 10;
+            height: 600px;
         }
-        
-        /* 左側：イラストエリア */
+
+        /* --- 3Dカードエリア --- */
         .login-illustration {
             flex: 1;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 60px 40px;
+            background: #111;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            perspective: 1000px;
             position: relative;
-            overflow: hidden;
         }
-        
-        .illustration-bg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+
+        .card-wrapper {
             width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(52, 152, 219, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-        
-        .illustration-content {
+            height: 420px;
             position: relative;
+            cursor: pointer;
             z-index: 2;
-            text-align: center;
         }
-        
-        .illustration-icon {
-            font-size: 8rem;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 15px;
+            transform-style: preserve-3d;
+            transform: rotateX(0) rotateY(0);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
         }
-        
-        .illustration-text {
-            font-size: 1.1rem;
-            color: #5a6c7d;
-            font-weight: 500;
-            line-height: 1.6;
+
+        /* ★★★ ここが修正ポイント (images フォルダに対応) ★★★ */
+        .card-bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 15px;
+            background-color: #333;
+            background-size: cover;
+            background-position: center top;
+            /* static/images フォルダ内の card.jpg を読み込みます */
+            background-image: url('/images/card.jpg'); 
         }
-        
-        /* 右側：ログインフォームエリア */
+
+        .card-glare {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 15px;
+            background: linear-gradient(125deg, transparent 0%, rgba(255,255,255,0.4) 45%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 55%, transparent 100%);
+            opacity: 0.8;
+            mix-blend-mode: overlay;
+            background-size: 200% 200%;
+            pointer-events: none;
+        }
+
+        .card-content {
+            position: absolute;
+            bottom: 30px; left: 20px;
+            transform: translateZ(40px);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        .card-content h2 { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
+        .card-content p { font-size: 0.9rem; letter-spacing: 3px; opacity: 0.9; }
+
+        /* --- ログインフォーム --- */
         .login-container {
             flex: 1;
-            padding: 60px 50px;
-            background: #ffffff;
-        }
-        
-        .login-header {
-            margin-bottom: 36px;
-        }
-        
-        .login-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-        
-        .login-subtitle {
-            color: #7f8c8d;
-            font-size: 0.95rem;
-            font-weight: 400;
-        }
-        
-        .login-form {
+            padding: 50px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            justify-content: center;
         }
         
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .form-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #2c3e50;
-        }
+        .login-title { font-size: 2rem; font-weight: 700; color: #2c3e50; margin-bottom: 10px; }
+        .login-subtitle { color: #7f8c8d; margin-bottom: 30px; font-size: 0.95rem; }
         
         .form-input {
-            padding: 14px 16px;
-            border: 1.5px solid #dfe6e9;
-            border-radius: 8px;
-            font-size: 1rem;
-            background: #ffffff;
-            color: #2c3e50;
-            transition: all 0.2s ease;
+            width: 100%; padding: 14px; margin-bottom: 15px;
+            border: 1.5px solid #dfe6e9; border-radius: 8px; font-size: 1rem;
+            transition: border-color 0.2s;
         }
-        
-        .form-input::placeholder {
-            color: #b2bec3;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-        
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: -8px;
-        }
-        
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .remember-me input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        
-        .remember-me label {
-            font-size: 0.875rem;
-            color: #5a6c7d;
-            cursor: pointer;
-        }
-        
-        .forgot-password {
-            font-size: 0.875rem;
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-        
-        .forgot-password:hover {
-            color: #2980b9;
-            text-decoration: underline;
-        }
+        .form-input:focus { outline: none; border-color: #3498db; }
         
         .login-button {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: #ffffff;
-            padding: 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
+            width: 100%; padding: 15px; margin-top: 10px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white; border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: bold; cursor: pointer;
             box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            transition: transform 0.2s;
         }
-        
-        .login-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-        }
-        
-        .login-button:active {
-            transform: translateY(0);
-        }
-        
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin: 24px 0;
-        }
-        
-        .divider-line {
-            flex: 1;
-            height: 1px;
-            background: #dfe6e9;
-        }
-        
-        .divider-text {
-            color: #95a5a6;
-            font-size: 0.875rem;
-        }
-        
-        .google-signin {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 14px;
-            border: 1.5px solid #dfe6e9;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #2c3e50;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .google-signin:hover {
-            background: #f8f9fa;
-            border-color: #b2bec3;
-        }
-        
-        .google-icon {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .success-message {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        
-        .error-message {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        
-        .register-link {
-            text-align: center;
-            margin-top: 24px;
-        }
-        
-        .register-link-text {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-        
-        .register-link a {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s ease;
-        }
-        
-        .register-link a:hover {
-            color: #2980b9;
-            text-decoration: underline;
-        }
-        
-        .footer-links {
-            text-align: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #ecf0f1;
-        }
-        
-        .footer-links-list {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        
-        .footer-links-list a {
-            color: #7f8c8d;
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: color 0.2s ease;
-        }
-        
-        .footer-links-list a:hover {
-            color: #3498db;
-        }
-        
-        .footer-description {
-            color: #95a5a6;
-            font-size: 0.8rem;
-            margin-top: 8px;
-        }
-        
-        /* レスポンシブ対応 */
+        .login-button:hover { transform: translateY(-2px); }
+
+        .footer-links { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #aaa; border-top: 1px solid #eee; padding-top: 20px; }
+        .footer-links a { color: #888; text-decoration: none; margin: 0 5px; }
+
         @media (max-width: 768px) {
-            .login-wrapper {
-                flex-direction: column;
-            }
-            
-            .login-illustration {
-                padding: 40px 30px;
-            }
-            
-            .illustration-icon {
-                font-size: 5rem;
-            }
-            
-            .login-container {
-                padding: 40px 30px;
-            }
-            
-            .login-title {
-                font-size: 1.6rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 30px 20px;
-            }
-            
-            .login-title {
-                font-size: 1.4rem;
-            }
-            
-            .footer-links-list {
-                flex-direction: column;
-                gap: 8px;
-            }
+            .login-wrapper { flex-direction: column; height: auto; }
+            .login-illustration { height: 400px; padding: 20px; }
+            .login-container { padding: 30px; }
         }
     </style>
 </head>
 <body>
     <div class="login-wrapper">
-        <!-- 左側：イラストエリア -->
         <div class="login-illustration">
-            <div class="illustration-bg"></div>
-            <div class="illustration-content">
-                <div class="illustration-icon">⚽</div>
-                <p class="illustration-text">
-                    海外サッカーの最新ニュース、<br>
-                    試合日程、詳細データを<br>
-                    お届けします
-                </p>
+            <div class="card-wrapper">
+                <div class="card">
+                    <div class="card-bg"></div>
+                    <div class="card-glare"></div>
+                    <div class="card-content">
+                        <h2>TAKUMI<br>MINAMINO</h2>
+                        <p>THE SAINT</p>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <!-- 右側：ログインフォーム -->
         <div class="login-container">
-            <div class="login-header">
+            <div>
                 <h1 class="login-title">WELCOME BACK</h1>
                 <p class="login-subtitle">アカウント情報を入力してください</p>
             </div>
             
-            <!-- 成功メッセージ -->
-            <div th:if="${success}" class="success-message" th:text="${success}"></div>
-            
-            <div th:if="${param.logout}" class="success-message">
-                ✓ ログアウトしました
+            <div th:if="${param.error}" style="color: #e74c3c; background: #fde8e7; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 0.9rem;">
+                ✗ ログインに失敗しました。IDまたはパスワードを確認してください。
             </div>
-            
-            <!-- エラーメッセージ -->
-            <div th:if="${param.error}" class="error-message">
-                ✗ ログインに失敗しました。ユーザー名またはパスワードをご確認ください。
-            </div>
-            
-            <!-- ログインフォーム -->
-            <form th:action="@{/login}" method="post" class="login-form">
-                <div class="form-group">
-                    <label for="username" class="form-label">Email</label>
-                    <input type="text" 
-                           id="username" 
-                           name="username" 
-                           class="form-input" 
-                           placeholder="メールアドレスを入力"
-                           required
-                           autofocus>
+
+            <form th:action="@{/login}" method="post">
+                <input type="text" name="username" class="form-input" placeholder="メールアドレス" required autofocus>
+                <input type="password" name="password" class="form-input" placeholder="パスワード" required>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:0.9rem; color:#5a6c7d;">
+                    <label style="cursor:pointer;"><input type="checkbox" name="remember"> ログイン状態を保持</label>
+                    <a href="#" style="color:#3498db; text-decoration:none;">パスワードをお忘れの方</a>
                 </div>
                 
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           class="form-input" 
-                           placeholder="パスワードを入力"
-                           required>
-                </div>
-                
-                <div class="form-options">
-                    <div class="remember-me">
-                        <input type="checkbox" id="remember" name="remember">
-                        <label for="remember">ログイン状態を保持</label>
-                    </div>
-                    <a href="#" class="forgot-password">パスワードを忘れた方</a>
-                </div>
-                
-                <!-- CSRF Token -->
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                
-                <button type="submit" class="login-button">
-                    Sign In
-                </button>
+                <button type="submit" class="login-button">ログイン</button>
             </form>
             
-            <div class="divider">
-                <div class="divider-line"></div>
-                <span class="divider-text">または</span>
-                <div class="divider-line"></div>
-            </div>
-            
-            <button class="google-signin" onclick="alert('Google認証は準備中です')">
-                <svg class="google-icon" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Sign in with Google
-            </button>
-            
-            <div class="register-link">
-                <span class="register-link-text">アカウントをお持ちでない方は </span>
-                <a href="/register">新規登録</a>
-            </div>
-            
             <div class="footer-links">
-                <div class="footer-links-list">
-                    <a href="#">利用規約</a>
-                    <span style="color: #dfe6e9;">|</span>
-                    <a href="#">プライバシーポリシー</a>
-                    <span style="color: #dfe6e9;">|</span>
-                    <a href="#">お問い合わせ</a>
-                </div>
-                <p class="footer-description">海外サッカーのニュース・試合日程・データ提供サービス</p>
+                <a href="#">利用規約</a> | <a href="#">プライバシーポリシー</a> | <a href="#">お問い合わせ</a>
+                <p style="margin-top:10px;">© 2026 Goal Labo. All rights reserved.</p>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wrapper = document.querySelector('.card-wrapper');
+            const card = document.querySelector('.card');
+            const glare = document.querySelector('.card-glare');
+
+            wrapper.addEventListener('mousemove', (e) => {
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateY = ((x - centerX) / centerX) * 20;
+                const rotateX = -((y - centerY) / centerY) * 20;
+
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+                const glareX = 50 + ((x - centerX) / centerX) * 40;
+                const glareY = 50 + ((y - centerY) / centerY) * 40;
+                glare.style.backgroundPosition = `${glareX}% ${glareY}%`;
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                card.style.transition = 'transform 0.5s ease';
+                card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                glare.style.backgroundPosition = '50% 50%';
+                setTimeout(() => { card.style.transition = 'none'; }, 500);
+            });
+
+            wrapper.addEventListener('mouseenter', () => {
+                card.style.transition = 'none';
+            });
+        });
+    </script>
 </body>
 </html>

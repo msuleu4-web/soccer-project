@@ -8,37 +8,29 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * セキュリティ設定
- * ログイン・会員登録機能を提供
+ * セキュリティ設定クラス
+ * ログイン認証やアクセス権限を管理します。
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
-    /**
-     * BCryptPasswordEncoderをBeanとして登録
-     * パスワードのハッシュ化に使用
-     */
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
-    /**
-     * セキュリティフィルタチェーン設定
-     * - ログイン・会員登録ページは認証不要
-     * - その他のページは認証が必要
-     */
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()  // ログイン・登録ページと静的リソースは許可
-                .anyRequest().authenticated()  // その他は認証が必要
+                // ★ /ai.html を許可リストに追加 (このページはログインなしでアクセス可能)
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/api/gemini/**", "/ai.html").permitAll()
+                .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginPage("/login")  // カスタムログインページ
-                .defaultSuccessUrl("/", true)  // ログイン成功後のリダイレクト先
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true)
                 .permitAll()
             )
             .logout(logout -> logout
@@ -46,12 +38,13 @@ public class SecurityConfig {
                 .permitAll()
             )
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**", "/api/players/update")  // H2コンソールと選手更新APIはCSRF除外
+                // ★ AI要約APIなどはCSRFチェックを除外
+                .ignoringRequestMatchers("/h2-console/**", "/api/players/update", "/api/gemini/**")
             )
             .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())  // H2コンソール用
+                .frameOptions(frame -> frame.sameOrigin())
             );
-        
+
         return http.build();
     }
 }
