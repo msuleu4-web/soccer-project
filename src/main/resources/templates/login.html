@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ログイン - Goal Labo</title>
     <style>
-        /* --- 1. 基本設定 --- */
+        /* --- 1. 基本設定 (Basic Settings) --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -30,14 +30,14 @@
             height: 600px;
         }
 
-        /* --- 3Dカードエリア --- */
+        /* --- 2. 3Dカードエリア (Left: 3D Card Section) --- */
         .login-illustration {
             flex: 1;
             background: #111;
             display: flex;
             align-items: center;
             justify-content: center;
-            perspective: 1000px;
+            perspective: 1000px; /* 3D効果に必須 */
             position: relative;
         }
 
@@ -60,7 +60,6 @@
             transition: transform 0.1s;
         }
 
-        /* ★★★ ここが修正ポイント (images フォルダに対応) ★★★ */
         .card-bg {
             position: absolute;
             top: 0; left: 0;
@@ -96,7 +95,7 @@
         .card-content h2 { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
         .card-content p { font-size: 0.9rem; letter-spacing: 3px; opacity: 0.9; }
 
-        /* --- ログインフォーム --- */
+        /* --- 3. ログインフォーム (Right: Login Form) --- */
         .login-container {
             flex: 1;
             padding: 50px;
@@ -124,6 +123,22 @@
             transition: transform 0.2s;
         }
         .login-button:hover { transform: translateY(-2px); }
+
+        /* ★★★ 新規登録リンク (Registration Link) ★★★ */
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #5a6c7d;
+        }
+        .register-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
 
         .footer-links { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #aaa; border-top: 1px solid #eee; padding-top: 20px; }
         .footer-links a { color: #888; text-decoration: none; margin: 0 5px; }
@@ -161,7 +176,9 @@
             </div>
 
             <form th:action="@{/login}" method="post">
-                <input type="text" name="username" class="form-input" placeholder="メールアドレス" required autofocus>
+                <!-- ユーザー名入力フィールド -->
+                <input type="text" name="username" class="form-input" placeholder="ユーザー名" required autofocus>
+                <!-- パスワード入力フィールド -->
                 <input type="password" name="password" class="form-input" placeholder="パスワード" required>
                 
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:0.9rem; color:#5a6c7d;">
@@ -171,6 +188,10 @@
                 
                 <button type="submit" class="login-button">ログイン</button>
             </form>
+
+            <div class="register-link">
+                アカウントをお持ちでない方は <a href="/register">新規登録</a>
+            </div>
             
             <div class="footer-links">
                 <a href="#">利用規約</a> | <a href="#">プライバシーポリシー</a> | <a href="#">お問い合わせ</a>
@@ -185,6 +206,7 @@
             const card = document.querySelector('.card');
             const glare = document.querySelector('.card-glare');
 
+            // マウス移動時の処理 (Mouse Move Event)
             wrapper.addEventListener('mousemove', (e) => {
                 const rect = wrapper.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -192,16 +214,19 @@
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
 
+                // 回転角度の計算 (Calculate Rotation)
                 const rotateY = ((x - centerX) / centerX) * 20;
                 const rotateX = -((y - centerY) / centerY) * 20;
 
                 card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
+                // グレア位置の計算 (Calculate Glare Position)
                 const glareX = 50 + ((x - centerX) / centerX) * 40;
                 const glareY = 50 + ((y - centerY) / centerY) * 40;
                 glare.style.backgroundPosition = `${glareX}% ${glareY}%`;
             });
 
+            // マウスが離れた時のリセット処理 (Mouse Leave Event)
             wrapper.addEventListener('mouseleave', () => {
                 card.style.transition = 'transform 0.5s ease';
                 card.style.transform = 'rotateX(0deg) rotateY(0deg)';
@@ -209,6 +234,7 @@
                 setTimeout(() => { card.style.transition = 'none'; }, 500);
             });
 
+            // マウスが入った時の処理 (Mouse Enter Event)
             wrapper.addEventListener('mouseenter', () => {
                 card.style.transition = 'none';
             });
