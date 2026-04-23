@@ -19,13 +19,13 @@ const j1Standings = [
 
 const RankCell = ({ rank }: { rank: number }) => {
   const rankColor: { [key: number]: string } = {
-    1: 'text-yellow-400',
-    2: 'text-gray-300',
-    3: 'text-orange-400',
+    1: 'text-rank-gold',
+    2: 'text-rank-silver',
+    3: 'text-rank-bronze',
   };
 
   return (
-    <td className={`px-2 py-3 text-center font-semibold flex items-center justify-center gap-1.5 ${rankColor[rank] || 'text-text-secondary'}`}>
+    <td className={`px-2 py-3 text-center font-semibold flex items-center justify-center gap-1.5 ${rankColor[rank] || 'text-text-muted'}`}>
       {rank <= 3 && <Trophy size={14} className={rankColor[rank]} />}
       <span>{rank}</span>
     </td>
@@ -38,25 +38,25 @@ const StandingsSection = () => {
   const standings = activeTab === 'PL' ? plStandings : j1Standings;
 
   return (
-    <div className="section-container">
+    <div className="gl-card">
       <h2 className="text-xl font-bold text-text-primary mb-4">リーグ順位</h2>
       <div>
-          <div className="flex border-b border-gray-800">
+          <div className="flex border-b border-border">
               <button 
                   onClick={() => setActiveTab('PL')}
-                  className={`py-2 px-4 font-semibold transition-colors text-sm ${activeTab === 'PL' ? 'text-text-primary border-b-2 border-accent-green' : 'text-text-secondary hover:text-white'}`}>
+                  className={`py-2 px-4 font-semibold transition-colors text-sm ${activeTab === 'PL' ? 'text-text-primary border-b-2 border-accent-green' : 'text-text-secondary hover:text-text-primary'}`}>
                   Premier League
               </button>
               <button 
                   onClick={() => setActiveTab('J1')}
-                  className={`py-2 px-4 font-semibold transition-colors text-sm ${activeTab === 'J1' ? 'text-text-primary border-b-2 border-accent-green' : 'text-text-secondary hover:text-white'}`}>
+                  className={`py-2 px-4 font-semibold transition-colors text-sm ${activeTab === 'J1' ? 'text-text-primary border-b-2 border-accent-green' : 'text-text-secondary hover:text-text-primary'}`}>
                   J1リーグ
               </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-white/5">
-                <tr className="text-xs text-text-secondary">
+              <thead className="bg-thead">
+                <tr className="text-xs text-text-muted">
                   <th className="px-2 py-2 font-medium text-center">順位</th>
                   <th className="px-2 py-2 font-medium">クラブ</th>
                   <th className="px-2 py-2 font-medium text-center">勝点</th>
@@ -67,7 +67,7 @@ const StandingsSection = () => {
               </thead>
               <tbody>
                 {standings.map((s) => (
-                    <tr key={s.rank} className="border-t border-gray-800 hover:bg-white/5 transition-colors">
+                    <tr key={s.rank} className="border-t border-border hover:bg-row-hover transition-colors">
                         <RankCell rank={s.rank} />
                         <td className="px-2 py-3 font-bold text-text-primary">{s.team}</td>
                         <td className="px-2 py-3 text-center font-bold text-text-primary">{s.points}</td>
