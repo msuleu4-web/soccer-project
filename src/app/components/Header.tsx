@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import Logo from "./ui/Logo";
+import ThemeToggle from "./ui/ThemeToggle";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,28 +35,31 @@ const Header = () => {
 
   const NavLinks = () => (
     <>
-      <Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">ニュース</Link>
-      <Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">試合日程</Link>
-      <Link href="#" className="text-base text-text-secondary hover:text-text-primary transition-colors">リーグ順位</Link>
+      <Link href="#" className="gl-nav-link">ニュース</Link>
+      <Link href="#" className="gl-nav-link">試合日程</Link>
+      <Link href="#" className="gl-nav-link">リーグ順位</Link>
     </>
   );
 
   return (
-    <header className="sticky top-0 z-50 bg-card-bg/80 backdrop-blur-lg border-b border-white/10">
-      <div className="max-w-4xl mx-auto px-4 h-16 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-text-primary">Goal Labo</Link>
+    <header className="gl-header">
+      <div className="gl-header-inner">
+        <Link href="/">
+          <Logo />
+        </Link>
         
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-6">
           <NavLinks />
-          <div className="w-px h-6 bg-white/10"></div>
+          <div className="w-px h-5 bg-border"></div>
           {session ? (
             <div className="flex items-center gap-4">
               <User className="w-5 h-5 text-text-secondary" />
-              <button onClick={handleSignOut} className="text-base text-text-secondary hover:text-text-primary transition-colors">ログアウト</button>
+              <button onClick={handleSignOut} className="gl-nav-link">ログアウト</button>
             </div>
           ) : (
-            <Link href="/login" className="text-base text-text-secondary hover:text-text-primary transition-colors">ログイン</Link>
+            <Link href="/login" className="gl-nav-link font-semibold text-text-primary">ログイン</Link>
           )}
+          <ThemeToggle />
         </nav>
 
         <div className="md:hidden">
@@ -65,15 +70,16 @@ const Header = () => {
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-card-bg border-t border-white/10">
+        <div className="md:hidden bg-card-bg border-t border-border">
           <nav className="flex flex-col items-center space-y-4 py-4">
             <NavLinks />
-            <div className="w-full border-t border-white/10 my-2"></div>
+            <div className="w-full border-t border-border my-2"></div>
             {session ? (
-              <button onClick={handleSignOut} className="text-base text-text-secondary hover:text-text-primary transition-colors">ログアウト</button>
+              <button onClick={handleSignOut} className="gl-nav-link">ログアウト</button>
             ) : (
-              <Link href="/login" className="text-base text-text-secondary hover:text-text-primary transition-colors">ログイン</Link>
+              <Link href="/login" className="gl-nav-link font-semibold text-text-primary">ログイン</Link>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       )}
