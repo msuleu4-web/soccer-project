@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FAFAF7; font-family: 'Inter', sans-serif; padding: 20px; }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #00D26A; margin-bottom: 10px; margin-top: 18px; }
+.section-label:first-child { margin-top: 0; }
+.row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #F0ECE4; }
+.row:last-child { border-bottom: none; }
+.dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+.meta { flex: 1; }
+.name { font-size: 12px; font-weight: 700; }
+.hex  { font-size: 10px; color: #8B9994; margin-top: 1px; }
+.wcag { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+.aa   { background: #DCFCE7; color: #15803D; }
+.sample { font-size: 14px; font-family: 'Noto Sans JP', sans-serif; }
+.border-demo { width: 80px; height: 28px; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Text Hierarchy</div>
+<div class="row">
+  <div class="dot" style="background:#0F3D2E;"></div>
+  <div class="meta">
+    <div class="name" style="color:#0F3D2E;">Primary Text<span class="wcag aa">AA 10.5:1</span></div>
+    <div class="hex">#0F3D2E — Brand Green · Headings, body</div>
+  </div>
+  <div class="sample" style="color:#0F3D2E;font-weight:700;">最新ニュース</div>
+</div>
+<div class="row">
+  <div class="dot" style="background:#5A6B66;"></div>
+  <div class="meta">
+    <div class="name" style="color:#5A6B66;">Secondary Text<span class="wcag aa">AA 5.2:1</span></div>
+    <div class="hex">#5A6B66 — Medium · Subtitles, labels</div>
+  </div>
+  <div class="sample" style="color:#5A6B66;">試合日程・結果</div>
+</div>
+<div class="row">
+  <div class="dot" style="background:#8B9994;"></div>
+  <div class="meta">
+    <div class="name" style="color:#8B9994;">Tertiary / Muted<span class="wcag aa" style="background:#FEF9C3;color:#92400E;">AA*</span></div>
+    <div class="hex">#8B9994 — Light · Dates, meta, placeholders</div>
+  </div>
+  <div class="sample" style="color:#8B9994;">2024-04-22</div>
+</div>
+
+<div class="section-label">Borders & Dividers</div>
+<div class="row">
+  <div class="border-demo" style="border: 1.5px solid rgba(15,61,46,0.12); background:#fff;"></div>
+  <div class="meta">
+    <div class="name" style="color:#0F3D2E;">Default Border</div>
+    <div class="hex">rgba(15, 61, 46, 0.12) — cards, inputs</div>
+  </div>
+</div>
+<div class="row">
+  <div class="border-demo" style="border: 1.5px solid rgba(15,61,46,0.24); background:#fff;"></div>
+  <div class="meta">
+    <div class="name" style="color:#0F3D2E;">Hover Border</div>
+    <div class="hex">rgba(15, 61, 46, 0.24) — focus, active</div>
+  </div>
+</div>
+<div class="row">
+  <div class="border-demo" style="border: 2px solid #00D26A; background:#fff;"></div>
+  <div class="meta">
+    <div class="name" style="color:#0F3D2E;">Focus Ring</div>
+    <div class="hex">#00D26A · 2px solid + 3px outer glow</div>
+  </div>
+</div>
+
+</body>
+</html>

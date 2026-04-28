@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; }
+
+.card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 32px; margin-bottom: 20px;
+}
+.card-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: #00D26A; margin-bottom: 20px;
+}
+
+/* ── Scale table ─────────────────────────────── */
+.scale-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+.scale-table thead th {
+  font-size: 10px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: #8B9994; padding: 0 12px 10px 0;
+  text-align: left; border-bottom: 1px solid rgba(15,61,46,0.10);
+}
+.scale-table thead th:last-child { padding-right: 0; }
+
+.row-default { background: rgba(0,210,106,0.06); }
+.scale-table tbody tr { border-bottom: 1px solid rgba(15,61,46,0.07); }
+.scale-table tbody tr:last-child { border-bottom: none; }
+.scale-table td { padding: 9px 12px 9px 0; vertical-align: middle; }
+.scale-table td:last-child { padding-right: 0; }
+
+.token { font-size: 12px; font-weight: 600; color: #0F3D2E; font-family: 'Courier New', monospace; white-space: nowrap; }
+.val   { font-size: 12px; font-weight: 600; color: #0F3D2E; font-family: 'Courier New', monospace; white-space: nowrap; width: 44px; }
+.bar-cell { width: 200px; }
+.bar-track { height: 8px; background: rgba(15,61,46,0.08); border-radius: 999px; overflow: hidden; }
+.bar-fill  { height: 100%; background: #00D26A; border-radius: 999px; }
+.usage-cell { font-size: 11px; color: #5A6B66; font-family: 'Noto Sans JP', sans-serif; line-height: 1.4; }
+.badge {
+  display: inline-block; padding: 1px 7px; border-radius: 999px;
+  font-size: 9px; font-weight: 700; background: #DCFCE7; color: #15803D;
+  font-family: 'Inter', sans-serif; margin-left: 5px; vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* ── Section divider ─────────────────────────── */
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: #00D26A;
+  padding-top: 28px; margin-bottom: 16px;
+  border-top: 1px solid rgba(15,61,46,0.10);
+}
+
+/* ── Usage examples ──────────────────────────── */
+.examples { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 32px; }
+.ex-block { flex: 1; min-width: 140px; }
+.ex-code { font-size: 10px; font-family: 'Courier New', monospace; color: #00D26A; margin-bottom: 8px; }
+.ex-comment { font-size: 10px; color: #8B9994; margin-bottom: 8px; }
+
+/* card mockup */
+.mock-card {
+  background: #FAFAF7; border: 1px solid rgba(15,61,46,0.12);
+  border-radius: 12px; font-family: 'Noto Sans JP', sans-serif;
+}
+.mock-thumb { background: #F5F1EA; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+/* section spacing mockup */
+.mock-section { background: #FAFAF7; border-radius: 8px; padding: 12px; }
+.mock-heading { font-size: 12px; font-weight: 700; color: #0F3D2E; font-family: 'Noto Sans JP', sans-serif; }
+.mock-spacer { background: repeating-linear-gradient(45deg, rgba(0,210,106,0.08) 0px, rgba(0,210,106,0.08) 4px, transparent 4px, transparent 8px); display: flex; align-items: center; justify-content: center; }
+.mock-spacer-label { font-size: 10px; font-weight: 600; color: #00D26A; font-family: 'Courier New', monospace; }
+
+/* list mockup */
+.mock-list { display: flex; flex-direction: column; background: #FAFAF7; border-radius: 8px; padding: 10px; }
+.mock-item { font-size: 11px; color: #0F3D2E; font-family: 'Noto Sans JP', sans-serif; padding: 6px 8px; background: #fff; border-radius: 6px; border: 1px solid rgba(15,61,46,0.10); }
+
+/* form mockup */
+.mock-form { display: flex; flex-direction: column; background: #FAFAF7; border-radius: 8px; padding: 10px; }
+.mock-label { font-size: 10px; font-weight: 600; color: #5A6B66; font-family: 'Inter', sans-serif; }
+.mock-input { background: #fff; border: 1px solid rgba(15,61,46,0.18); border-radius: 6px; padding: 7px 10px; font-size: 11px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif; }
+.mock-help { font-size: 10px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif; }
+
+/* ── Guidelines ──────────────────────────────── */
+.guidelines { background: #FAFAF7; border-radius: 12px; padding: 20px; border: 1px solid rgba(15,61,46,0.10); }
+.guide-title { font-size: 12px; font-weight: 700; color: #0F3D2E; margin-bottom: 12px; font-family: 'Inter', sans-serif; }
+.guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.guide-item { display: flex; gap: 8px; align-items: flex-start; }
+.guide-dot { width: 8px; height: 8px; border-radius: 50%; background: #00D26A; margin-top: 3px; flex-shrink: 0; }
+.guide-text { font-size: 11px; color: #5A6B66; font-family: 'Noto Sans JP', sans-serif; line-height: 1.5; }
+.guide-note { font-size: 11px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif; border-top: 1px solid rgba(15,61,46,0.08); padding-top: 10px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-label">Spacing Tokens — Goal Labo</div>
+
+  <!-- ── Scale table ─────────────────────────────────── -->
+  <table class="scale-table">
+    <thead>
+      <tr>
+        <th>Token</th>
+        <th>Value</th>
+        <th>Visual</th>
+        <th>用途</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- max = 96px for bar ratio -->
+      <tr><td class="token">--space-0</td><td class="val">0px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:0%;"></div></div></td><td class="usage-cell">リセット・隣接要素</td></tr>
+      <tr><td class="token">--space-1</td><td class="val">4px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:4.2%;"></div></div></td><td class="usage-cell">アイコン〜テキスト間、微調整</td></tr>
+      <tr><td class="token">--space-2</td><td class="val">8px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:8.3%;"></div></div></td><td class="usage-cell">インライン要素間、小ギャップ</td></tr>
+      <tr><td class="token">--space-3</td><td class="val">12px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:12.5%;"></div></div></td><td class="usage-cell">ラベル〜入力欄、コンパクトリスト</td></tr>
+      <tr class="row-default"><td class="token">--space-4</td><td class="val">16px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:16.7%;"></div></div></td><td class="usage-cell">コンポーネント間余白<span class="badge">デフォルト</span></td></tr>
+      <tr><td class="token">--space-5</td><td class="val">20px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:20.8%;"></div></div></td><td class="usage-cell">リスト項目間、ミディアムギャップ</td></tr>
+      <tr class="row-default"><td class="token">--space-6</td><td class="val">24px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:25%;"></div></div></td><td class="usage-cell">カード内パディング<span class="badge">カード標準</span></td></tr>
+      <tr><td class="token">--space-8</td><td class="val">32px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:33.3%;"></div></div></td><td class="usage-cell">ブロック間、大カードパディング</td></tr>
+      <tr><td class="token">--space-10</td><td class="val">40px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:41.7%;"></div></div></td><td class="usage-cell">ヘッダー高さ、フォーム余白</td></tr>
+      <tr class="row-default"><td class="token">--space-12</td><td class="val">48px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:50%;"></div></div></td><td class="usage-cell">セクション間小マージン<span class="badge">セクション最小</span></td></tr>
+      <tr><td class="token">--space-16</td><td class="val">64px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:66.7%;"></div></div></td><td class="usage-cell">セクション標準マージン、ナビ高さ</td></tr>
+      <tr class="row-default"><td class="token">--space-20</td><td class="val">80px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:83.3%;"></div></div></td><td class="usage-cell">大セクション区切り<span class="badge">呼吸感</span></td></tr>
+      <tr><td class="token">--space-24</td><td class="val">96px</td><td class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:100%;"></div></div></td><td class="usage-cell">ヒーロー縦余白、ページ境界</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ── Usage Examples ─────────────────────────────── -->
+  <div class="section-label">実用例</div>
+  <div class="examples">
+
+    <!-- Card padding -->
+    <div class="ex-block">
+      <div class="ex-code">padding: var(--space-6);</div>
+      <div class="ex-comment">// 24px — カード内部</div>
+      <div class="mock-card" style="padding:16px;">
+        <div class="mock-thumb" style="height:36px;margin-bottom:10px;">⚽</div>
+        <div style="font-size:11px;font-weight:700;color:#0F3D2E;font-family:'Noto Sans JP',sans-serif;">古橋が決勝ゴール</div>
+        <div style="font-size:10px;color:#8B9994;font-family:'Inter',sans-serif;margin-top:4px;">2024-04-22 · J1</div>
+      </div>
+    </div>
+
+    <!-- Section gap -->
+    <div class="ex-block">
+      <div class="ex-code">margin-top: var(--space-20);</div>
+      <div class="ex-comment">// 80px — セクション間</div>
+      <div class="mock-section">
+        <div class="mock-heading">最新ニュース</div>
+        <div class="mock-spacer" style="height:28px;margin:4px 0;border-radius:4px;">
+          <span class="mock-spacer-label">80px</span>
+        </div>
+        <div class="mock-heading">本日の試合</div>
+      </div>
+    </div>
+
+    <!-- List gap -->
+    <div class="ex-block">
+      <div class="ex-code">gap: var(--space-4);</div>
+      <div class="ex-comment">// 16px — リスト項目間</div>
+      <div class="mock-list" style="gap:8px;">
+        <div class="mock-item">🇯🇵 川崎フロンターレ</div>
+        <div class="mock-item">🏴󠁧󠁢󠁥󠁮󠁧󠁿 アーセナル</div>
+        <div class="mock-item">🇪🇸 FCバルセロナ</div>
+      </div>
+    </div>
+
+    <!-- Form spacing -->
+    <div class="ex-block">
+      <div class="ex-code">gap: var(--space-2) / var(--space-3);</div>
+      <div class="ex-comment">// 8px / 12px — フォーム</div>
+      <div class="mock-form" style="gap:6px;">
+        <div class="mock-label">メールアドレス</div>
+        <div class="mock-input">you@example.com</div>
+        <div class="mock-help">※ ログインに使用します</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Guidelines ──────────────────────────────────── -->
+  <div class="section-label">使用ガイドライン</div>
+  <div class="guidelines">
+    <div class="guide-title">Goal Labo スペーシングガイドライン</div>
+    <div class="guide-grid">
+      <div class="guide-item"><div class="guide-dot"></div><div class="guide-text"><strong style="color:#0F3D2E;">小 (4–12px)</strong><br>インライン要素、アイコン周り</div></div>
+      <div class="guide-item"><div class="guide-dot"></div><div class="guide-text"><strong style="color:#0F3D2E;">中 (16–24px)</strong><br>コンポーネント内部、カードパディング</div></div>
+      <div class="guide-item"><div class="guide-dot"></div><div class="guide-text"><strong style="color:#0F3D2E;">大 (32–48px)</strong><br>ブロック間、見出しと本文の分離</div></div>
+      <div class="guide-item"><div class="guide-dot"></div><div class="guide-text"><strong style="color:#0F3D2E;">特大 (64–96px)</strong><br>セクション間、ページ余白</div></div>
+    </div>
+    <div class="guide-note">4px グリッドシステムを採用。すべての値は 4 の倍数で設計されています。</div>
+  </div>
+
+</div>
+</body>
+</html>

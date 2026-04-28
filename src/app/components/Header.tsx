@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu, X, User } from "lucide-react";
@@ -35,9 +37,8 @@ const Header = () => {
 
   const NavLinks = () => (
     <>
-      <Link href="#" className="gl-nav-link">ニュース</Link>
-      <Link href="#" className="gl-nav-link">試合日程</Link>
-      <Link href="#" className="gl-nav-link">リーグ順位</Link>
+      <Link href="/news" className="gl-nav-link">ニュース</Link>
+      <Link href="/standings" className="gl-nav-link">リーグ順位</Link>
     </>
   );
 

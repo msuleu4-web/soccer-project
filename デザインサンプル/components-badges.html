@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(230,57,70,0.5); }
+  50%       { opacity: .9; box-shadow: 0 0 0 5px rgba(230,57,70,0); }
+}
+
+.card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 32px;
+}
+
+/* ── Section ───────────────────────────────── */
+.section { margin-bottom: 32px; }
+.section:last-child { margin-bottom: 0; }
+.section-header { margin-bottom: 12px; }
+.section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: #0F3D2E;
+}
+.section-desc {
+  font-size: 11px; color: #8B9994; margin-top: 2px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.divider { height: 1px; background: rgba(15,61,46,0.08); margin-bottom: 32px; }
+
+/* ── Badge base ────────────────────────────── */
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 999px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s ease; white-space: nowrap;
+}
+.badge:hover { transform: scale(1.05); }
+.badge-league {
+  padding: 4px 11px; font-size: 12px;
+  font-family: 'Inter', sans-serif;
+}
+.badge-category {
+  padding: 6px 12px; font-size: 12px; font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.badge-status {
+  padding: 4px 10px; font-size: 11px; font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+.status--live {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+/* ── Rank indicators ───────────────────────── */
+.ranks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
+.rank {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; font-weight: 700; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.rank:hover { transform: scale(1.08); }
+.rank-lg { width: 36px; height: 36px; font-size: 13px; }
+.rank-sm { width: 26px; height: 26px; font-size: 11px; }
+.rank-zone {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.rank-zone:hover { transform: scale(1.04); }
+
+/* ── Tabs ──────────────────────────────────── */
+.tab-bar {
+  display: flex; border-bottom: 1px solid rgba(15,61,46,0.12);
+  margin-bottom: 12px;
+}
+.tab {
+  padding: 10px 16px; font-size: 13px; font-family: 'Noto Sans JP', sans-serif;
+  background: none; border: none; cursor: pointer;
+  border-bottom: 3px solid transparent; margin-bottom: -1px;
+  transition: all 0.2s ease;
+}
+.tab--active  { color: #0F3D2E; font-weight: 700; border-bottom-color: #00D26A; }
+.tab--hover   { color: #0F3D2E; font-weight: 500; border-bottom: 2px solid rgba(0,210,106,0.4); }
+.tab--inactive{ color: #5A6B66; font-weight: 500; }
+.tab:not(.tab--active):hover { color: #0F3D2E; border-bottom-color: rgba(0,210,106,0.4); }
+
+/* ── Dev note ──────────────────────────────── */
+.dev-note {
+  background: #FAFAF7; border-radius: 8px; padding: 10px 12px;
+  border: 1px solid rgba(15,61,46,0.10); margin-top: 10px;
+}
+.dev-note code {
+  font-size: 10px; font-family: 'Courier New', monospace;
+  color: #00D26A; display: block; line-height: 1.8;
+}
+
+/* ── State legend ─────────────────────────── */
+.state-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.state-label { font-size: 10px; font-weight: 600; color: #8B9994; width: 70px; flex-shrink: 0; font-family: 'Inter', sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ── 1. LEAGUE BADGES ────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">League Badges</div>
+      <div class="section-desc">試合・選手・ニュースで使用するリーグ識別</div>
+    </div>
+    <div class="badges">
+      <span class="badge badge-league" style="background:#7B2CBF;color:#fff;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL</span>
+      <span class="badge badge-league" style="background:#E63946;color:#fff;">🇯🇵 J1</span>
+      <span class="badge badge-league" style="background:#F77F00;color:#fff;">🇪🇸 La Liga</span>
+      <span class="badge badge-league" style="background:#0077B6;color:#fff;">🇮🇹 Serie A</span>
+      <span class="badge badge-league" style="background:#FFB703;color:#0F3D2E;">🇩🇪 Bundesliga</span>
+      <span class="badge badge-league" style="background:#003566;color:#fff;">🇫🇷 Ligue 1</span>
+      <span class="badge badge-league" style="background:#1A2B4A;color:#fff;">⭐ UCL</span>
+      <span class="badge badge-league" style="background:#8B9994;color:#fff;">⚽ Other</span>
+    </div>
+    <div class="dev-note">
+      <code>&lt;span class="badge badge-league badge-league--pl"&gt;🏴󠁧󠁢󠁥󠁮󠁧󠁿 PL&lt;/span&gt;</code>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 2. CATEGORY BADGES ──────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Category Badges</div>
+      <div class="section-desc">ニュースフィードでのカテゴリー分類</div>
+    </div>
+    <div class="badges">
+      <span class="badge badge-category" style="background:rgba(0,210,106,0.12);color:#0F3D2E;">⚽ 試合結果</span>
+      <span class="badge badge-category" style="background:rgba(230,57,70,0.12);color:#993324;">🔥 話題</span>
+      <span class="badge badge-category" style="background:rgba(255,183,3,0.16);color:#8B5E00;">⭐ 注目</span>
+      <span class="badge badge-category" style="background:rgba(0,119,182,0.12);color:#004C73;">📰 ニュース</span>
+      <span class="badge badge-category" style="background:rgba(123,44,191,0.12);color:#4A1A73;">💬 コラム</span>
+      <span class="badge badge-category" style="background:rgba(26,43,74,0.12);color:#1A2B4A;">🤖 AI分析</span>
+    </div>
+    <div class="dev-note">
+      <code>&lt;span class="badge badge-category badge-category--match"&gt;⚽ 試合結果&lt;/span&gt;</code>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 3. RANK INDICATORS ──────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Rank Indicators</div>
+      <div class="section-desc">順位表や得点ランキングで使用</div>
+    </div>
+
+    <!-- Podium ranks -->
+    <div class="ranks" style="margin-bottom:12px;">
+      <span class="rank rank-lg" style="background:#FFD700;color:#5C4400;">1</span>
+      <span class="rank rank-lg" style="background:#C0C0C0;color:#3A3A3A;">2</span>
+      <span class="rank rank-lg" style="background:#CD7F32;color:#fff;">3</span>
+      <span class="rank rank-sm" style="background:#F5F1EA;color:#0F3D2E;">4</span>
+      <span class="rank rank-sm" style="background:#F5F1EA;color:#0F3D2E;">5</span>
+      <span class="rank rank-sm" style="background:#F5F1EA;color:#0F3D2E;">6</span>
+      <span style="font-size:11px;color:#8B9994;font-family:'Inter',sans-serif;">…</span>
+      <span class="rank rank-sm" style="background:#F5F1EA;color:#0F3D2E;">17</span>
+      <span class="rank rank-sm" style="background:rgba(230,57,70,0.12);color:#993324;">18</span>
+      <span class="rank rank-sm" style="background:rgba(230,57,70,0.12);color:#993324;">20</span>
+    </div>
+
+    <!-- Zone badges -->
+    <div class="ranks">
+      <span class="rank-zone" style="background:rgba(0,210,106,0.16);color:#0F3D2E;">⬆ 昇格圏 (1〜3位)</span>
+      <span class="rank-zone" style="background:rgba(0,119,182,0.12);color:#004C73;">🏆 CL出場 (1〜4位)</span>
+      <span class="rank-zone" style="background:rgba(230,57,70,0.12);color:#993324;">⬇ 降格圏 (18〜20位)</span>
+    </div>
+    <div class="dev-note">
+      <code>&lt;span class="rank rank--gold"&gt;1&lt;/span&gt;  &lt;span class="rank rank--silver"&gt;2&lt;/span&gt;</code>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 4. STATUS BADGES ────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Status Badges</div>
+      <div class="section-desc">試合の状態や特殊情報を示す</div>
+    </div>
+    <div class="badges">
+      <span class="badge badge-status status--live" style="background:#E63946;color:#fff;">🔴 LIVE</span>
+      <span class="badge badge-status" style="background:rgba(230,57,70,0.12);color:#993324;">⏱ 試合中</span>
+      <span class="badge badge-status" style="background:rgba(139,153,148,0.16);color:#5A6B66;">✅ 終了</span>
+      <span class="badge badge-status" style="background:rgba(0,119,182,0.12);color:#004C73;">⏰ 予定</span>
+      <span class="badge badge-status" style="background:rgba(255,183,3,0.16);color:#8B5E00;">⚠️ 延期</span>
+    </div>
+    <div class="dev-note">
+      <code>&lt;span class="status status--live"&gt;🔴 LIVE&lt;/span&gt;  &lt;span class="status status--finished"&gt;✅ 終了&lt;/span&gt;</code>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── 5. TAB ACTIVE INDICATOR ──────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Tab Active Indicator</div>
+      <div class="section-desc">ナビゲーションタブの状態</div>
+    </div>
+
+    <!-- State legend -->
+    <div style="margin-bottom:16px;">
+      <div class="state-row">
+        <span class="state-label">Active</span>
+        <button class="tab tab--active" style="pointer-events:none;">Premier League</button>
+        <span style="font-size:11px;color:#8B9994;font-family:'Inter',sans-serif;">color #0F3D2E · weight 700 · underline 3px #00D26A</span>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Hover</span>
+        <button class="tab tab--hover" style="pointer-events:none;">J1リーグ</button>
+        <span style="font-size:11px;color:#8B9994;font-family:'Inter',sans-serif;">color #0F3D2E · underline 2px rgba(0,210,106,0.4)</span>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Inactive</span>
+        <button class="tab tab--inactive" style="pointer-events:none;">Serie A</button>
+        <span style="font-size:11px;color:#8B9994;font-family:'Inter',sans-serif;">color #5A6B66 · weight 500 · no underline</span>
+      </div>
+    </div>
+
+    <!-- Live tab bar demo -->
+    <div style="background:#FAFAF7;border-radius:10px;padding:12px 12px 0;">
+      <div class="tab-bar">
+        <button class="tab tab--active">Premier League</button>
+        <button class="tab tab--inactive" onmouseenter="this.className='tab tab--hover'" onmouseleave="this.className='tab tab--inactive'">J1リーグ</button>
+        <button class="tab tab--inactive" onmouseenter="this.className='tab tab--hover'" onmouseleave="this.className='tab tab--inactive'">La Liga</button>
+        <button class="tab tab--inactive" onmouseenter="this.className='tab tab--hover'" onmouseleave="this.className='tab tab--inactive'">Serie A</button>
+      </div>
+      <div style="height:24px;"></div>
+    </div>
+
+    <div class="dev-note" style="margin-top:10px;">
+      <code>&lt;button class="tab tab--active"&gt;Premier League&lt;/button&gt;
+&lt;button class="tab tab--inactive"&gt;J1リーグ&lt;/button&gt;</code>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

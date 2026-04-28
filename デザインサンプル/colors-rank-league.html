@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FAFAF7; font-family: 'Inter', sans-serif; padding: 20px; }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #00D26A; margin-bottom: 10px; margin-top: 18px; }
+.section-label:first-child { margin-top: 0; }
+.badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1; }
+.ranks { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.rank-chip { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; }
+.rank-label { font-size: 13px; font-weight: 700; }
+.rank-sub { font-size: 10px; font-weight: 400; opacity: 0.75; margin-left: 2px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">League Badges</div>
+<div class="badges">
+  <span class="badge" style="background:#F3E8FF;color:#6D28D9;">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</span>
+  <span class="badge" style="background:#FEE2E2;color:#B91C1C;">🇯🇵 J1リーグ</span>
+  <span class="badge" style="background:#FFEDD5;color:#C2410C;">🇪🇸 La Liga</span>
+  <span class="badge" style="background:#DBEAFE;color:#1D4ED8;">🇮🇹 Serie A</span>
+  <span class="badge" style="background:#FEF9C3;color:#92400E;">🇩🇪 Bundesliga</span>
+  <span class="badge" style="background:#DBEAFE;color:#1e3a8a;">⭐ UCL</span>
+</div>
+
+<div class="section-label">League Key Colors</div>
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+  <div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="height:40px;background:#7B2CBF;"></div>
+    <div style="padding:6px 8px;background:#fff;border-top:1px solid #F0ECE4;">
+      <div style="font-size:10px;font-weight:700;color:#0F3D2E;">PL</div>
+      <div style="font-size:9px;color:#8B9994;">#7B2CBF</div>
+    </div>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="height:40px;background:#E63946;"></div>
+    <div style="padding:6px 8px;background:#fff;border-top:1px solid #F0ECE4;">
+      <div style="font-size:10px;font-weight:700;color:#0F3D2E;">J1</div>
+      <div style="font-size:9px;color:#8B9994;">#E63946</div>
+    </div>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="height:40px;background:#F77F00;"></div>
+    <div style="padding:6px 8px;background:#fff;border-top:1px solid #F0ECE4;">
+      <div style="font-size:10px;font-weight:700;color:#0F3D2E;">La Liga</div>
+      <div style="font-size:9px;color:#8B9994;">#F77F00</div>
+    </div>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="height:40px;background:#0077B6;"></div>
+    <div style="padding:6px 8px;background:#fff;border-top:1px solid #F0ECE4;">
+      <div style="font-size:10px;font-weight:700;color:#0F3D2E;">Serie A</div>
+      <div style="font-size:9px;color:#8B9994;">#0077B6</div>
+    </div>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="height:40px;background:#FFB703;"></div>
+    <div style="padding:6px 8px;background:#fff;border-top:1px solid #F0ECE4;">
+      <div style="font-size:10px;font-weight:700;color:#0F3D2E;">Bundesliga</div>
+      <div style="font-size:9px;color:#8B9994;">#FFB703</div>
+    </div>
+  </div>
+  <div style="border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="height:40px;background:#003566;"></div>
+    <div style="padding:6px 8px;background:#fff;border-top:1px solid #F0ECE4;">
+      <div style="font-size:10px;font-weight:700;color:#0F3D2E;">UCL</div>
+      <div style="font-size:9px;color:#8B9994;">#003566</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">Rank Indicators</div>
+<div class="ranks">
+  <div class="rank-chip" style="background:#FEF9C3;">
+    <span style="font-size:18px;">🥇</span>
+    <span class="rank-label" style="color:#92400E;">1位<span class="rank-sub">#D97706</span></span>
+  </div>
+  <div class="rank-chip" style="background:#F3F4F6;">
+    <span style="font-size:18px;">🥈</span>
+    <span class="rank-label" style="color:#374151;">2位<span class="rank-sub">#6B7280</span></span>
+  </div>
+  <div class="rank-chip" style="background:#FFEDD5;">
+    <span style="font-size:18px;">🥉</span>
+    <span class="rank-label" style="color:#92400E;">3位<span class="rank-sub">#B45309</span></span>
+  </div>
+  <div class="rank-chip" style="background:#F5F1EA;">
+    <span style="font-size:14px;color:#8B9994;font-weight:700;font-family:'Inter',sans-serif;">4 〜</span>
+    <span class="rank-label" style="color:#8B9994;">その他<span class="rank-sub">#8B9994</span></span>
+  </div>
+</div>
+
+</body>
+</html>

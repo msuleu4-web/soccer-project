@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; }
+
+.card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 32px;
+}
+
+/* ── Section ───────────────────── */
+.section { margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid rgba(15,61,46,0.08); }
+.section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #00D26A; margin-bottom: 4px; }
+.section-desc  { font-size: 11px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif; margin-bottom: 16px; }
+
+/* ── Row ───────────────────────── */
+.btn-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+.row-wrap { margin-bottom: 18px; }
+.row-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #5A6B66; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.row-label .tag { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #DCFCE7; color: #15803D; font-family: 'Inter', sans-serif; letter-spacing: .03em; }
+.dev-note { font-size: 10px; font-family: 'Courier New', monospace; color: #00D26A; margin-top: 6px; }
+
+/* ── Base btn ──────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border: none; cursor: pointer; font-family: 'Inter', sans-serif;
+  border-radius: 12px; transition: all 0.2s ease; white-space: nowrap;
+  outline: none;
+}
+.btn:focus-visible { outline: 2px solid #00D26A; outline-offset: 2px; }
+.btn:active { transform: scale(0.97); }
+
+/* Sizes */
+.btn-sm  { padding: 7px 16px; font-size: 13px; height: 32px; }
+.btn-md  { padding: 11px 22px; font-size: 14px; height: 40px; }
+.btn-lg  { padding: 13px 28px; font-size: 16px; height: 48px; }
+.btn-icon-md { width: 40px; height: 40px; padding: 0; border-radius: 12px; font-size: 18px; }
+.btn-icon-round { width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 18px; }
+
+/* Variants */
+.btn-primary    { background: #0F3D2E; color: #fff; font-weight: 600; }
+.btn-primary:hover { background: #1A5A43; }
+
+.btn-accent     { background: #00D26A; color: #0F3D2E; font-weight: 700; }
+.btn-accent:hover { background: #00B85B; transform: scale(1.02); }
+
+.btn-secondary  { background: #fff; color: #0F3D2E; font-weight: 600; border: 1.5px solid #0F3D2E; }
+.btn-secondary:hover { background: rgba(15,61,46,0.06); }
+
+.btn-ghost      { background: transparent; color: #0F3D2E; font-weight: 500; }
+.btn-ghost:hover { background: rgba(15,61,46,0.06); }
+
+.btn-google     { background: #fff; color: #0F3D2E; font-weight: 600; border: 1px solid rgba(15,61,46,0.18); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.btn-google:hover { border-color: rgba(15,61,46,0.35); box-shadow: 0 3px 8px rgba(0,0,0,0.10); }
+
+.btn-danger     { background: #E63946; color: #fff; font-weight: 600; }
+.btn-danger:hover { background: #c8303c; }
+
+.btn-disabled   { background: rgba(15,61,46,0.08); color: #8B9994; cursor: not-allowed; font-weight: 600; }
+
+.btn-icon-base  { background: #F5F1EA; color: #0F3D2E; }
+.btn-icon-base:hover { background: rgba(15,61,46,0.10); }
+
+/* State pills */
+.state-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.state-pill { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #F5F1EA; color: #5A6B66; font-family: 'Inter', sans-serif; margin-right: -10px; }
+
+/* Hover simulations */
+.btn-primary-hover    { background: #1A5A43 !important; }
+.btn-accent-hover     { background: #00B85B !important; transform: scale(1.02); }
+.btn-secondary-hover  { background: rgba(15,61,46,0.06) !important; }
+.btn-focus            { outline: 2px solid #00D26A !important; outline-offset: 2px; }
+.btn-pressed          { transform: scale(0.97) !important; }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ── 1 PRIMARY ─────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Primary <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— ログイン・登録</span></div>
+    <div class="section-desc">最重要アクション。ブランドグリーン #0F3D2E を使用</div>
+    <div class="row-wrap">
+      <div class="row-label">サイズ</div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm">ログイン</button>
+        <button class="btn btn-primary btn-md">ログイン <span style="font-size:10px;opacity:.6;">· MD</span></button>
+        <button class="btn btn-primary btn-lg">ログイン</button>
+      </div>
+    </div>
+    <div class="row-wrap">
+      <div class="row-label">状態</div>
+      <div class="state-row">
+        <div><div class="state-pill">Default</div><br><button class="btn btn-primary btn-md" style="margin-top:6px;">登録する</button></div>
+        <div><div class="state-pill">Hover</div><br><button class="btn btn-primary btn-md btn-primary-hover" style="margin-top:6px;pointer-events:none;">登録する</button></div>
+        <div><div class="state-pill">Focus</div><br><button class="btn btn-primary btn-md btn-focus" style="margin-top:6px;pointer-events:none;">登録する</button></div>
+        <div><div class="state-pill">Pressed</div><br><button class="btn btn-primary btn-md btn-pressed" style="margin-top:6px;pointer-events:none;">登録する</button></div>
+        <div><div class="state-pill">Disabled</div><br><button class="btn btn-disabled btn-md" style="margin-top:6px;" disabled>登録する</button></div>
+      </div>
+    </div>
+    <div class="dev-note">class="btn btn-primary"</div>
+  </div>
+
+  <!-- ── 2 ACCENT CTA ───────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Accent CTA <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— 最も目立たせたいアクション</span></div>
+    <div class="section-desc">ヒーローCTA、主要コンバージョン。#00D26A ブライトグリーン</div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-accent btn-sm">ニュースを見る</button>
+      <button class="btn btn-accent btn-md">最新ニュースを見る →</button>
+      <button class="btn btn-accent btn-lg">AI分析を試す ✨</button>
+    </div>
+    <div class="dev-note">class="btn btn-accent"</div>
+  </div>
+
+  <!-- ── 3 SECONDARY ────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Secondary <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— 詳細・キャンセル</span></div>
+    <div class="section-desc">アウトラインスタイル。Primaryと並列で使用</div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-secondary btn-sm">詳細を見る</button>
+      <button class="btn btn-secondary btn-md">詳細を見る</button>
+      <button class="btn btn-secondary btn-lg">キャンセル</button>
+    </div>
+    <div class="dev-note">class="btn btn-secondary"</div>
+  </div>
+
+  <!-- ── 4 GHOST ────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Ghost <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— ナビゲーション・補助</span></div>
+    <div class="section-desc">背景なし。ナビリンクや補助的なアクションに</div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-ghost btn-md">ニュース</button>
+      <button class="btn btn-ghost btn-md">試合日程</button>
+      <button class="btn btn-ghost btn-md">リーグ順位</button>
+    </div>
+    <div class="dev-note">class="btn btn-ghost"</div>
+  </div>
+
+  <!-- ── 5 GOOGLE AUTH ──────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Google Auth <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— ソーシャルログイン</span></div>
+    <div class="section-desc">Googleでのログイン。アイコン＋テキスト構成</div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-google btn-md">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.615 24 12.255 24z"/><path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 0 0 0 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.64 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/></svg>
+        Googleでログイン
+      </button>
+    </div>
+    <div class="dev-note">class="btn btn-google"</div>
+  </div>
+
+  <!-- ── 6 DANGER ───────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Danger <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— 削除・退会</span></div>
+    <div class="section-desc">破壊的操作の確認ダイアログなどで使用</div>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button class="btn btn-danger btn-sm">削除する</button>
+      <button class="btn btn-danger btn-md">削除する</button>
+      <button class="btn btn-secondary btn-md" style="border-color:#E63946;color:#E63946;">キャンセル</button>
+    </div>
+    <div class="dev-note">class="btn btn-danger"</div>
+  </div>
+
+  <!-- ── 7+8 ICON BUTTONS ───────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Icon Buttons <span style="color:#8B9994;font-size:9px;font-weight:400;letter-spacing:0;text-transform:none;">— アクション・ツールバー</span></div>
+    <div class="section-desc">アイコンのみ、または左右アイコン付きテキストボタン</div>
+    <div class="row-wrap">
+      <div class="row-label">アイコンのみ (40×40)</div>
+      <div class="btn-row">
+        <button class="btn btn-icon-base btn-icon-md" title="お気に入り">♡</button>
+        <button class="btn btn-icon-base btn-icon-md" title="ブックマーク">🔖</button>
+        <button class="btn btn-icon-base btn-icon-md" title="シェア">⇢</button>
+        <button class="btn btn-icon-base btn-icon-round" title="メニュー">☰</button>
+      </div>
+    </div>
+    <div class="row-wrap">
+      <div class="row-label">テキスト + アイコン</div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-md">🔍 検索する</button>
+        <button class="btn btn-secondary btn-md">次へ →</button>
+        <button class="btn btn-accent btn-md">✨ AI分析を試す</button>
+      </div>
+    </div>
+    <div class="dev-note">class="btn btn-icon"  /  class="btn btn-primary" (with icon)</div>
+  </div>
+
+</div>
+</body>
+</html>

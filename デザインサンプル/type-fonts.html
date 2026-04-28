@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; }
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 32px;
+  margin-bottom: 20px;
+}
+
+.font-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: #00D26A; margin-bottom: 4px;
+}
+.font-name {
+  font-size: 22px; font-weight: 900; color: #0F3D2E;
+  font-family: 'Inter', sans-serif; letter-spacing: -0.02em; margin-bottom: 2px;
+}
+.font-meta { font-size: 12px; color: #5A6B66; margin-bottom: 12px; }
+.import-box {
+  background: #F5F1EA; border-radius: 8px; padding: 8px 12px;
+  font-size: 11px; color: #5A6B66; font-family: 'Courier New', monospace;
+  border: 1px solid rgba(15,61,46,0.10); margin-bottom: 20px;
+  word-break: break-all; line-height: 1.6;
+}
+.weights { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.weight-chip {
+  padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  background: #F5F1EA; color: #0F3D2E; border: 1px solid rgba(15,61,46,0.12);
+}
+.divider { height: 1px; background: rgba(15,61,46,0.10); margin: 28px 0; }
+
+/* Weight showcase */
+.showcase { display: flex; flex-direction: column; gap: 0; }
+.wrow {
+  display: flex; align-items: baseline; gap: 16px;
+  padding: 10px 0; border-bottom: 1px solid rgba(15,61,46,0.07);
+}
+.wrow:last-child { border-bottom: none; }
+.wtag {
+  width: 100px; flex-shrink: 0; font-size: 10px; font-weight: 600;
+  color: #8B9994; letter-spacing: .04em; text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+}
+.wsample-en { font-size: 18px; color: #0F3D2E; flex: 1; }
+.wsample-jp { font-size: 16px; color: #5A6B66; }
+
+/* Big display samples */
+.display-block { margin-bottom: 10px; }
+.display-big  { font-size: 36px; font-weight: 900; color: #0F3D2E; letter-spacing: -0.03em; line-height: 1.1; font-family: 'Inter', sans-serif; }
+.display-med  { font-size: 18px; font-weight: 700; color: #0F3D2E; letter-spacing: -0.01em; line-height: 1.3; font-family: 'Inter', sans-serif; margin-top: 6px; }
+.display-char { font-size: 14px; font-weight: 400; color: #8B9994; letter-spacing: .02em; font-family: 'Inter', sans-serif; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ── DISPLAY / HEADINGS ─────────────────────────────────────────────── -->
+<div class="card">
+  <div class="font-label">Display / Headings</div>
+  <div class="font-name" style="font-family:'Inter',sans-serif;">Inter</div>
+  <div class="font-meta">見出し・スコア・ナビゲーション・数値表示 — Latin characters</div>
+
+  <div class="import-box">@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');</div>
+
+  <div class="weights">
+    <span class="weight-chip">400 Regular</span>
+    <span class="weight-chip">500 Medium</span>
+    <span class="weight-chip">600 Semibold</span>
+    <span class="weight-chip">700 Bold</span>
+    <span class="weight-chip">900 Black</span>
+  </div>
+
+  <!-- Big samples -->
+  <div class="display-block">
+    <div class="display-big">Goal Labo</div>
+    <div class="display-med">2024/25 Premier League</div>
+    <div class="display-char">AaBbCcDd Ee Ff Gg &nbsp; 0 1 2 3 4 5 6 7 8 9</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Weight showcase -->
+  <div class="showcase">
+    <div class="wrow">
+      <span class="wtag">400 · Regular</span>
+      <span class="wsample-en" style="font-weight:400;font-family:'Inter',sans-serif;">Goal Labo</span>
+      <span class="wsample-jp" style="font-weight:400;font-family:'Inter',sans-serif;">本文・メタ用</span>
+    </div>
+    <div class="wrow">
+      <span class="wtag">500 · Medium</span>
+      <span class="wsample-en" style="font-weight:500;font-family:'Inter',sans-serif;">Goal Labo</span>
+      <span class="wsample-jp" style="font-weight:500;font-family:'Inter',sans-serif;">ラベル・強調用</span>
+    </div>
+    <div class="wrow">
+      <span class="wtag">700 · Bold</span>
+      <span class="wsample-en" style="font-weight:700;font-family:'Inter',sans-serif;">Goal Labo</span>
+      <span class="wsample-jp" style="font-weight:700;font-family:'Inter',sans-serif;">見出し用</span>
+    </div>
+    <div class="wrow">
+      <span class="wtag">900 · Black</span>
+      <span class="wsample-en" style="font-weight:900;font-family:'Inter',sans-serif;">Goal Labo</span>
+      <span class="wsample-jp" style="font-weight:900;font-family:'Inter',sans-serif;">スコア・特大見出し</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── BODY / JAPANESE ────────────────────────────────────────────────── -->
+<div class="card">
+  <div class="font-label">Body / Japanese</div>
+  <div class="font-name" style="font-family:'Noto Sans JP',sans-serif;">Noto Sans JP</div>
+  <div class="font-meta">本文・日本語テキスト全般 — 漢字・ひらがな・カタカナ対応</div>
+
+  <div class="import-box">@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');</div>
+
+  <div class="weights">
+    <span class="weight-chip">400 Regular</span>
+    <span class="weight-chip">500 Medium</span>
+    <span class="weight-chip">700 Bold</span>
+  </div>
+
+  <!-- Big samples -->
+  <div class="display-block">
+    <div style="font-family:'Noto Sans JP',sans-serif;font-size:22px;font-weight:700;color:#0F3D2E;letter-spacing:-0.01em;line-height:1.3;margin-bottom:6px;">ゴールラボ — サッカー情報プラットフォーム</div>
+    <div style="font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:500;color:#5A6B66;line-height:1.5;margin-bottom:8px;">ガンバAIくん — 試合予測・分析</div>
+    <div style="font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:400;color:#5A6B66;line-height:1.75;max-width:480px;">世界のサッカーを、もっと身近に。最新ニュース、試合結果、順位表をリアルタイムでお届けします。</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Weight showcase -->
+  <div class="showcase">
+    <div class="wrow">
+      <span class="wtag">400 · Regular</span>
+      <span class="wsample-en" style="font-weight:400;font-family:'Noto Sans JP',sans-serif;">ゴールラボ</span>
+      <span class="wsample-jp" style="font-weight:400;font-family:'Noto Sans JP',sans-serif;font-size:13px;">本文・日付・説明文</span>
+    </div>
+    <div class="wrow">
+      <span class="wtag">500 · Medium</span>
+      <span class="wsample-en" style="font-weight:500;font-family:'Noto Sans JP',sans-serif;">ゴールラボ</span>
+      <span class="wsample-jp" style="font-weight:500;font-family:'Noto Sans JP',sans-serif;font-size:13px;">ラベル・キャプション</span>
+    </div>
+    <div class="wrow">
+      <span class="wtag">700 · Bold</span>
+      <span class="wsample-en" style="font-weight:700;font-family:'Noto Sans JP',sans-serif;">ゴールラボ</span>
+      <span class="wsample-jp" style="font-weight:700;font-family:'Noto Sans JP',sans-serif;font-size:13px;">ニュースタイトル・見出し</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
