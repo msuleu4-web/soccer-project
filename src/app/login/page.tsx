@@ -1,32 +1,47 @@
 
 "use client";
 
-   import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
    import { createClient } from "../../lib/supabase/client";
    import Logo from "../components/ui/Logo";
 
    export default function LoginPage() {
      const [email, setEmail] = useState("");
-     const [password, setPassword] = useState("");
-     const supabase = createClient();
+const [password, setPassword] = useState("");
+const [loading, setLoading] = useState(false);
+const router = useRouter();
+const supabase = createClient();
 
-     const handleSignInWithGoogle = async () => {
-       await supabase.auth.signInWithOAuth({
-         provider: "google",
-         options: {
-           redirectTo: `${location.origin}/auth/callback`,
-         },
-       });
-     };
+const handleSignInWithGoogle = async () => {
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${location.origin}/auth/callback`,
+    },
+  });
+};
 
-     const handleSignInWithEmail = async (e: React.FormEvent) => {
-       e.preventDefault();
-       await supabase.auth.signInWithPassword({
-         email,
-         password,
-       });
-       // This should be handled by a route handler
-     };
+const handleSignInWithEmail = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      alert(`エラーが発生しました: ${error.message}`);
+    } else {
+      router.push('/');
+      router.refresh();
+    }
+  } catch (error) {
+    alert(`予期せぬエラーが発生しました: ${error}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
      return (
        <div className="min-h-screen flex items-center justify-center bg-page">
@@ -76,12 +91,13 @@
                    />
                  </div>
                </div>
-               <button 
-                 type="submit" 
-                 className="w-full mt-6 gl-btn gl-btn-primary"
-               >
-                 ログイン
-               </button>
+<button 
+  type="submit" 
+  disabled={loading}
+  className="w-full mt-6 gl-btn gl-btn-primary"
+>
+  {loading ? 'ログイン中...' : 'ログイン'}
+</button>
              </form>
               <p className="text-center mt-4 text-sm text-text-muted">
                 アカウントをお持ちでないですか？{' '}

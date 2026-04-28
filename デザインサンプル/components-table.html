@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
+.card-body { padding: 20px 24px; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #00D26A; margin-bottom: 4px; }
+.section-desc  { font-size: 11px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif; }
+.dev-note { font-size: 10px; font-family: 'Courier New', monospace; color: #00D26A; margin-top: 10px; }
+
+/* ── Tabs ─────────────────────────────────── */
+.tab-bar { display: flex; border-bottom: 1px solid rgba(15,61,46,0.10); padding: 0 20px; }
+.tab { padding: 11px 14px; font-size: 13px; font-weight: 600; cursor: pointer; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -1px; font-family: 'Noto Sans JP', sans-serif; transition: all 0.2s; }
+.tab.active { color: #0F3D2E; border-bottom-color: #00D26A; }
+.tab.inactive { color: #8B9994; }
+.tab.inactive:hover { color: #0F3D2E; border-bottom-color: rgba(0,210,106,0.3); }
+
+/* ── Table ────────────────────────────────── */
+.standings-table { width: 100%; border-collapse: collapse; }
+.standings-table thead { background: #F5F1EA; }
+.standings-table th {
+  padding: 9px 12px; font-size: 11px; font-weight: 600;
+  color: #8B9994; text-align: center; font-family: 'Inter', sans-serif;
+  letter-spacing: .04em;
+}
+.standings-table th:nth-child(2) { text-align: left; }
+.standings-table td { padding: 11px 12px; border-top: 1px solid rgba(15,61,46,0.07); text-align: center; font-family: 'Inter', sans-serif; font-size: 13px; color: #5A6B66; transition: background 0.2s; }
+.standings-table td:nth-child(2) { text-align: left; font-weight: 700; color: #0F3D2E; font-family: 'Noto Sans JP', sans-serif; }
+.standings-table td:nth-child(3) { font-weight: 800; font-size: 15px; color: #0F3D2E; }
+.standings-table tr:hover td { background: rgba(0,210,106,0.04); }
+
+/* rank cell */
+.rank-cell { display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: 700; font-size: 13px; }
+.rank-gold   { color: #D97706; }
+.rank-silver { color: #6B7280; }
+.rank-bronze { color: #B45309; }
+.rank-normal { color: #8B9994; }
+.rank-relegate { color: #E63946; }
+
+/* zone indicators */
+.zone-bar { width: 3px; height: 100%; position: absolute; left: 0; top: 0; border-radius: 0 2px 2px 0; }
+td.cl-zone   { position: relative; padding-left: 16px; }
+td.rel-zone  { position: relative; padding-left: 16px; }
+.cl-bar  { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #1A2B4A; border-radius: 0 2px 2px 0; }
+.rel-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #E63946; border-radius: 0 2px 2px 0; }
+
+/* form indicator */
+.form-dots { display: flex; gap: 3px; align-items: center; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot-w { background: #00D26A; }
+.dot-d { background: #8B9994; }
+.dot-l { background: #E63946; }
+</style>
+</head>
+<body>
+
+<!-- ── Full Table ──────────────────────────────── -->
+<div class="card">
+  <div class="tab-bar">
+    <button class="tab active">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+    <button class="tab inactive">🇯🇵 J1リーグ</button>
+    <button class="tab inactive">🇪🇸 La Liga</button>
+  </div>
+  <table class="standings-table">
+    <thead>
+      <tr>
+        <th style="width:48px;">#</th>
+        <th>クラブ</th>
+        <th>勝点</th>
+        <th>勝</th>
+        <th>分</th>
+        <th>敗</th>
+        <th>直近5試合</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="rank-cell rank-gold">🏆 1</div></td>
+        <td class="cl-zone"><div class="cl-bar"></div>アーセナル</td>
+        <td>77</td><td>24</td><td>5</td><td>5</td>
+        <td><div class="form-dots"><div class="dot dot-w"></div><div class="dot dot-w"></div><div class="dot dot-d"></div><div class="dot dot-w"></div><div class="dot dot-w"></div></div></td>
+      </tr>
+      <tr>
+        <td><div class="rank-cell rank-silver">🏆 2</div></td>
+        <td class="cl-zone"><div class="cl-bar"></div>マンチェスター・C</td>
+        <td>76</td><td>23</td><td>7</td><td>3</td>
+        <td><div class="form-dots"><div class="dot dot-w"></div><div class="dot dot-l"></div><div class="dot dot-w"></div><div class="dot dot-w"></div><div class="dot dot-d"></div></div></td>
+      </tr>
+      <tr>
+        <td><div class="rank-cell rank-bronze">🏆 3</div></td>
+        <td class="cl-zone"><div class="cl-bar"></div>リヴァプール</td>
+        <td>74</td><td>22</td><td>8</td><td>4</td>
+        <td><div class="form-dots"><div class="dot dot-w"></div><div class="dot dot-w"></div><div class="dot dot-w"></div><div class="dot dot-l"></div><div class="dot dot-d"></div></div></td>
+      </tr>
+      <tr>
+        <td><div class="rank-cell rank-normal">4</div></td>
+        <td>アストン・ヴィラ</td>
+        <td>66</td><td>20</td><td>6</td><td>8</td>
+        <td><div class="form-dots"><div class="dot dot-l"></div><div class="dot dot-w"></div><div class="dot dot-w"></div><div class="dot dot-d"></div><div class="dot dot-w"></div></div></td>
+      </tr>
+      <tr>
+        <td><div class="rank-cell rank-normal">5</div></td>
+        <td>トッテナム</td>
+        <td>60</td><td>18</td><td>6</td><td>9</td>
+        <td><div class="form-dots"><div class="dot dot-d"></div><div class="dot dot-d"></div><div class="dot dot-w"></div><div class="dot dot-l"></div><div class="dot dot-w"></div></div></td>
+      </tr>
+      <tr>
+        <td><div class="rank-cell rank-relegate">18</div></td>
+        <td class="rel-zone"><div class="rel-bar"></div>ルートン</td>
+        <td>26</td><td>6</td><td>8</td><td>19</td>
+        <td><div class="form-dots"><div class="dot dot-l"></div><div class="dot dot-l"></div><div class="dot dot-d"></div><div class="dot dot-l"></div><div class="dot dot-l"></div></div></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="card-body">
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#5A6B66;font-family:'Noto Sans JP',sans-serif;">
+        <div style="width:3px;height:14px;background:#1A2B4A;border-radius:2px;"></div>CL出場圏 (1〜4位)
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#5A6B66;font-family:'Noto Sans JP',sans-serif;">
+        <div style="width:3px;height:14px;background:#E63946;border-radius:2px;"></div>降格圏 (18〜20位)
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#5A6B66;font-family:'Noto Sans JP',sans-serif;">
+        <div class="dot dot-w" style="width:10px;height:10px;"></div>勝利
+        <div class="dot dot-d" style="width:10px;height:10px;"></div>引分
+        <div class="dot dot-l" style="width:10px;height:10px;"></div>敗北
+      </div>
+    </div>
+    <div class="section-title">Standings Table</div>
+    <div class="section-desc">タブ切替・ゾーンライン・直近5試合フォーム付き。hover: rgba(0,210,106,0.04)</div>
+    <div class="dev-note">&lt;table class="standings-table"&gt; · rank colors: gold #D97706 · silver #6B7280 · bronze #B45309</div>
+  </div>
+</div>
+
+</body>
+</html>

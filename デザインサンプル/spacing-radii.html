@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; }
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 32px;
+  margin-bottom: 20px;
+}
+
+.card-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: #00D26A; margin-bottom: 4px;
+}
+.card-desc {
+  font-size: 13px; color: #5A6B66; line-height: 1.65;
+  font-family: 'Noto Sans JP', sans-serif; margin-bottom: 28px;
+  max-width: 540px;
+}
+
+/* Scale grid */
+.scale-grid {
+  display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 32px;
+}
+.scale-item {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.swatch {
+  width: 72px; height: 72px;
+  background: #fff;
+  border: 1px solid rgba(15,61,46,0.16);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.pill-swatch {
+  width: 64px; height: 28px;
+  background: #fff;
+  border: 1px solid rgba(15,61,46,0.16);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-radius: 999px;
+}
+.swatch-label { text-align: center; }
+.token  { font-size: 9px; font-weight: 600; color: #00D26A; font-family: 'Courier New', monospace; margin-bottom: 2px; }
+.value  { font-size: 13px; font-weight: 700; color: #0F3D2E; margin-bottom: 2px; }
+.usage  { font-size: 10px; color: #5A6B66; font-family: 'Noto Sans JP', sans-serif; line-height: 1.4; text-align: center; }
+
+.recommended {
+  display: inline-block; padding: 2px 7px; border-radius: 999px;
+  font-size: 9px; font-weight: 700; background: #DCFCE7; color: #15803D;
+  margin-top: 3px; font-family: 'Inter', sans-serif; letter-spacing: .03em;
+}
+
+/* Divider */
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: #00D26A;
+  margin-bottom: 16px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(15,61,46,0.10);
+}
+
+/* Usage examples */
+.examples { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.ex { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.ex-label { font-size: 9px; font-weight: 700; color: #00D26A; font-family: 'Courier New', monospace; letter-spacing: .04em; }
+
+.ex-input {
+  padding: 9px 13px; background: #FAFAF7;
+  border: 1px solid rgba(15,61,46,0.18); border-radius: 8px;
+  font-size: 13px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif;
+  width: 200px;
+}
+.ex-btn {
+  padding: 10px 20px; background: #00D26A; color: #fff;
+  border: none; border-radius: 12px; font-size: 13px; font-weight: 700;
+  font-family: 'Inter', sans-serif; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,210,106,0.25);
+}
+.ex-card {
+  background: #fff; border: 1px solid rgba(15,61,46,0.12);
+  border-radius: 16px; padding: 12px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); width: 170px;
+}
+.ex-card-thumb { width: 100%; height: 36px; background: #F5F1EA; border-radius: 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.ex-card-title { font-size: 11px; font-weight: 700; color: #0F3D2E; font-family: 'Noto Sans JP', sans-serif; }
+.ex-card-meta  { font-size: 10px; color: #8B9994; font-family: 'Inter', sans-serif; margin-top: 2px; }
+
+.ex-badge {
+  padding: 5px 13px; border-radius: 999px; font-size: 12px; font-weight: 700;
+  background: #FEE2E2; color: #B91C1C; font-family: 'Noto Sans JP', sans-serif;
+}
+.ex-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #00D26A, #0F3D2E);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff; font-weight: 700;
+  border: 2px solid rgba(15,61,46,0.12);
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-label">Border Radii — Goal Labo</div>
+  <p class="card-desc">Goal Laboは、20〜30代の日本のサッカーファンに親しみやすいデザインを目指しています。大きめの角丸（12px〜16px）を基準とし、柔らかく、現代的で、親しみやすい印象を演出します。</p>
+
+  <!-- ── Scale ─────────────────────────────────────────── -->
+  <div class="scale-grid">
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:0px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-none</div>
+        <div class="value">0px</div>
+        <div class="usage">区切り線<br>フルブリード</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:4px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-xs</div>
+        <div class="value">4px</div>
+        <div class="usage">小タグ<br>インジケーター</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:8px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-sm</div>
+        <div class="value">8px</div>
+        <div class="usage">入力欄<br>select</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:12px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-md</div>
+        <div class="value">12px</div>
+        <div class="usage">ボタン<br>primary CTA</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:16px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-lg</div>
+        <div class="value">16px</div>
+        <div class="usage">カード<br>ニュース・試合</div>
+        <div class="recommended">✦ 推奨デフォルト</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:24px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-xl</div>
+        <div class="value">24px</div>
+        <div class="usage">モーダル<br>大型パネル</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div class="swatch" style="border-radius:32px;"></div>
+      <div class="swatch-label">
+        <div class="token">--radius-2xl</div>
+        <div class="value">32px</div>
+        <div class="usage">ヒーローCTA<br>特集カード</div>
+      </div>
+    </div>
+
+    <div class="scale-item">
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+        <div class="pill-swatch"></div>
+        <div style="width:40px;height:40px;background:#fff;border:1px solid rgba(15,61,46,0.16);box-shadow:0 2px 8px rgba(0,0,0,0.06);border-radius:50%;"></div>
+      </div>
+      <div class="swatch-label">
+        <div class="token">--radius-full</div>
+        <div class="value">9999px</div>
+        <div class="usage">バッジ・pill<br>アバター</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Usage Examples ───────────────────────────────── -->
+  <div class="section-label">実用例</div>
+  <div class="examples">
+
+    <div class="ex">
+      <div class="ex-label">--radius-sm · 8px</div>
+      <div class="ex-input">メールアドレスを入力</div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-label">--radius-md · 12px</div>
+      <button class="ex-btn">ログイン</button>
+    </div>
+
+    <div class="ex">
+      <div class="ex-label">--radius-lg · 16px</div>
+      <div class="ex-card">
+        <div class="ex-card-thumb">⚽</div>
+        <div class="ex-card-title">古橋が決勝ゴール</div>
+        <div class="ex-card-meta">2024-04-22 · J1</div>
+      </div>
+    </div>
+
+    <div class="ex">
+      <div class="ex-label">--radius-full · pill</div>
+      <span class="ex-badge">⚽ 試合結果</span>
+    </div>
+
+    <div class="ex">
+      <div class="ex-label">--radius-full · avatar</div>
+      <div class="ex-avatar">GL</div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,116 +1,73 @@
-
 "use client";
 
 import { useState } from "react";
-import { createClient } from "../../lib/supabase/client";
-import Logo from "../components/ui/Logo";
 import { useRouter } from "next/navigation";
+import { createClient } from "../../lib/supabase/client";
 
-export default function SignupPage() {
+export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const supabase = createClient();
   const router = useRouter();
+  const supabase = createClient();
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
+
     if (error) {
-      alert(error.message);
+      alert(`Error signing up: ${error.message}`);
     } else {
-      // Direct the user to a page that tells them to check their email
-      // For now, just redirect to login
       router.push("/login");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-page">
-      <div className="max-w-md w-full mx-auto p-4">
-        <div className="text-center mb-6">
-          <Logo />
-        </div>
-        <div className="gl-card p-8">
-          <h1 className="text-2xl font-bold text-center text-text-primary mb-6">
-            アカウントを作成
-          </h1>
-
-          <form onSubmit={handleSignUp}>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-text-secondary mb-1"
-                >
-                  メールアドレス
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="gl-input"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-text-secondary mb-1"
-                >
-                  パスワード
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="gl-input"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-text-secondary mb-1"
-                >
-                  パスワード（確認）
-                </label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="gl-input"
-                />
-              </div>
-            </div>
-            <button
-              type="submit"
-              className="w-full mt-6 gl-btn gl-btn-primary"
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center text-gray-900">アカウントを作成</h1>
+        <form onSubmit={handleSignUp} className="space-y-6">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
             >
-              会員登録
-            </button>
-          </form>
-          <p className="text-center mt-4 text-sm text-text-muted">
-            アカウントをお持ちですか？{" "}
-            <a
-              href="/login"
-              className="font-semibold text-accent-primary hover:underline"
+              メールアドレス
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
             >
-              ログイン
-            </a>
-          </p>
-        </div>
+              パスワード
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            会員登録
+          </button>
+        </form>
       </div>
     </div>
   );

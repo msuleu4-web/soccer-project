@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #F5F1EA; font-family: 'Inter', sans-serif; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+.card { background: #fff; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
+.card-body { padding: 24px 28px; }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #00D26A; margin-bottom: 4px; }
+.section-desc  { font-size: 11px; color: #8B9994; font-family: 'Noto Sans JP', sans-serif; margin-bottom: 0; }
+.dev-note { font-size: 10px; font-family: 'Courier New', monospace; color: #00D26A; margin-top: 12px; }
+.divider { height: 1px; background: rgba(15,61,46,0.08); margin: 16px 0; }
+.state-label { font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #8B9994; margin-bottom: 8px; }
+
+/* ── HEADER ─────────────────────────────────── */
+.header-demo {
+  background: rgba(250,250,247,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(15,61,46,0.10);
+  height: 64px; display: flex; align-items: center;
+  padding: 0 24px; justify-content: space-between;
+}
+.header-demo.dark {
+  background: rgba(16,24,39,0.90);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.logo-mark { display: flex; align-items: center; gap: 0; }
+nav { display: flex; align-items: center; gap: 24px; }
+.nav-link { font-size: 14px; color: #5A6B66; text-decoration: none; font-family: 'Inter', sans-serif; cursor: pointer; transition: color 0.2s; }
+.nav-link:hover { color: #0F3D2E; }
+.nav-link.dark { color: #9ca3af; }
+.nav-link.dark:hover { color: #e5e7eb; }
+.nav-divider { width: 1px; height: 20px; background: rgba(15,61,46,0.12); }
+.nav-divider.dark { background: rgba(255,255,255,0.10); }
+.login-link { font-size: 14px; font-weight: 600; color: #0F3D2E; text-decoration: none; font-family: 'Inter', sans-serif; cursor: pointer; transition: color 0.2s; }
+.login-link:hover { color: #00D26A; }
+.login-link.dark { color: #e5e7eb; }
+.theme-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(15,61,46,0.12);
+  background: #F5F1EA; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; color: #5A6B66; transition: all 0.2s;
+}
+.theme-btn.dark { background: #1f2937; border-color: #374151; }
+
+/* mobile header */
+.mobile-header {
+  background: rgba(250,250,247,0.92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(15,61,46,0.10);
+  height: 56px; display: flex; align-items: center;
+  padding: 0 18px; justify-content: space-between;
+}
+.hamburger { background: none; border: none; font-size: 20px; color: #0F3D2E; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- ── Light Mode Header ──────────────────────── -->
+<div class="card">
+  <div class="header-demo">
+    <!-- Logo -->
+    <svg height="26" viewBox="0 0 150 26" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="1" width="26" height="24" fill="none" stroke="#0F3D2E" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="6.5" y1="1" x2="6.5" y2="25" stroke="#0F3D2E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="13" y1="1" x2="13" y2="25" stroke="#0F3D2E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="19.5" y1="1" x2="19.5" y2="25" stroke="#0F3D2E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="7.5" x2="26" y2="7.5" stroke="#0F3D2E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="13" x2="26" y2="13" stroke="#0F3D2E" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="18.5" x2="26" y2="18.5" stroke="#0F3D2E" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="13" cy="13" r="4.5" fill="#00D26A"/>
+      <circle cx="13" cy="13" r="4.5" fill="none" stroke="#0F3D2E" stroke-width="0.8"/>
+      <polygon points="13,9 15.5,10.5 14.8,14.5 11.2,14.5 10.5,10.5" fill="#fff"/>
+      <text x="34" y="19" font-family="system-ui,-apple-system,sans-serif" font-size="15" font-weight="900" fill="#0F3D2E" letter-spacing="-0.5">GOAL</text>
+      <rect x="76" y="5" width="2.5" height="15" fill="#00D26A"/>
+      <text x="83" y="19" font-family="system-ui,-apple-system,sans-serif" font-size="15" font-weight="300" fill="#1A2B4A" letter-spacing="-0.5">LABO</text>
+    </svg>
+    <nav>
+      <a class="nav-link">ニュース</a>
+      <a class="nav-link">試合日程</a>
+      <a class="nav-link">リーグ順位</a>
+      <div class="nav-divider"></div>
+      <a class="login-link">ログイン</a>
+      <div class="theme-btn">🌙</div>
+    </nav>
+  </div>
+  <div class="card-body">
+    <div class="section-title">Navigation Header — Light Mode</div>
+    <div class="section-desc">frosted glass · sticky top-0 · z-50 · height 64px</div>
+    <div class="dev-note">background: rgba(250,250,247,0.92) · backdrop-filter: blur(14px) · border-bottom: rgba(15,61,46,0.10)</div>
+  </div>
+</div>
+
+<!-- ── Dark Mode Header ───────────────────────── -->
+<div class="card" style="background:#050a14;">
+  <div class="header-demo dark">
+    <svg height="26" viewBox="0 0 150 26" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="1" width="26" height="24" fill="none" stroke="#F5F1EA" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="6.5" y1="1" x2="6.5" y2="25" stroke="#F5F1EA" stroke-width="0.5" opacity="0.3"/>
+      <line x1="13" y1="1" x2="13" y2="25" stroke="#F5F1EA" stroke-width="0.5" opacity="0.3"/>
+      <line x1="19.5" y1="1" x2="19.5" y2="25" stroke="#F5F1EA" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="7.5" x2="26" y2="7.5" stroke="#F5F1EA" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="13" x2="26" y2="13" stroke="#F5F1EA" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="18.5" x2="26" y2="18.5" stroke="#F5F1EA" stroke-width="0.5" opacity="0.3"/>
+      <circle cx="13" cy="13" r="4.5" fill="#00D26A"/>
+      <circle cx="13" cy="13" r="4.5" fill="none" stroke="#F5F1EA" stroke-width="0.8"/>
+      <polygon points="13,9 15.5,10.5 14.8,14.5 11.2,14.5 10.5,10.5" fill="#0F3D2E"/>
+      <text x="34" y="19" font-family="system-ui,-apple-system,sans-serif" font-size="15" font-weight="900" fill="#F5F1EA" letter-spacing="-0.5">GOAL</text>
+      <rect x="76" y="5" width="2.5" height="15" fill="#00D26A"/>
+      <text x="83" y="19" font-family="system-ui,-apple-system,sans-serif" font-size="15" font-weight="300" fill="#F5F1EA" letter-spacing="-0.5">LABO</text>
+    </svg>
+    <nav>
+      <a class="nav-link dark">ニュース</a>
+      <a class="nav-link dark">試合日程</a>
+      <a class="nav-link dark">リーグ順位</a>
+      <div class="nav-divider dark"></div>
+      <a class="login-link dark">ログイン</a>
+      <div class="theme-btn dark">☀️</div>
+    </nav>
+  </div>
+  <div class="card-body" style="background:#050a14;">
+    <div class="section-title">Navigation Header — Dark Mode</div>
+    <div class="section-desc" style="color:#6b7280;">background: rgba(16,24,39,0.90) · border-bottom: rgba(255,255,255,0.10)</div>
+    <div class="dev-note">同一コンポーネント、dark propで色を切り替え</div>
+  </div>
+</div>
+
+<!-- ── Mobile Header ──────────────────────────── -->
+<div class="card">
+  <div class="mobile-header">
+    <svg height="22" viewBox="0 0 100 22" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="1" width="20" height="20" fill="none" stroke="#0F3D2E" stroke-width="1.8" stroke-linejoin="round"/>
+      <circle cx="10" cy="11" r="4" fill="#00D26A"/>
+      <polygon points="10,7.5 12,9 11.5,13 8.5,13 8,9" fill="#fff"/>
+      <text x="27" y="16" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="900" fill="#0F3D2E" letter-spacing="-0.5">GOAL</text>
+      <rect x="61" y="4" width="2" height="13" fill="#00D26A"/>
+      <text x="67" y="16" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="300" fill="#1A2B4A" letter-spacing="-0.5">LABO</text>
+    </svg>
+    <button class="hamburger">☰</button>
+  </div>
+  <div class="card-body">
+    <div class="section-title">Mobile Header — Hamburger</div>
+    <div class="section-desc">height 56px · ハンバーガーメニュー · ロゴ中央寄せ</div>
+    <div class="dev-note">&lt;button class="btn-hamburger" aria-label="メニューを開く"&gt;</div>
+  </div>
+</div>
+
+</body>
+</html>

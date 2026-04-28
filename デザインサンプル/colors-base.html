@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FAFAF7; font-family: 'Inter', sans-serif; padding: 20px; }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: #00D26A; margin-bottom: 10px; margin-top: 18px; }
+.section-label:first-child { margin-top: 0; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.swatch { border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+.color-block { height: 58px; }
+.info { padding: 8px 10px; background: #fff; border-top: 1px solid #F0ECE4; }
+.name { font-size: 11px; font-weight: 700; color: #0F3D2E; }
+.hex  { font-size: 10px; color: #8B9994; margin-top: 1px; font-variant-numeric: tabular-nums; }
+.var  { font-size: 9px; color: #B0BAB6; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Brand Colors</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="color-block" style="background:#0F3D2E;"></div>
+    <div class="info"><div class="name">Brand Green</div><div class="hex">#0F3D2E</div><div class="var">--color-brand-green</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#1A2B4A;"></div>
+    <div class="info"><div class="name">Brand Navy</div><div class="hex">#1A2B4A</div><div class="var">--color-brand-navy</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#00D26A;"></div>
+    <div class="info"><div class="name">Accent Green</div><div class="hex">#00D26A</div><div class="var">--color-accent-green</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#F5F1EA; border: 1px solid #E8E4DC;"></div>
+    <div class="info"><div class="name">Brand Cream</div><div class="hex">#F5F1EA</div><div class="var">--color-brand-cream</div></div>
+  </div>
+</div>
+
+<div class="section-label">Light Mode Surfaces</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="color-block" style="background:#FAFAF7; border: 1px solid #E8E4DC;"></div>
+    <div class="info"><div class="name">Page BG</div><div class="hex">#FAFAF7</div><div class="var">--bg-page</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#FFFFFF; border: 1px solid #E8E4DC;"></div>
+    <div class="info"><div class="name">Card / Surface</div><div class="hex">#FFFFFF</div><div class="var">--bg-card</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#F5F1EA;"></div>
+    <div class="info"><div class="name">Section BG</div><div class="hex">#F5F1EA</div><div class="var">--bg-section</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#E8E4DC;"></div>
+    <div class="info"><div class="name">Border</div><div class="hex">#E8E4DC</div><div class="var">--border-default</div></div>
+  </div>
+</div>
+
+<div class="section-label">Dark Mode Surfaces</div>
+<div class="grid">
+  <div class="swatch">
+    <div class="color-block" style="background:#050a14;"></div>
+    <div class="info" style="background:#101827;border-top:1px solid #1f2937;"><div class="name" style="color:#e5e7eb;">Page BG</div><div class="hex" style="color:#6b7280;">#050a14</div><div class="var" style="color:#4b5563;">--bg-page-dark</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#101827;"></div>
+    <div class="info" style="background:#101827;border-top:1px solid #1f2937;"><div class="name" style="color:#e5e7eb;">Card BG</div><div class="hex" style="color:#6b7280;">#101827</div><div class="var" style="color:#4b5563;">--bg-card-dark</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#0a1628;"></div>
+    <div class="info" style="background:#101827;border-top:1px solid #1f2937;"><div class="name" style="color:#e5e7eb;">Section BG</div><div class="hex" style="color:#6b7280;">#0a1628</div><div class="var" style="color:#4b5563;">--bg-section-dark</div></div>
+  </div>
+  <div class="swatch">
+    <div class="color-block" style="background:#1f2937;"></div>
+    <div class="info" style="background:#101827;border-top:1px solid #1f2937;"><div class="name" style="color:#e5e7eb;">Border</div><div class="hex" style="color:#6b7280;">#1f2937</div><div class="var" style="color:#4b5563;">--border-dark</div></div>
+  </div>
+</div>
+
+</body>
+</html>
