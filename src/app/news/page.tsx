@@ -1,8 +1,9 @@
-
 import Image from 'next/image';
 import type { Article } from '@/types/news';
 import { AlertCircle } from 'lucide-react';
 import { fetchLatestNews } from '@/lib/newsData';
+import Header from '@/app/components/Header';
+import Footer from '@/app/components/Footer';
 
 const NewsCard = ({ article }: { article: Article }) => {
   const pubDate = new Date(article.pubDate).toLocaleDateString('ja-JP', {
@@ -40,7 +41,7 @@ const NewsCard = ({ article }: { article: Article }) => {
   );
 };
 
-const NewsSection = ({ title, articles }: { title: string, articles: Article[] }) => (
+const NewsGrid = ({ title, articles }: { title: string; articles: Article[] }) => (
   <div>
     <h2 className="text-2xl font-bold mb-6 border-l-4 border-primary pl-4">{title}</h2>
     {articles && articles.length > 0 ? (
@@ -60,24 +61,28 @@ export default async function NewsPage() {
     const { overseas, jleague } = await fetchLatestNews();
 
     return (
-      <div className="max-w-7xl mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">ニュース</h1>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Header />
+        <h1 className="text-3xl font-bold mt-8 mb-8 text-center">ニュース</h1>
         <div className="space-y-12">
-          <NewsSection title="海外サッカー" articles={overseas} />
-          <NewsSection title="Jリーグ" articles={jleague} />
+          <NewsGrid title="海外サッカー" articles={overseas} />
+          <NewsGrid title="Jリーグ" articles={jleague} />
         </div>
+        <Footer />
       </div>
     );
   } catch (error) {
     return (
-      <div className="max-w-7xl mx-auto p-8">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md flex items-center">
-          <AlertCircle className="h-6 w-6 mr-3"/>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Header />
+        <div className="mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md flex items-center">
+          <AlertCircle className="h-6 w-6 mr-3" />
           <div>
             <h2 className="font-bold">エラー</h2>
             <p>ニュースの読み込みに失敗しました。時間をおいて再度お試しください。</p>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }

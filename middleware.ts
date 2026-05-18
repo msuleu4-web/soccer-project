@@ -30,9 +30,15 @@ export async function middleware(request: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  const protectedRoutes = ['/mypage', '/admin'];
-  if (!session && protectedRoutes.some(path => request.nextUrl.pathname.startsWith(path))) {
+  const publicRoutes = ['/login', '/signup', '/auth'];
+  const isPublic = publicRoutes.some(path => request.nextUrl.pathname.startsWith(path));
+
+  if (!session && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  if (session && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return response;

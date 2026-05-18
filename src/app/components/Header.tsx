@@ -39,6 +39,9 @@ const Header = () => {
     <>
       <Link href="/news" className="gl-nav-link">ニュース</Link>
       <Link href="/standings" className="gl-nav-link">リーグ順位</Link>
+      <Link href="/board" className="gl-nav-link">掲示板</Link>
+      <Link href="/simulator" className="gl-nav-link">監督AI</Link>
+      <Link href="/manu" className="gl-nav-link">マンUくん</Link>
     </>
   );
 

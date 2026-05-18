@@ -16,7 +16,7 @@ const Hero = () => {
         <p className="text-base md:text-lg gl-hero-subtitle max-w-2xl mx-auto mb-10">
           最新ニュース、試合結果、リーグ順位をリアルタイムでお届けします。
         </p>
-        <a href="#" className="gl-btn gl-btn-accent">
+        <a href="/news" className="gl-btn gl-btn-accent">
           最新ニュースを見る →
         </a>
       </div>
