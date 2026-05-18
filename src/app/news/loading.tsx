@@ -1,8 +1,10 @@
+import Header from '@/app/components/Header';
 
 export default function Loading() {
   return (
-    <div className="max-w-7xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">ニュース</h1>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <Header />
+      <h1 className="text-3xl font-bold mt-8 mb-8 text-center">ニュース</h1>
       <div className="space-y-12">
         <div>
           <h2 className="text-2xl font-bold mb-6 border-l-4 border-primary pl-4">海外サッカー</h2>

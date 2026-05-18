@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
    import { createClient } from "../../lib/supabase/client";
    import Logo from "../components/ui/Logo";
+import HologramCard from "./HologramCard";
 
    export default function LoginPage() {
      const [email, setEmail] = useState("");
@@ -44,8 +45,16 @@ const handleSignInWithEmail = async (e: React.FormEvent) => {
 };
 
      return (
-       <div className="min-h-screen flex items-center justify-center bg-page">
-         <div className="max-w-md w-full mx-auto p-4">
+       <div className="min-h-screen flex items-center justify-center bg-page px-4 py-12">
+         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 max-w-5xl w-full">
+
+           {/* ホログラムカード (md以上で表示) */}
+           <div className="hidden md:flex justify-center flex-shrink-0">
+             <HologramCard />
+           </div>
+
+           {/* ログインフォーム */}
+           <div className="w-full max-w-md mx-auto lg:mx-0">
           <div className="text-center mb-6">
             <Logo />
           </div>
@@ -106,6 +115,8 @@ const handleSignInWithEmail = async (e: React.FormEvent) => {
                 </a>
               </p>
            </div>
+           </div>
+
          </div>
        </div>
      );
