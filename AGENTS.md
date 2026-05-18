@@ -1,5 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# AIエージェントへの注意事項
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+このプロジェクトで使用している Next.js には、トレーニングデータと異なる破壊的変更が含まれている可能性があります。
+コードを書く前に必ず `node_modules/next/dist/docs/` 内の該当ドキュメントを参照し、非推奨警告に従ってください。
 <!-- END:nextjs-agent-rules -->
