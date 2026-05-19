@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { createAnonClient, createServiceClient } from '@/lib/supabase/service';
+import type { MatchAnalysis, SimulationWithTeams } from '@/types/simulator';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+interface PlayerRow {
+  team_id: string;
+  name: string;
+  shirt_number: number | null;
+  position: 'GK' | 'DF' | 'MF' | 'FW';
+  ovr: number | null;
+  pac: number | null;
+  sho: number | null;
+  pas: number | null;
+  dri: number | null;
+  def_stat: number | null;
+  phy: number | null;
+  strengths: string[] | null;
+  weaknesses: string[] | null;
+}
 
 export async function POST(
   _req: NextRequest,
@@ -26,29 +43,35 @@ export async function POST(
       return NextResponse.json({ error: '試合が見つかりません' }, { status: 404 });
     }
 
-    if (sim.analysis) {
-      return NextResponse.json({ analysis: sim.analysis, cached: true });
+    const simulation = sim as SimulationWithTeams & { analysis?: MatchAnalysis };
+
+    if (simulation.analysis) {
+      return NextResponse.json({ analysis: simulation.analysis, cached: true });
     }
 
     const { data: allPlayers } = await supa
       .from('players')
       .select('team_id, name, shirt_number, position, ovr, pac, sho, pas, dri, def_stat, phy, strengths, weaknesses')
-      .in('team_id', [sim.home_team_id, sim.away_team_id])
+      .in('team_id', [simulation.home_team_id, simulation.away_team_id])
       .eq('is_active', true);
 
-    const homePlayers = (allPlayers ?? []).filter((p: any) => p.team_id === sim.home_team_id);
-    const awayPlayers = (allPlayers ?? []).filter((p: any) => p.team_id === sim.away_team_id);
+    const players = (allPlayers ?? []) as PlayerRow[];
+    const homePlayers = players.filter((p) => p.team_id === simulation.home_team_id);
+    const awayPlayers = players.filter((p) => p.team_id === simulation.away_team_id);
 
-    const avgOvr = (players: any[]) => {
-      const ovrs = players.map((p) => p.ovr ?? 70);
-      return ovrs.length > 0 ? Math.round(ovrs.reduce((a: number, b: number) => a + b, 0) / ovrs.length) : 70;
+    const avgOvr = (list: PlayerRow[]) => {
+      const ovrs = list.map((p) => p.ovr ?? 70);
+      return ovrs.length > 0 ? Math.round(ovrs.reduce((a, b) => a + b, 0) / ovrs.length) : 70;
     };
 
-    const formatPlayerStats = (players: any[]) =>
-      players
-        .map((p: any) => {
+    const formatPlayerStats = (list: PlayerRow[]) =>
+      list
+        .map((p) => {
           const num = p.shirt_number ? `#${p.shirt_number} ` : '';
-          return `${num}${p.name} [${p.position}, OVR${p.ovr ?? '?'}, PAC${p.pac ?? '?'}/SHO${p.sho ?? '?'}/PAS${p.pas ?? '?'}/DRI${p.dri ?? '?'}/DEF${p.def_stat ?? '?'}/PHY${p.phy ?? '?'}] 強み:${(p.strengths || []).join(',')} 弱み:${(p.weaknesses || []).join(',')}`;
+          const stats = `[${p.position}, OVR${p.ovr ?? '?'}, PAC${p.pac ?? '?'}/SHO${p.sho ?? '?'}/PAS${p.pas ?? '?'}/DRI${p.dri ?? '?'}/DEF${p.def_stat ?? '?'}/PHY${p.phy ?? '?'}]`;
+          const str = (p.strengths ?? []).join(',');
+          const weak = (p.weaknesses ?? []).join(',');
+          return `${num}${p.name} ${stats} 強み:${str} 弱み:${weak}`;
         })
         .join('\n');
 
@@ -92,20 +115,20 @@ AIが生成した架空のサッカーの試合結果とイベントデータ、
 - OVR差が大きい場合はリーグレベル差にも言及する
 - 個人を侮辱する表現は使わない。敗因も「相手が上回った」等の中立的な表現で`;
 
-    const matchData = sim.match_data as any;
-    const events = (matchData.events ?? [])
+    const matchData = simulation.match_data;
+    const events = matchData.events
       .map(
-        (e: any) =>
-          `${e.minute}' [${e.type}] ${e.team ?? ''} ${e.scorer ? e.scorer : ''} ${e.description}`
+        (e) =>
+          `${e.minute}' [${e.type}] ${e.team ?? ''} ${e.scorer ?? ''} ${e.description}`
       )
       .join('\n');
 
     const userPrompt = `# 試合結果
-${sim.home_team.name} ${sim.home_score} - ${sim.away_score} ${sim.away_team.name}
+${simulation.home_team.name} ${simulation.home_score} - ${simulation.away_score} ${simulation.away_team.name}
 
 # フォーメーション・スタイル
-${sim.home_team.name}: ${sim.home_formation} / ${sim.home_style}
-${sim.away_team.name}: ${sim.away_formation} / ${sim.away_style}
+${simulation.home_team.name}: ${simulation.home_formation} / ${simulation.home_style}
+${simulation.away_team.name}: ${simulation.away_formation} / ${simulation.away_style}
 
 # スタッツ
 ボール支配率: ${matchData.home_possession}% - ${matchData.away_possession}%
@@ -118,10 +141,10 @@ ${matchData.mvp?.name} (${matchData.mvp?.team}) - ${matchData.mvp?.reason}
 ${events}
 
 # 選手能力値データ
-## ${sim.home_team.name} (平均OVR: ${avgOvr(homePlayers)})
+## ${simulation.home_team.name} (平均OVR: ${avgOvr(homePlayers)})
 ${formatPlayerStats(homePlayers)}
 
-## ${sim.away_team.name} (平均OVR: ${avgOvr(awayPlayers)})
+## ${simulation.away_team.name} (平均OVR: ${avgOvr(awayPlayers)})
 ${formatPlayerStats(awayPlayers)}
 
 上記データに基づき、詳細な試合分析レビューをJSON形式で生成してください。`;
@@ -140,20 +163,16 @@ ${formatPlayerStats(awayPlayers)}
     const raw = completion.choices[0]?.message?.content ?? '';
     const cleaned = raw.replace(/```json|```/g, '').trim();
 
-    let analysis;
+    let analysis: MatchAnalysis;
     try {
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      analysis = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
+      analysis = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned) as MatchAnalysis;
     } catch {
       console.error('Analysis JSON parse error:', cleaned);
       return NextResponse.json({ error: '分析の生成に失敗しました' }, { status: 500 });
     }
 
-    service
-      .from('simulations')
-      .update({ analysis })
-      .eq('id', params.id)
-      .then(() => {});
+    await service.from('simulations').update({ analysis }).eq('id', params.id);
 
     return NextResponse.json({ analysis, cached: false });
   } catch (e) {

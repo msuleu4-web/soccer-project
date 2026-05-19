@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Send } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'model';
@@ -9,9 +10,9 @@ interface Message {
 }
 
 const suggestionPrompts = [
-  "カントナについて",
-  "今シーズンの成績は？",
-  "次の試合いつ？",
+  'カントナについて',
+  '今シーズンの成績は？',
+  '次の試合いつ？',
 ];
 
 export default function ManUChatSection() {
@@ -23,42 +24,31 @@ export default function ManUChatSection() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || loading) return;
 
     const newMessages: Message[] = [...messages, { role: 'user', content }];
     setMessages(newMessages);
-    if (input) setInput(''); // clear input only if it was used
+    setInput('');
     setLoading(true);
 
     try {
       const response = await fetch('/api/chat/manu', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages }),
       });
 
-      if (!response.ok) {
-        throw new Error('API response error');
-      }
+      if (!response.ok) throw new Error('API error');
 
       const data = await response.json();
       setMessages([...newMessages, data]);
-
-    } catch (error) {
-      console.error('Error fetching from chat API:', error);
-      const errorMessage: Message = { role: 'model', content: 'Sorry, something went wrong.' };
-      setMessages([...newMessages, errorMessage]);
+    } catch {
+      setMessages([...newMessages, { role: 'model', content: 'ごめん、ちょっとエラーが出ちゃったぜ…もう一回試してみてくれ！' }]);
     } finally {
       setLoading(false);
     }
@@ -67,46 +57,75 @@ export default function ManUChatSection() {
   return (
     <div className="gl-card">
       <h2 className="text-xl font-bold text-text-primary mb-2">マンUくんに聞いてみよう 🔴⚪</h2>
-      <p className="text-text-secondary mb-4">マンU について何でも質問してください</p>
+      <p className="text-text-secondary mb-4">Manchester United について何でも質問してください</p>
 
       <div className="h-96 bg-background-muted rounded-lg flex flex-col p-4">
-        <div className="flex-1 overflow-y-auto pr-2">
-          {
-            messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-3`}>
-                <div className={`p-3 rounded-lg max-w-xs lg:max-w-md ${msg.role === 'user' ? 'bg-green-600 text-white' : 'bg-gray-700 text-white'}`}>
-                  <p className="text-sm">{msg.content}</p>
+        <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+          {messages.map((msg, index) => (
+            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'model' && (
+                <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-xs mr-2 shrink-0 self-end mb-1">
+                  M
                 </div>
+              )}
+              <div
+                className={`px-3 py-2 rounded-2xl max-w-xs text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'bg-red-600 text-white rounded-br-sm'
+                    : 'bg-background text-text-primary border border-border rounded-bl-sm'
+                }`}
+              >
+                {msg.content}
               </div>
-            ))
-          }
-          {loading && <div className="flex justify-start mb-3"><div className="p-3 rounded-lg bg-gray-700"><p className='text-sm text-white'>...</p></div></div>}
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-xs mr-2 shrink-0">
+                M
+              </div>
+              <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-background border border-border">
+                <span className="flex gap-1">
+                  <span className="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </span>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
-          {suggestionPrompts.map(prompt => (
-             <button 
-                key={prompt}
-                onClick={() => handleSendMessage(prompt)}
-                className="bg-gray-700 text-white text-xs px-3 py-1 rounded-full whitespace-nowrap hover:bg-gray-600"
-             >
+        <div className="mt-3 flex gap-2 overflow-x-auto shrink-0">
+          {suggestionPrompts.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => handleSendMessage(prompt)}
+              disabled={loading}
+              className="text-xs px-3 py-1 rounded-full border border-border text-text-secondary hover:border-red-500 hover:text-red-500 transition-colors whitespace-nowrap shrink-0 disabled:opacity-40"
+            >
               {prompt}
             </button>
           ))}
         </div>
 
-        <div className="pt-4 border-t border-border-muted mt-2">
-          <div className="flex">
+        <div className="pt-3 border-t border-border mt-3 shrink-0">
+          <div className="flex items-center gap-2 bg-background rounded-full border border-border px-4 py-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(input)}
-              className="w-full bg-input-background text-text-primary p-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-accent-green"
-              placeholder="メッセージを入力..."
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage(input)}
+              placeholder="マンUくんに質問する..."
+              className="flex-1 bg-transparent text-text-primary text-sm focus:outline-none placeholder:text-text-muted"
             />
-            <button onClick={() => handleSendMessage(input)} className="bg-accent-green text-white px-4 rounded-r-lg">送信</button>
+            <button
+              onClick={() => handleSendMessage(input)}
+              disabled={!input.trim() || loading}
+              className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center text-white disabled:opacity-40 hover:bg-red-700 transition-colors shrink-0"
+            >
+              <Send size={13} />
+            </button>
           </div>
         </div>
       </div>

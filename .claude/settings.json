@@ -1,7 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{redirect_url}\" http://localhost:3003/)",
+      "Bash(curl -v http://localhost:3003/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} -> %{redirect_url}\" http://localhost:3003/)",
+      "Bash(kill 21364)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} -> %{redirect_url}\" http://localhost:3000/)",
+      "Bash(netstat -ano)",
+      "Bash(curl -v -s -o /dev/null http://localhost:3003/)",
+      "PowerShell(Stop-Process -Id 28952, 9324, 17480, 21364 -Force -ErrorAction SilentlyContinue)",
+      "Bash(npm run *)",
+      "Bash(curl -v -s -o /dev/null http://localhost:3000/)",
+      "Bash(curl -i http://localhost:3000/)",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/images/trophy.png)",
+      "Bash(Get-ChildItem -Recurse \"c:\\\\Users\\\\KIMYONGJIN\\\\Desktop\\\\soccer\\\\src\\\\app\\\\game\")",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

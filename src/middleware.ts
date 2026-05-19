@@ -26,18 +26,22 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
-
-  const { data: { session } } = await supabase.auth.getSession();
-
-  const publicRoutes = ['/login', '/signup', '/auth'];
+  const publicRoutes = ['/login', '/signup', '/about', '/privacy'];
   const isPublic = publicRoutes.some(path => request.nextUrl.pathname.startsWith(path));
 
-  if (!session && !isPublic) {
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (e) {
+    // 인증 실패 시 비로그인으로 처리
+  }
+
+  if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  if (session && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -46,6 +50,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)).*)',
   ],
 };

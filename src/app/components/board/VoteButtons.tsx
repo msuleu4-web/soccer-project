@@ -20,19 +20,39 @@ export default function VoteButtons({ postId, initialLikes, initialDislikes, ini
   const handleVote = async (type: 'like' | 'dislike') => {
     if (loading) return
     setLoading(true)
+    // 楽観的UI: 同じボタン→取消、別ボタン→切替
+    const prevType = voteType
+    if (voteType === type) {
+      setVoteType(null)
+      setLikes(l => type === 'like' ? l - 1 : l)
+      setDislikes(d => type === 'dislike' ? d - 1 : d)
+    } else {
+      setVoteType(type)
+      setLikes(l => type === 'like' ? l + 1 : prevType === 'like' ? l - 1 : l)
+      setDislikes(d => type === 'dislike' ? d + 1 : prevType === 'dislike' ? d - 1 : d)
+    }
     try {
       const res = await fetch(`/api/board/posts/${postId}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vote_type: type, anon_id: getAnonId() }),
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        // 失敗時は元に戻す
+        setVoteType(prevType)
+        setLikes(initialLikes)
+        setDislikes(initialDislikes)
+        return
+      }
       const data = await res.json()
+      // サーバーの正確な値で更新
       setLikes(data.likes)
       setDislikes(data.dislikes)
-      setVoteType(data.vote_type)
+      setVoteType(data.vote_type ?? null)
     } catch {
-      // ネットワークエラーは無視
+      setVoteType(prevType)
+      setLikes(initialLikes)
+      setDislikes(initialDislikes)
     } finally {
       setLoading(false)
     }

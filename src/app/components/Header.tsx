@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 import Logo from "./ui/Logo";
@@ -12,6 +13,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     const getSession = async () => {
@@ -33,6 +35,7 @@ const Header = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    router.push('/login');
   };
 
   const NavLinks = () => (
@@ -42,6 +45,7 @@ const Header = () => {
       <Link href="/board" className="gl-nav-link">掲示板</Link>
       <Link href="/simulator" className="gl-nav-link">監督AI</Link>
       <Link href="/manu" className="gl-nav-link">マンUくん</Link>
+      <Link href="/game" className="gl-nav-link">育成ゲーム</Link>
     </>
   );
 
@@ -52,21 +56,19 @@ const Header = () => {
           <Logo />
         </Link>
         
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden lg:flex items-center space-x-1">
           <NavLinks />
           <div className="w-px h-5 bg-border"></div>
           {session ? (
-            <div className="flex items-center gap-4">
-              <User className="w-5 h-5 text-text-secondary" />
-              <button onClick={handleSignOut} className="gl-nav-link">ログアウト</button>
-            </div>
+            <button onClick={handleSignOut} className="gl-nav-link">ログアウト</button>
           ) : (
             <Link href="/login" className="gl-nav-link font-semibold text-text-primary">ログイン</Link>
           )}
           <ThemeToggle />
         </nav>
 
-        <div className="md:hidden">
+        <div className="lg:hidden flex items-center gap-3">
+          <ThemeToggle />
           <button onClick={() => setIsOpen(!isOpen)} className="text-text-primary">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -74,7 +76,7 @@ const Header = () => {
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-card-bg border-t border-border">
+        <div className="lg:hidden bg-card-bg border-t border-border">
           <nav className="flex flex-col items-center space-y-4 py-4">
             <NavLinks />
             <div className="w-full border-t border-border my-2"></div>
@@ -83,7 +85,6 @@ const Header = () => {
             ) : (
               <Link href="/login" className="gl-nav-link font-semibold text-text-primary">ログイン</Link>
             )}
-            <ThemeToggle />
           </nav>
         </div>
       )}

@@ -70,7 +70,8 @@ export async function DELETE(
     const authSupabase = createClient()
     const { data: { user } } = await authSupabase.auth.getUser()
 
-    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+    const adminEmails = (process.env.ADMIN_EMAIL ?? '').split(',').map(e => e.trim())
+    if (!user || !adminEmails.includes(user.email ?? '')) {
       return NextResponse.json({ error: '権限がありません', code: 'SERVER_ERROR' }, { status: 403 })
     }
 

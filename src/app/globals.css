@@ -452,8 +452,10 @@
     gap: var(--space-1);
     color: var(--fg-1);
     font-weight: var(--fw-medium);
+    font-size: 0.875rem;
     text-decoration: none;
-    padding: var(--space-2) var(--space-3);
+    white-space: nowrap;
+    padding: var(--space-2) var(--space-2);
     border-radius: var(--radius-sm);
     transition: all var(--transition-base);
   }

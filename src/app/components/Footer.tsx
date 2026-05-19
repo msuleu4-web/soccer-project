@@ -13,10 +13,10 @@ const Footer = () => {
           <a href="#" className="hover:text-white"><Globe size={20} /></a>
         </div>
         <div className="flex space-x-6 text-sm">
-          <a href="#" className="hover:text-white">ニュース</a>
-          <a href="#" className="hover:text-white">試合日程</a>
-          <a href="#" className="hover:text-white">リーグ順位</a>
-          <a href="#" className="hover:text-white">About</a>
+          <a href="/news" className="hover:text-white">ニュース</a>
+          <a href="/standings" className="hover:text-white">リーグ順位</a>
+          <a href="/about" className="hover:text-white">About</a>
+          <a href="/privacy" className="hover:text-white">プライバシーポリシー</a>
         </div>
       </div>
     </footer>

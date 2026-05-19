@@ -22,6 +22,13 @@ export default function Home() {
           マンUくんと話す →
         </Link>
       </div>
+      <div className="gl-card text-center mt-4">
+        <h2 className="text-xl font-bold text-text-primary mb-2">選手育成ゲーム 🎮</h2>
+        <p className="text-text-secondary mb-4">無名の選手を育ててバロンドールを目指せ！</p>
+        <Link href="/game" className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors">
+          ゲームを始める →
+        </Link>
+      </div>
       <Footer />
     </main>
   );

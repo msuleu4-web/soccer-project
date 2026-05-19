@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createAnonClient } from '@/lib/supabase/service'
+import { createServiceClient } from '@/lib/supabase/service'
 import { hashAnonId } from '@/lib/board/hash'
 import type { VoteBody, VoteResponse, ApiError } from '@/types/board'
 
@@ -42,7 +42,8 @@ export async function POST(
       )
     }
 
-    const supabase = createAnonClient()
+    // service client で RLS をバイパス（votes テーブルへの読み書きに必要）
+    const supabase = createServiceClient()
 
     // 投稿の存在確認
     const { data: post, error: postError } = await supabase
@@ -82,7 +83,21 @@ export async function POST(
           { status: 500 }
         )
       }
-    } else if (existing.vote_type !== vote_type) {
+    } else if (existing.vote_type === vote_type) {
+      // 同じボタンを再クリック → 投票取消 (DELETE)
+      const { error: deleteError } = await supabase
+        .from('votes')
+        .delete()
+        .eq('id', existing.id)
+
+      if (deleteError) {
+        console.error('[POST /api/board/posts/[id]/vote] Delete error:', deleteError.message)
+        return NextResponse.json(
+          { error: '投票の取消に失敗しました', code: 'SERVER_ERROR' },
+          { status: 500 }
+        )
+      }
+    } else {
       // 投票変更: UPDATE
       const { error: updateError } = await supabase
         .from('votes')
@@ -97,28 +112,33 @@ export async function POST(
         )
       }
     }
-    // 同じ vote_type での再投票はべき等 (何もしない)
 
-    // トリガーが posts を更新済みなので最新値を取得して返す
-    const { data: updated, error: fetchError } = await supabase
-      .from('posts')
-      .select('likes, dislikes')
-      .eq('id', post_id)
-      .single()
+    // votes テーブルから集計して posts を直接更新
+    const { data: voteCounts, error: countError } = await supabase
+      .from('votes')
+      .select('vote_type')
+      .eq('post_id', post_id)
 
-    if (fetchError || !updated) {
-      console.error('[POST /api/board/posts/[id]/vote] Fetch error:', fetchError?.message)
+    if (countError) {
+      console.error('[POST /api/board/posts/[id]/vote] Count error:', countError.message)
       return NextResponse.json(
-        { error: '投票数の取得に失敗しました', code: 'SERVER_ERROR' },
+        { error: '投票数の集計に失敗しました', code: 'SERVER_ERROR' },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({
-      vote_type,
-      likes:    updated.likes,
-      dislikes: updated.dislikes,
-    })
+    const likes    = voteCounts?.filter(v => v.vote_type === 'like').length    ?? 0
+    const dislikes = voteCounts?.filter(v => v.vote_type === 'dislike').length ?? 0
+
+    // posts の likes/dislikes を更新
+    await supabase
+      .from('posts')
+      .update({ likes, dislikes })
+      .eq('id', post_id)
+
+    // 取消の場合は vote_type: null を返す
+    const wasCancel = existing?.vote_type === vote_type
+    return NextResponse.json({ vote_type: wasCancel ? null : vote_type, likes, dislikes })
   } catch (err) {
     console.error('[POST /api/board/posts/[id]/vote] Unexpected error:', err)
     return NextResponse.json(
