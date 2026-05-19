@@ -7,7 +7,7 @@ export function saveGame(state: GameState): void {
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch {
-    // localStorage may not be available in SSR or private mode
+    // SSRまたはプライベートモードではlocalStorageが利用不可の場合がある
   }
 }
 
@@ -16,7 +16,7 @@ export function loadGame(): GameState | null {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GameState;
-    // Backward compatibility: fill in new fields if missing
+    // 後方互換性: 新フィールドが未設定の場合に補完
     const state: GameState = {
       ...parsed,
       achievements:      parsed.achievements      ?? [],
@@ -58,6 +58,6 @@ export function resetGame(): void {
   try {
     localStorage.removeItem(SAVE_KEY);
   } catch {
-    // ignore
+    // 無視
   }
 }

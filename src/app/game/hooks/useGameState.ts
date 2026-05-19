@@ -153,17 +153,17 @@ export function useGameState(): GameStateExtended & GameActions {
     const nextWeek = currentState.currentWeek + 1;
     const maxWeeks = 38;
 
-    // Check retirement
+    // 引退チェック
     if (currentState.age >= GAME_CONFIG.RETIREMENT_AGE) {
       return { ...currentState, gamePhase: 'ending' };
     }
 
-    // End of season
+    // シーズン終了
     if (nextWeek > maxWeeks) {
       // ovrStart: シーズン開始時のOVRを保持（なければ現在値）
       const ovrStart = currentState.seasonStartOvr ?? currentState.ovr;
 
-      // Season end: age up, reset season stats, offer transfers
+      // シーズン終了: 年齢加算・シーズン成績リセット・移籍オファー生成
       const newState: GameState = {
         ...currentState,
         age: currentState.age + 1,
@@ -211,7 +211,7 @@ export function useGameState(): GameStateExtended & GameActions {
         }
       }
 
-      // Add trophies if in top leagues
+      // 上位リーグでトロフィーを追加
       const trophiesThisSeason: string[] = [];
       if (newState.currentLeague === 'champions_league' && Math.random() < 0.3) {
         const t = `チャンピオンズリーグ優勝 (Season ${newState.currentSeason - 1})`;
@@ -227,11 +227,11 @@ export function useGameState(): GameStateExtended & GameActions {
         trophiesThisSeason.push(t);
       }
 
-      // Season fan bonus
+      // シーズンのファンボーナス
       const seasonFanBonus = Math.floor(currentState.seasonGoals * 100 + currentState.matchesPlayed * 30);
       newState.fans = (newState.fans ?? 0) + seasonFanBonus;
 
-      // Build season summary
+      // シーズンサマリーを生成
       const summary: SeasonSummary = {
         season: currentState.currentSeason,
         league: LEAGUES[currentState.currentLeague].name,
@@ -248,7 +248,7 @@ export function useGameState(): GameStateExtended & GameActions {
       newState.lastSeasonSummary = summary;
       newState.showSeasonSummary = true;
 
-      // Check achievements after season
+      // シーズン後の実績チェック
       const newlyUnlockedAch = checkAchievements(currentState, newState);
       if (newlyUnlockedAch.length > 0) {
         newState.achievements = [...(newState.achievements ?? []), ...newlyUnlockedAch];
@@ -267,8 +267,8 @@ export function useGameState(): GameStateExtended & GameActions {
         return { ...newState, gamePhase: 'ending' };
       }
 
-      // Stay in 'playing' phase — SeasonSummaryModal will be shown;
-      // dismissSeasonSummary moves to 'transfer'
+      // 'playing'フェーズを維持 — SeasonSummaryModalが表示される
+      // dismissSeasonSummaryが'transfer'フェーズへ移行する
       return { ...newState, gamePhase: 'playing' };
     }
 
@@ -298,12 +298,12 @@ export function useGameState(): GameStateExtended & GameActions {
 
       const { statsChange, fatigueChange, injuryOccurred } = applyTraining(prev, type);
 
-      // Training streak
+      // 連続トレーニング
       const prevStreak = prev.trainingStreak ?? { type: '', count: 0 };
       const newStreakCount = prevStreak.type === type ? prevStreak.count + 1 : 1;
       const newStreak = { type, count: newStreakCount };
 
-      // Streak bonus: +1 for 3 consecutive, +2 for 5 consecutive
+      // 連続ボーナス: 3回連続→+1、5回連続→+2
       let streakBonus = 0;
       if (newStreakCount >= 5) streakBonus = 2;
       else if (newStreakCount >= 3) streakBonus = 1;
@@ -333,19 +333,19 @@ export function useGameState(): GameStateExtended & GameActions {
         trainingStreak: newStreak,
       };
 
-      // Advance week
+      // 週を進める
       newState = advanceWeek(newState);
 
       const allNewUnlocks: string[] = [];
 
       if (newState.gamePhase === 'playing' && !newState.showSeasonSummary) {
-        // Check for match
+        // 試合チェック
         if (shouldMatchOccur(newState)) {
           const result = simulateMatch(newState);
           setLastMatchResult(result);
           setHighlights(generateHighlights(result, newState.playerName));
 
-          // Fan count: scoring
+          // ファン数: 得点ボーナス
           const goalFans = result.playerGoals > 0
             ? Math.floor(Math.random() * 200 + 100) * result.playerGoals
             : 0;
@@ -373,7 +373,7 @@ export function useGameState(): GameStateExtended & GameActions {
             gamePhase: 'match_day',
           };
 
-          // Check achievements after match
+          // 試合後の実績チェック
           const newAch = checkAchievements(prev, newState, result.playerGoals);
           if (newAch.length > 0) {
             newState.achievements = [...(newState.achievements ?? []), ...newAch];
@@ -383,7 +383,7 @@ export function useGameState(): GameStateExtended & GameActions {
             }));
           }
         } else {
-          // Check for event
+          // イベントチェック
           const eventChance = Math.random();
           if (eventChance < GAME_CONFIG.EVENT_CHANCE_PER_WEEK) {
             const event = getRandomEvent(newState);
@@ -394,7 +394,7 @@ export function useGameState(): GameStateExtended & GameActions {
         }
       }
 
-      // Check new skills
+      // 新スキルチェック
       const newSkillIds = checkNewSkills(newState);
       if (newSkillIds.length > 0) {
         newState.skills = [...(newState.skills ?? []), ...newSkillIds];
@@ -526,7 +526,7 @@ export function useGameState(): GameStateExtended & GameActions {
       const nextLeagueForOffer = offer.team.league;
       const isPromotion = LEAGUES[nextLeagueForOffer].level > LEAGUES[prev.currentLeague].level;
 
-      // Fan boost on promotion
+      // 昇格時のファンブースト
       const promotionFans = isPromotion
         ? Math.floor(Math.random() * 500 + 200)
         : 0;
@@ -543,7 +543,7 @@ export function useGameState(): GameStateExtended & GameActions {
       };
       newState.leagueStandings = generateStandings(newState);
 
-      // Check achievements after transfer
+      // 移籍後の実績チェック
       const newAch = checkAchievements(prev, newState);
       if (newAch.length > 0) {
         newState.achievements = [...(newState.achievements ?? []), ...newAch];
@@ -559,7 +559,7 @@ export function useGameState(): GameStateExtended & GameActions {
 
   const declineTransfer = useCallback(() => {
     setState(prev => {
-      // Try to auto-promote if OVR is high enough
+      // OVRが十分高ければ自動昇格を試みる
       const nextLeague = getNextLeague(prev.currentLeague);
       let newLeague = prev.currentLeague;
       let newTeam = prev.currentTeam;

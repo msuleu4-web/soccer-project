@@ -184,7 +184,7 @@ export default function GameScreen() {
     <div>
       <UnlockToast />
 
-      {/* 시상식 모달: pendingAwards가 있으면 무조건 먼저 표시 */}
+      {/* 授賞式モーダル: pendingAwardsがあれば必ず先に表示 */}
       {(state.pendingAwards?.length ?? 0) > 0 && (
         <AwardsCeremonyModal
           awards={state.pendingAwards!}
@@ -193,7 +193,7 @@ export default function GameScreen() {
         />
       )}
 
-      {/* 시즌 요약: awards가 모두 닫힌 후에만 표시 */}
+      {/* シーズン要約: awardsがすべて閉じた後にのみ表示 */}
       {state.showSeasonSummary && (state.pendingAwards?.length ?? 0) === 0 && (
         state.lastSeasonSummary
           ? <SeasonSummaryModal summary={state.lastSeasonSummary} onClose={game.dismissSeasonSummary} />

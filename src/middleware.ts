@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
     const { data } = await supabase.auth.getUser();
     user = data.user;
   } catch (e) {
-    // 인증 실패 시 비로그인으로 처리
+    // 認証失敗時は未ログインとして処理
   }
 
   if (!user && !isPublic) {

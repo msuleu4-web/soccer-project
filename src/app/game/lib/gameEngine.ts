@@ -295,7 +295,7 @@ export function generateTransferOffers(state: GameState): TransferOffer[] {
     }
   }
 
-  // Limit to 3 offers max
+  // 最大3件に制限
   return offers.slice(0, 3);
 }
 
