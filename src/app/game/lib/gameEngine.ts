@@ -10,10 +10,33 @@ export type TrainingType =
   | 'defense'
   | 'rest';
 
+export type TrainingOutcome = 'critical_success' | 'success' | 'failure' | 'critical_failure';
+
 export interface TrainingResult {
   statsChange: Partial<PlayerStats>;
   fatigueChange: number;
   injuryOccurred: boolean;
+  outcome: TrainingOutcome;
+  successRate: number;       // 0〜1（UI表示用）
+}
+
+// 各練習種別のベース成功率
+const BASE_SUCCESS_RATE: Record<TrainingType, number> = {
+  shooting:  0.65,
+  passing:   0.68,
+  dribbling: 0.62,
+  physical:  0.58,
+  defense:   0.64,
+  rest:      1.00,
+};
+
+/** 現在の状態から訓練成功率を計算（0〜1） */
+export function getTrainingSuccessRate(fatigue: number, morale: number, trainingType: TrainingType): number {
+  if (trainingType === 'rest') return 1;
+  const base      = BASE_SUCCESS_RATE[trainingType];
+  const fatigueMod = -0.28 * (fatigue / 100);          // 疲労0→修正なし / 疲労100→-28%
+  const moraleMod  = -0.15 + 0.22 * (morale / 100);   // モラル0→-15% / モラル100→+7%
+  return Math.min(0.90, Math.max(0.12, base + fatigueMod + moraleMod));
 }
 
 // OVRはスタット/上限で正規化 → 全スタットが上限に達するとOVR99
@@ -30,16 +53,20 @@ export function calculateOVR(stats: PlayerStats, position: Position): number {
   return Math.round(Math.min(99, Math.max(1, raw * 99)));
 }
 
-// 収穫逓減：現在値/上限で計算するので100超えスタットでも正常動作
-// raw < 1 のとき確率的に +1 を返す（上限近くでも必ずいつか上がる）
+// 収穫逓減：2.0乗で全域にわたってきつく
+// - 上限の30%以下：比較的伸びやすい
+// - 上限の70%超え：急激に困難
+// - 上限の95%超え：最低5%を保証（完全に止まらないようにする）
 function diminishing(base: number, currentValue: number, morale: number, maxValue: number): number {
   if (base <= 0 || currentValue >= maxValue) return 0;
-  const factor = (1 - currentValue / maxValue) * (morale / 100);
+  const ratio = 1 - currentValue / maxValue;
+  const factor = Math.pow(ratio, 2.0) * (morale / 100);
   if (factor <= 0) return 0;
   const raw = base * factor;
-  if (raw >= 1) return Math.round(raw);
-  // 端数部分を確率に変換: raw=0.37 → 37%で+1, 63%で+0
-  return Math.random() < raw ? 1 : 0;
+  // 上限付近（残り5%以内）でも最低5%の確率を保証してスタックを防ぐ
+  const finalChance = ratio < 0.05 ? Math.max(raw, 0.05) : raw;
+  if (finalChance >= 1) return Math.round(finalChance);
+  return Math.random() < finalChance ? 1 : 0;
 }
 
 function rand(min: number, max: number): number {
@@ -48,52 +75,74 @@ function rand(min: number, max: number): number {
 
 export function applyTraining(state: GameState, trainingType: TrainingType): TrainingResult {
   const { stats, morale, fatigue, position } = state;
+  const skills = state.skills ?? [];
+
+  // ── 成功率・成否判定 ──────────────────────────────────
+  const successRate = getTrainingSuccessRate(fatigue, morale, trainingType);
+  let outcome: TrainingOutcome = 'success';
+  if (trainingType !== 'rest') {
+    const r = Math.random();
+    if      (r < successRate * 0.15) outcome = 'critical_success';  // 大成功
+    else if (r < successRate)        outcome = 'success';
+    else if (r > 0.97)               outcome = 'critical_failure';  // 大失敗（〜3%）
+    else                             outcome = 'failure';
+  }
+
+  // 成功時の倍率（大成功: 1.5倍、失敗: 0）
+  const multiplier =
+    outcome === 'critical_success' ? 1.5 :
+    outcome === 'success'          ? 1.0 : 0;
+
   const halfEffect = fatigue >= GAME_CONFIG.FATIGUE_INJURY_THRESHOLD ? 0.5 : 1;
   let injuryOccurred = false;
 
-  if (fatigue >= GAME_CONFIG.FATIGUE_INJURY_THRESHOLD && Math.random() < GAME_CONFIG.FATIGUE_INJURY_CHANCE) {
+  // wall スキル: 怪我リスク -50%
+  const injuryChance = skills.includes('wall')
+    ? GAME_CONFIG.FATIGUE_INJURY_CHANCE * 0.5
+    : GAME_CONFIG.FATIGUE_INJURY_CHANCE;
+  if (fatigue >= GAME_CONFIG.FATIGUE_INJURY_THRESHOLD && Math.random() < injuryChance) {
     injuryOccurred = true;
   }
 
-  const mx = STAT_MAX[position]; // ポジション別上限
+  const mx = STAT_MAX[position];
   const statsChange: Partial<PlayerStats> = {};
   let fatigueChange = 0;
 
   switch (trainingType) {
     case 'shooting': {
-      const base = rand(3, 5);
+      const base = rand(5, 14) * multiplier;
       statsChange.shooting = diminishing(base * halfEffect, stats.shooting, morale, mx.shooting);
-      statsChange.passing  = diminishing(1   * halfEffect, stats.passing,  morale, mx.passing);
-      fatigueChange = 15;
-      break;
-    }
-    case 'passing': {
-      const base = rand(3, 5);
-      statsChange.passing   = diminishing(base * halfEffect, stats.passing,   morale, mx.passing);
-      statsChange.dribbling = diminishing(1    * halfEffect, stats.dribbling, morale, mx.dribbling);
-      fatigueChange = 10;
-      break;
-    }
-    case 'dribbling': {
-      const base = rand(3, 5);
-      statsChange.dribbling = diminishing(base * halfEffect, stats.dribbling, morale, mx.dribbling);
-      statsChange.speed     = diminishing(1    * halfEffect, stats.speed,     morale, mx.speed);
-      fatigueChange = 15;
-      break;
-    }
-    case 'physical': {
-      const baseSpeed   = rand(2, 4);
-      const baseStamina = rand(2, 4);
-      statsChange.speed   = diminishing(baseSpeed   * halfEffect, stats.speed,   morale, mx.speed);
-      statsChange.stamina = diminishing(baseStamina * halfEffect, stats.stamina, morale, mx.stamina);
+      statsChange.passing  = diminishing(1.5 * multiplier * halfEffect, stats.passing, morale, mx.passing);
       fatigueChange = 20;
       break;
     }
-    case 'defense': {
-      const base = rand(3, 5);
-      statsChange.defense = diminishing(base * halfEffect, stats.defense, morale, mx.defense);
-      statsChange.stamina = diminishing(1    * halfEffect, stats.stamina, morale, mx.stamina);
+    case 'passing': {
+      const base = rand(5, 14) * multiplier;
+      statsChange.passing   = diminishing(base * halfEffect, stats.passing,   morale, mx.passing);
+      statsChange.dribbling = diminishing(1.5 * multiplier * halfEffect, stats.dribbling, morale, mx.dribbling);
       fatigueChange = 15;
+      break;
+    }
+    case 'dribbling': {
+      const base = rand(5, 14) * multiplier;
+      statsChange.dribbling = diminishing(base * halfEffect, stats.dribbling, morale, mx.dribbling);
+      statsChange.speed     = diminishing(1.5 * multiplier * halfEffect, stats.speed,  morale, mx.speed);
+      fatigueChange = 20;
+      break;
+    }
+    case 'physical': {
+      const baseSpeed   = rand(4, 10) * multiplier;
+      const baseStamina = rand(4, 10) * multiplier;
+      statsChange.speed   = diminishing(baseSpeed   * halfEffect, stats.speed,   morale, mx.speed);
+      statsChange.stamina = diminishing(baseStamina * halfEffect, stats.stamina, morale, mx.stamina);
+      fatigueChange = 28;
+      break;
+    }
+    case 'defense': {
+      const base = rand(5, 14) * multiplier;
+      statsChange.defense = diminishing(base * halfEffect, stats.defense, morale, mx.defense);
+      statsChange.stamina = diminishing(1.5 * multiplier * halfEffect, stats.stamina, morale, mx.stamina);
+      fatigueChange = 20;
       break;
     }
     case 'rest': {
@@ -102,7 +151,15 @@ export function applyTraining(state: GameState, trainingType: TrainingType): Tra
     }
   }
 
-  return { statsChange, fatigueChange, injuryOccurred };
+  // 大失敗: 追加疲労 +12
+  if (outcome === 'critical_failure') fatigueChange += 12;
+
+  // iron_body スキル: 疲労増加 -20%
+  if (skills.includes('iron_body') && fatigueChange > 0) {
+    fatigueChange = Math.ceil(fatigueChange * 0.8);
+  }
+
+  return { statsChange, fatigueChange, injuryOccurred, outcome, successRate };
 }
 
 // ランダムな分を重複なしで生成
@@ -133,7 +190,7 @@ const PLAYER_ASSIST_TEXTS = [
 
 // チームメイトゴールの説明文
 const TEAMMATE_GOAL_TEXTS = [
-  (opponent: string, min: number) => `⚽ ${min}分 チームメイトのシュートがゴール！(${opponent} 0-1)`,
+  (_: string, min: number) => `⚽ ${min}分 チームメイトの強烈なシュートがゴールへ！`,
   (_: string, min: number) => `⚽ ${min}分 セットプレーからチームメイトがヘッドで押し込む！`,
   (_: string, min: number) => `⚽ ${min}分 カウンターからチームメイトが流し込む！`,
   (_: string, min: number) => `⚽ ${min}分 ペナルティキックをチームメイトが決める！`,
@@ -161,51 +218,91 @@ export function generateHighlights(result: MatchResult, _playerName: string): st
   return result.events.map(e => e.text);
 }
 
+// ポワソン分布でゴール数をサンプリング（最大5点）
+function poissonGoals(lambda: number): number {
+  const r = Math.random();
+  let cumP = 0;
+  let p = Math.exp(-lambda);
+  for (let k = 0; k <= 5; k++) {
+    cumP += p;
+    if (r < cumP) return k;
+    p *= lambda / (k + 1);
+  }
+  return 5;
+}
+
 export function simulateMatch(state: GameState): MatchResult {
   const { stats, ovr, currentTeam, position } = state;
   const leagueLevel = LEAGUES[state.currentLeague].level;
-  const opponentStrength = leagueLevel * 10 + rand(-5, 5);
 
   const fatiguePenalty = state.fatigue > 50 ? (state.fatigue - 50) / 100 : 0;
   const moraleFactor = state.morale / 100;
   const effectiveOvr = ovr * (1 - fatiguePenalty * 0.3) * (0.7 + moraleFactor * 0.3);
 
-  // 個人ゴール・アシスト確率
+  // 個人ゴール確率 — ステータス比率で非線形スケーリング（高スペック支配力の極大化）
+  const mx = STAT_MAX[position];
+  const shootRatio  = Math.min(1.0, stats.shooting  / mx.shooting);
+  const dribRatio   = Math.min(1.0, stats.dribbling / mx.dribbling);
+  const speedRatio  = Math.min(1.0, stats.speed     / mx.speed);
+  // 冪乗曲線で中程度の差が試合に圧倒的に反映される
+  const dominance   = Math.pow((shootRatio * 0.5 + dribRatio * 0.3 + speedRatio * 0.2), 1.8);
+  const ovrDom      = Math.pow(effectiveOvr / 99, 2.2);
+
   let goalChance = 0;
-  if (position === 'FW')      goalChance = (stats.shooting / 100) * 0.6 + (effectiveOvr / 100) * 0.4;
-  else if (position === 'MF') goalChance = (stats.shooting / 100) * 0.3 + (effectiveOvr / 100) * 0.2;
-  else                        goalChance = (stats.shooting / 100) * 0.1 + (effectiveOvr / 100) * 0.05;
+  if (position === 'FW')      goalChance = dominance * 0.90 + ovrDom * 0.40;
+  else if (position === 'MF') goalChance = dominance * 0.45 + ovrDom * 0.20;
+  else                        goalChance = dominance * 0.15 + ovrDom * 0.08;
 
   let playerGoals = 0;
-  if (Math.random() < goalChance * 1.5) {
-    playerGoals = Math.random() < 0.25 ? 2 : 1;
-    if (Math.random() < 0.05) playerGoals = 3; // ハットトリック
+  if (Math.random() < Math.min(goalChance, 0.99)) {
+    // 高ドミナンスほど複数得点の確率が上昇
+    const multiGoalChance = 0.10 + dominance * 0.40;
+    const hatTrickChance  = 0.01 + dominance * 0.15;
+    playerGoals = Math.random() < multiGoalChance ? 2 : 1;
+    if (Math.random() < hatTrickChance) playerGoals = 3;
+    if (dominance >= 0.95 && Math.random() < 0.06) playerGoals = 4; // 神域
   }
-  const playerAssists = Math.random() < 0.25 ? 1 : 0;
+  // アシスト確率（ポジションによって差をつける）
+  const assistChance = position === 'MF' ? 0.28 : position === 'FW' ? 0.18 : 0.10;
+  const playerAssists = Math.random() < assistChance ? 1 : 0;
 
-  // チーム全体スコア（選手ゴールを必ず含む）
-  const teamStrength = currentTeam.prestige * 15 + ovr * 0.5;
-  const baseTeamScore = Math.round(Math.random() * 3 + teamStrength / opponentStrength);
-  // アシストはチームゴールとは別カウントなので playerGoals のみ保証
-  const teamScore = Math.max(playerGoals, baseTeamScore);
-  const opponentScore = Math.round(Math.random() * 3 + opponentStrength / (teamStrength + 1));
+  // ─── 現実的なチームスコア計算 ───
+  // チーム同士の強さ比率：同リーグなら互角、OVRで微調整
+  const teamEffective = currentTeam.prestige * 10 + rand(-3, 3);
+  const oppEffective  = leagueLevel * 10 + rand(-3, 3);
+  const ovrBonus = (effectiveOvr - 50) / 200; // -0.25〜+0.25
+  const rawRatio = teamEffective / Math.max(5, oppEffective) + ovrBonus;
+  // 0.6〜1.8 にクランプ（7:0 のような極端なスコアを防ぐ）
+  const strengthRatio = Math.min(1.8, Math.max(0.6, rawRatio));
+
+  // ポワソン分布でゴール数（平均1.2〜2.2点）
+  const baseTeamScore = poissonGoals(1.2 * strengthRatio);
+  const opponentScore = poissonGoals(1.2 / strengthRatio);
+
+  // 選手のゴール＋アシストはチームスコアに反映（アシストは味方ゴール保証）
+  const teamScore = Math.max(playerGoals + playerAssists, baseTeamScore);
   const win = teamScore > opponentScore;
 
-  // 評価点
-  let rating = 5.0 + (effectiveOvr - 50) / 20;
-  rating += playerGoals * 0.8 + playerAssists * 0.4;
-  if (win) rating += 0.5;
-  rating = Math.max(3.0, Math.min(10.0, rating + (Math.random() - 0.5)));
+  // 評価点 — 高ドミナンス選手はほぼ毎試合高評価を独占
+  const ratingBase = 4.0 + ovrDom * 5.5;
+  let rating = ratingBase + playerGoals * 0.8 + playerAssists * 0.4;
+  if (win) rating += 0.4;
+  if (dominance >= 0.90) rating += 0.5; // 支配選手ボーナス
+  rating = Math.max(3.0, Math.min(10.0, rating + (Math.random() * 0.4 - 0.2)));
 
   // 対戦相手
-  const leagueTeams = TEAMS[state.currentLeague];
+  const leagueTeams = TEAMS[state.currentLeague] ?? [];
   const opponents = leagueTeams.filter(t => t.id !== currentTeam.id);
-  const opponent = opponents[rand(0, opponents.length - 1)] ?? leagueTeams[0];
+  const opponentPool = opponents.length > 0 ? opponents : leagueTeams;
+  const opponent = opponentPool.length > 0
+    ? opponentPool[rand(0, opponentPool.length - 1)]
+    : { id: 'unknown', name: '対戦相手', league: state.currentLeague, prestige: 1, salary: 0 };
 
   // ──── 分単位イベント生成 ────
   const events: MatchEvent[] = [];
-  // チームメイトゴール = チームスコア - 選手のゴール（アシストはゴールではない）
-  const teammatGoals = teamScore - playerGoals;
+  // アシストイベント自体が「味方ゴール」を表すため、
+  // 追加の teammate_goal は (teamScore - playerGoals - playerAssists) 個だけ生成する
+  const extraTeammatGoals = Math.max(0, teamScore - playerGoals - playerAssists);
 
   // 必要な分数を確保
   const totalGoals = teamScore + opponentScore;
@@ -220,15 +317,15 @@ export function simulateMatch(state: GameState): MatchResult {
     events.push({ minute: min, type: 'player_goal', text: tpl(state.playerName, min) });
   }
 
-  // 選手アシスト
+  // 選手アシスト（このイベント自体が味方の1ゴールを意味する）
   for (let i = 0; i < playerAssists; i++) {
     const min = allMinutes[minIdx++];
     const tpl = PLAYER_ASSIST_TEXTS[rand(0, PLAYER_ASSIST_TEXTS.length - 1)];
     events.push({ minute: min, type: 'player_assist', text: tpl(state.playerName, min) });
   }
 
-  // チームメイトゴール
-  for (let i = 0; i < Math.max(0, teammatGoals); i++) {
+  // アシスト以外のチームメイトゴール
+  for (let i = 0; i < extraTeammatGoals; i++) {
     const min = allMinutes[minIdx++];
     const tpl = TEAMMATE_GOAL_TEXTS[rand(0, TEAMMATE_GOAL_TEXTS.length - 1)];
     events.push({ minute: min, type: 'teammate_goal', text: tpl(opponent.name, min) });
@@ -245,9 +342,9 @@ export function simulateMatch(state: GameState): MatchResult {
   for (let i = 0; i < chanceCount; i++) {
     const min = allMinutes[minIdx++] ?? rand(1, 90);
     const tpl = CHANCE_TEXTS[rand(0, CHANCE_TEXTS.length - 1)];
-    const type = tpl(state.playerName, min).startsWith('🛡️') || tpl(state.playerName, min).startsWith('⚠️')
-      ? 'save' as const : 'chance' as const;
-    events.push({ minute: min, type, text: tpl(state.playerName, min) });
+    const text = tpl(state.playerName, min);
+    const type = text.startsWith('🛡️') || text.startsWith('⚠️') ? 'save' as const : 'chance' as const;
+    events.push({ minute: min, type, text });
   }
 
   // 分数順にソート
@@ -270,28 +367,69 @@ export function generateTransferOffers(state: GameState): TransferOffer[] {
   const currentLevel = LEAGUES[state.currentLeague].level;
   const thresholds = GAME_CONFIG.TRANSFER_THRESHOLDS;
 
+  // ── パフォーマンスボーナス計算 ─────────────────────────
+  // 順位が上位3位以内かどうか
+  const sorted = [...state.leagueStandings].sort((a, b) => b.points - a.points);
+  const rank   = sorted.findIndex(e => e.isPlayer) + 1;
+  const isTop3 = rank >= 1 && rank <= 3;
+
+  // シーズン評価が良いかどうか
+  const goodRating = state.seasonRating >= 7.0;
+
+  // ポジション別の活躍基準
+  const goodGoals =
+    (state.position === 'FW' && state.seasonGoals >= 8)  ||
+    (state.position === 'MF' && state.seasonGoals >= 5)  ||
+    (state.position === 'DF' && state.seasonGoals >= 2)  ||
+    (state.position === 'GK' && state.matchesPlayed >= 20);
+
+  const performanceBonus =
+    (isTop3     ? 0.30 : 0) +
+    (goodRating ? 0.20 : 0) +
+    (goodGoals  ? 0.10 : 0);
+
+  const messages = [
+    '',  // placeholder (実際は下で使う)
+  ];
+  void messages; // suppress unused warning
+
   for (const [leagueId, minOvr] of Object.entries(thresholds)) {
-    if (state.ovr >= minOvr) {
-      const targetLevel = LEAGUES[leagueId as keyof typeof LEAGUES].level;
-      if (targetLevel > currentLevel || (targetLevel === currentLevel && Math.random() < 0.3)) {
-        const leagueTeams = TEAMS[leagueId as keyof typeof TEAMS];
-        const team: Team = leagueTeams[rand(0, leagueTeams.length - 1)];
-        const salaryMultiplier = 1 + (state.ovr - minOvr) / 50;
-        const salary = Math.round(team.salary * salaryMultiplier);
+    const targetLevel = LEAGUES[leagueId as keyof typeof LEAGUES].level;
 
-        const messages = [
-          `${team.name}はあなたのような才能ある選手を必要としています。`,
-          `是非私たちのチームでプレーしてください。`,
-          `あなたのプレーを長く見てきました。共に戦いましょう。`,
-          `あなたならば私たちのチームを次のレベルへ導けると確信しています。`,
-        ];
+    // 現在リーグ以下は対象外
+    if (targetLevel <= currentLevel) continue;
 
-        offers.push({
-          team,
-          salary,
-          message: messages[rand(0, messages.length - 1)],
-        });
-      }
+    const ovrDiff = state.ovr - minOvr;
+
+    // OVR が閾値より8以上低い場合は対象外（成績ボーナスでも届かない）
+    if (ovrDiff < -8) continue;
+
+    // 基本確率: 閾値超過→80%、閾値未満でも好成績なら最大60%まで
+    const baseChance = ovrDiff >= 0
+      ? 0.80
+      : 0.20 + ((ovrDiff + 8) / 8) * 0.40;
+
+    const totalChance = Math.min(0.95, baseChance + performanceBonus);
+
+    if (Math.random() < totalChance) {
+      const leagueTeams = TEAMS[leagueId as keyof typeof TEAMS];
+      if (!leagueTeams || leagueTeams.length === 0) continue;
+      const team: Team = leagueTeams[rand(0, leagueTeams.length - 1)];
+      const salaryMultiplier = 1 + Math.max(0, ovrDiff) / 50;
+      const salary = Math.round(team.salary * salaryMultiplier);
+
+      const msgs = [
+        `${team.name}はあなたのような才能ある選手を必要としています。`,
+        `是非私たちのチームでプレーしてください。`,
+        `あなたのプレーを長く見てきました。共に戦いましょう。`,
+        `あなたならば私たちのチームを次のレベルへ導けると確信しています。`,
+      ];
+
+      offers.push({
+        team,
+        salary,
+        message: msgs[rand(0, msgs.length - 1)],
+      });
     }
   }
 
@@ -302,7 +440,8 @@ export function generateTransferOffers(state: GameState): TransferOffer[] {
 export function shouldMatchOccur(state: GameState): boolean {
   const matchesPerSeason = LEAGUES[state.currentLeague].matchesPerSeason;
   const totalWeeks = 38;
-  const probability = matchesPerSeason / totalWeeks;
+  // 最大85%に制限（上位リーグでも毎週試合にならないようにする）
+  const probability = Math.min(0.85, matchesPerSeason / totalWeeks);
   return Math.random() < probability;
 }
 

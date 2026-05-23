@@ -14,6 +14,18 @@ interface Props {
   onContinue: () => void;
 }
 
+const COMPETITION_CONFIG: Record<string, { label: string; emoji: string; color: string }> = {
+  cl_group: { label: 'チャンピオンズリーグ', emoji: '⭐', color: '#2563eb' },
+  cl_r16:   { label: 'チャンピオンズリーグ R16',  emoji: '⭐', color: '#2563eb' },
+  cl_qf:    { label: 'チャンピオンズリーグ QF',   emoji: '⭐', color: '#1d4ed8' },
+  cl_sf:    { label: 'チャンピオンズリーグ SF',   emoji: '🏆', color: '#1d4ed8' },
+  cl_final: { label: 'チャンピオンズリーグ FINAL', emoji: '👑', color: '#eab308' },
+  national: { label: '日本代表 親善試合', emoji: '🇯🇵', color: '#dc2626' },
+  wc_group: { label: 'ワールドカップ グループステージ', emoji: '🌍', color: '#16a34a' },
+  wc_sf:    { label: 'ワールドカップ 準決勝',      emoji: '🌍', color: '#15803d' },
+  wc_final: { label: 'ワールドカップ 決勝',        emoji: '🏆', color: '#ca8a04' },
+};
+
 type Phase = 'intro' | 'live' | 'result';
 
 function eventIcon(type: MatchEventType): string {
@@ -52,6 +64,7 @@ function eventBorder(type: MatchEventType): string {
 }
 
 export default function MatchSimulation({ result, playerName, highlights: _, position, league, age, ovr, onContinue }: Props) {
+  const compCfg = result.competition ? COMPETITION_CONFIG[result.competition] : null;
   const [phase, setPhase] = useState<Phase>('intro');
   const [countdown, setCountdown] = useState(3);
   const [shownCount, setShownCount] = useState(0);
@@ -101,21 +114,33 @@ export default function MatchSimulation({ result, playerName, highlights: _, pos
       const t = setTimeout(() => setPhase('result'), 600);
       return () => clearTimeout(t);
     }
-    const delay = result.events[shownCount]?.type === 'player_goal' ? 900 : 650;
+    const t_type = result.events[shownCount]?.type;
+    const delay = (t_type === 'player_goal' || t_type === 'player_assist') ? 900 : 650;
     const t = setTimeout(() => setShownCount(c => c + 1), delay);
     return () => clearTimeout(t);
   }, [phase, shownCount, result.events]);
 
   // 現在スコア計算（表示済みイベントまで）
   const visibleEvents = result.events.slice(0, shownCount);
-  // アシストはゴールではないのでスコア計算に含めない
+  // player_assist = 味方ゴール1点を意味するのでスコアに含める
   const liveTeamGoals = visibleEvents.filter(e =>
-    e.type === 'player_goal' || e.type === 'teammate_goal'
+    e.type === 'player_goal' || e.type === 'teammate_goal' || e.type === 'player_assist'
   ).length;
   const liveOpponent = visibleEvents.filter(e => e.type === 'opponent_goal').length;
 
   return (
     <div className="gl-card py-6 px-4">
+      {/* ── 大会バナー ── */}
+      {compCfg && (
+        <div
+          className="rounded-xl px-4 py-2 mb-4 text-center text-sm font-black tracking-wide"
+          style={{ background: `${compCfg.color}20`, color: compCfg.color, border: `1px solid ${compCfg.color}40` }}
+        >
+          {compCfg.emoji} {compCfg.label}
+          {result.round && <span className="ml-2 font-normal opacity-80">— {result.round}</span>}
+        </div>
+      )}
+
       {/* ── イントロ ── */}
       {phase === 'intro' && (
         <div className="text-center">

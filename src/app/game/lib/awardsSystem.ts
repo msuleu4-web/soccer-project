@@ -39,7 +39,7 @@ const AWARD_DEFS: AwardCheck[] = [
     description: 'リーグ最優秀新人選手として表彰された。',
     condition: s =>
       s.age <= 21 &&
-      s.currentSeason <= 3 &&
+      s.currentSeason <= 2 &&   // 最初の2シーズンのみ
       s.matchesPlayed >= 10 &&
       s.seasonRating >= 6.0,
     unique: true,
@@ -98,6 +98,7 @@ const AWARD_DEFS: AwardCheck[] = [
     rarity: 'gold',
     description: 'リーグで最も輝いた選手に贈られるMVP賞。',
     condition: s =>
+      s.currentSeason >= 2 &&   // 初シーズンは対象外
       s.seasonRating >= 8.0 &&
       s.matchesPlayed >= 20,
   },
@@ -119,13 +120,13 @@ const AWARD_DEFS: AwardCheck[] = [
     rarity: 'gold',
     description: 'ドイツブンデスリーガ シーズンMVP。',
     condition: s =>
-      s.currentLeague === 'premier_league' &&
+      s.currentLeague === 'premier_league' &&   // leagueId 'premier_league' = ブンデスリーガ
       s.seasonRating >= 8.0 &&
       s.matchesPlayed >= 20,
   },
   {
     id: 'cl_mvp',
-    name: 'プレミアリーグ/ラ・リーガ MVP',
+    name: 'プレミアリーグ / ラ・リーガ MVP',
     icon: '👑',
     rarity: 'legendary',
     description: '欧州最高峰リーグの最優秀選手賞。',
@@ -233,6 +234,21 @@ const AWARD_DEFS: AwardCheck[] = [
     unique: true,
   },
 
+  // ── プスカシュ賞 ──────────────────────────────────
+  {
+    id: 'puskas_award',
+    name: 'プスカシュ賞',
+    icon: '✨',
+    rarity: 'legendary',
+    description: 'FIFA年間最優秀ゴール賞。最も美しく劇的なゴールを決めた選手に贈られる名誉ある賞。',
+    condition: s =>
+      (s.currentLeague === 'j1' || s.currentLeague === 'premier_league' || s.currentLeague === 'champions_league') &&
+      s.seasonGoals >= 18 &&
+      s.seasonRating >= 8.0 &&
+      s.matchesPlayed >= 15 &&
+      (s.position === 'FW' || s.position === 'MF'),
+  },
+
   // ── 特別賞 ─────────────────────────────────────
   {
     id: 'iron_player',
@@ -257,7 +273,7 @@ const AWARD_DEFS: AwardCheck[] = [
     rarity: 'gold',
     description: '今シーズン3試合以上でハットトリックを達成。稀有な記録。',
     condition: s =>
-      s.seasonGoals >= GOAL_THRESHOLD[s.currentLeague] * 1.5 &&
+      (s.seasonHatTricks ?? 0) >= 3 &&
       s.matchesPlayed >= 15,
   },
   {

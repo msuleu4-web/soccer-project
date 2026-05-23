@@ -1,5 +1,6 @@
 import { createAnonClient } from '@/lib/supabase/service';
 import SimulatorForm from './SimulatorForm';
+import Header from '@/app/components/Header';
 import type { Team } from '@/types/board';
 
 export const metadata = {
@@ -18,7 +19,8 @@ export default async function SimulatorPage() {
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="mb-8">
+      <Header />
+      <div className="mb-8 mt-4">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">
           監督AIシミュレーター
         </h1>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Position } from '../types/game';
 import { useGameState } from '../hooks/useGameState';
 import { useAutoSave } from '../hooks/useAutoSave';
+import { TEAMS } from '../lib/leagueData';
 import GameHeader from './GameHeader';
 import PlayerCard from './PlayerCard';
 import StatsPanel from './StatsPanel';
@@ -14,6 +15,7 @@ import TransferModal from './TransferModal';
 import EventModal from './EventModal';
 import EndingScreen from './EndingScreen';
 import SeasonSummaryModal from './SeasonSummaryModal';
+import SeasonReviewModal from './SeasonReviewModal';
 import StatEffectPanel from './StatEffectPanel';
 import LeagueStandingsPanel from './LeagueStandingsPanel';
 import AwardsCeremonyModal from './AwardsCeremonyModal';
@@ -21,6 +23,11 @@ import { RARITY_COLOR, RARITY_LABEL } from '../lib/awardsSystem';
 import { ACHIEVEMENTS } from '../lib/achievements';
 import { LEAGUES } from '../lib/leagueData';
 import { SKILLS } from '../lib/skills';
+import ShopModal from './ShopModal';
+import GachaModal from './GachaModal';
+import InventoryModal from './InventoryModal';
+import SaveSlotScreen from './SaveSlotScreen';
+import { resetGame, resetGameFromSupabase, getAllSlotPreviews } from '../lib/saveManager';
 
 const POSITIONS: { value: Position; label: string; desc: string; icon: string }[] = [
   { value: 'FW', label: 'フォワード', desc: '点取り屋として活躍する攻撃的なポジション', icon: '⚽' },
@@ -29,16 +36,23 @@ const POSITIONS: { value: Position; label: string; desc: string; icon: string }[
   { value: 'GK', label: 'ゴールキーパー', desc: '最後の砦として守門神を目指す', icon: '🥅' },
 ];
 
+const REGIONAL_TEAMS = TEAMS.regional;
+
 export default function GameScreen() {
   const game = useGameState();
   const { state } = game;
-  useAutoSave(state);
+  useAutoSave(state, game.currentSlotId ?? 'slot1');
 
   const [setupName, setSetupName] = useState('');
   const [setupPosition, setSetupPosition] = useState<Position>('FW');
+  const [setupTeamId, setSetupTeamId] = useState<string>(REGIONAL_TEAMS[0].id);
+  const [setupStep, setSetupStep] = useState<'basic' | 'team'>('basic');
   const [setupError, setSetupError] = useState('');
+  const [showShop, setShowShop] = useState(false);
+  const [showGacha, setShowGacha] = useState(false);
+  const [showInventory, setShowInventory] = useState(false);
 
-  const handleStartGame = () => {
+  const handleNextStep = () => {
     if (!setupName.trim()) {
       setSetupError('選手名を入力してください');
       return;
@@ -48,11 +62,33 @@ export default function GameScreen() {
       return;
     }
     setSetupError('');
-    game.startNewGame(setupName.trim(), setupPosition);
+    setSetupStep('team');
   };
 
-  // Setup screen
-  if (state.gamePhase === 'setup') {
+  const handleStartGame = () => {
+    game.startNewGame(setupName.trim(), setupPosition, setupTeamId);
+  };
+
+  // スロット選択画面（スロット未選択 or 新規セットアップ前）
+  if (game.currentSlotId === null) {
+    return (
+      <SaveSlotScreen
+        slots={game.allSlots}
+        onSelect={game.selectSlot}
+        onDelete={async (slotId) => {
+          resetGame(slotId);
+          await resetGameFromSupabase(slotId);
+          const updated = getAllSlotPreviews();
+          game.returnToSlotSelect();
+          // allSlots は returnToSlotSelect 内で更新される
+          void updated;
+        }}
+      />
+    );
+  }
+
+  // Setup screen - Step 1: Name & Position
+  if (state.gamePhase === 'setup' && setupStep === 'basic') {
     return (
       <div className="gl-card max-w-lg mx-auto">
         <h1 className="text-2xl font-black text-text-primary mb-1">選手育成ゲーム</h1>
@@ -69,7 +105,7 @@ export default function GameScreen() {
             type="text"
             value={setupName}
             onChange={e => setSetupName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleStartGame()}
+            onKeyDown={e => e.key === 'Enter' && handleNextStep()}
             placeholder="例: 田中 健太"
             maxLength={20}
             className="gl-input w-full"
@@ -106,17 +142,63 @@ export default function GameScreen() {
         </div>
 
         <button
+          onClick={handleNextStep}
+          className="gl-btn gl-btn-accent w-full text-base font-bold"
+          style={{ minHeight: '48px' }}
+        >
+          次へ：チームを選ぶ →
+        </button>
+
+        <p className="text-xs text-text-secondary text-center mt-3">
+          ※ セーブデータは自動保存されます
+        </p>
+      </div>
+    );
+  }
+
+  // Setup screen - Step 2: Team Selection (regional only)
+  if (state.gamePhase === 'setup' && setupStep === 'team') {
+    return (
+      <div className="gl-card max-w-lg mx-auto">
+        <button
+          onClick={() => setSetupStep('basic')}
+          className="text-xs text-text-secondary hover:text-text-primary mb-4 flex items-center gap-1"
+        >
+          ← 戻る
+        </button>
+        <h2 className="text-xl font-black text-text-primary mb-1">🏘️ 所属チームを選択</h2>
+        <p className="text-text-secondary text-sm mb-4">
+          地域リーグのチームからスタートします。実力をつけて上のリーグを目指そう！
+        </p>
+        <div className="space-y-2 mb-6">
+          {REGIONAL_TEAMS.map(team => (
+            <button
+              key={team.id}
+              onClick={() => setSetupTeamId(team.id)}
+              className={`w-full p-3 rounded-lg border text-left transition-all ${
+                setupTeamId === team.id
+                  ? 'border-[var(--color-accent-green)] bg-[var(--color-accent-green)]/10'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-accent-green)]'
+              }`}
+              style={{ minHeight: '48px' }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-sm font-bold text-text-primary">{team.name}</span>
+                  <span className="text-xs text-text-secondary ml-2">地域リーグ</span>
+                </div>
+                <span className="text-xs text-text-secondary">給料 {team.salary}万/月</span>
+              </div>
+            </button>
+          ))}
+        </div>
+        <button
           onClick={handleStartGame}
           className="gl-btn gl-btn-accent w-full text-base font-bold"
           style={{ minHeight: '48px' }}
         >
           ゲームスタート →
         </button>
-
-        {/* Load Save Notice */}
-        <p className="text-xs text-text-secondary text-center mt-3">
-          ※ セーブデータは自動保存されます
-        </p>
       </div>
     );
   }
@@ -161,20 +243,40 @@ export default function GameScreen() {
     );
   }
 
-  // Achievement/Skill unlock toast notification
+  // Achievement/Skill unlock toast
   const UnlockToast = () => {
     if (game.newUnlocks.length === 0) return null;
     return (
       <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-1 pointer-events-none">
         {game.newUnlocks.map((msg, i) => (
-          <div
-            key={i}
-            className="px-4 py-2 rounded-lg text-sm font-bold text-white shadow-lg"
-            style={{ background: 'rgba(34,197,94,0.9)' }}
-          >
+          <div key={i} className="px-4 py-2 rounded-lg text-sm font-bold text-white shadow-lg"
+            style={{ background: 'rgba(34,197,94,0.9)' }}>
             {msg}
           </div>
         ))}
+      </div>
+    );
+  };
+
+  // Training result toast
+  const TrainingToast = () => {
+    const fb = game.trainingFeedback;
+    if (!fb) return null;
+    const styles: Record<string, { bg: string; border: string; color: string }> = {
+      critical_success: { bg: 'rgba(250,204,21,0.95)',  border: '#ca8a04', color: '#78350f' },
+      success:          { bg: 'rgba(34,197,94,0.92)',   border: '#15803d', color: '#fff' },
+      failure:          { bg: 'rgba(107,114,128,0.92)', border: '#4b5563', color: '#fff' },
+      critical_failure: { bg: 'rgba(220,38,38,0.92)',   border: '#991b1b', color: '#fff' },
+    };
+    const s = styles[fb.outcome];
+    return (
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+        <div
+          className="px-5 py-3 rounded-xl text-sm font-bold shadow-xl border"
+          style={{ background: s.bg, borderColor: s.border, color: s.color, minWidth: '220px', textAlign: 'center' }}
+        >
+          {fb.message}
+        </div>
       </div>
     );
   };
@@ -183,6 +285,35 @@ export default function GameScreen() {
   return (
     <div>
       <UnlockToast />
+      <TrainingToast />
+
+      {/* ショップモーダル */}
+      {showShop && (
+        <ShopModal
+          state={state}
+          onBuy={item => game.buyItem(item)}
+          onClose={() => setShowShop(false)}
+        />
+      )}
+
+      {/* ガチャモーダル */}
+      {showGacha && (
+        <GachaModal
+          state={state}
+          onPull={(type, isMulti) => game.pullGacha(type, isMulti)}
+          onClose={() => setShowGacha(false)}
+        />
+      )}
+
+      {/* 倉庫モーダル */}
+      {showInventory && (
+        <InventoryModal
+          state={state}
+          onUse={uid => game.useInventoryItem(uid)}
+          onDiscard={uid => game.discardInventoryItem(uid)}
+          onClose={() => setShowInventory(false)}
+        />
+      )}
 
       {/* 授賞式モーダル: pendingAwardsがあれば必ず先に表示 */}
       {(state.pendingAwards?.length ?? 0) > 0 && (
@@ -200,8 +331,55 @@ export default function GameScreen() {
           : null
       )}
 
+      {/* シーズン評価レポート: 要約を閉じた後に表示 */}
+      {state.showSeasonReview && !state.showSeasonSummary && (
+        <SeasonReviewModal state={state} onClose={game.dismissSeasonReview} />
+      )}
+
       <GameHeader state={state} />
       <PlayerCard state={state} />
+
+      {/* ショップ + スロット変更ボタン */}
+      <div className="mb-4 flex justify-between items-center gap-2">
+        <button
+          onClick={game.returnToSlotSelect}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+          style={{ background: 'var(--bg-surface-elevated)', color: 'var(--fg-2)', border: '1px solid var(--color-border)' }}
+        >
+          👤 スロット変更
+        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowShop(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all"
+            style={{ background: 'var(--color-brand-green)', color: '#fff', boxShadow: '0 2px 8px rgba(15,61,46,0.25)' }}
+          >
+            🛒 <span className="hidden sm:inline">ショップ</span>
+            <span className="text-xs opacity-75 font-normal">{state.money.toLocaleString()}万</span>
+          </button>
+          <button
+            onClick={() => setShowGacha(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold transition-all"
+            style={{ background: 'linear-gradient(135deg,#eab308,#f59e0b)', color: '#fff', boxShadow: '0 2px 8px rgba(234,179,8,0.35)' }}
+          >
+            🔍 <span className="hidden sm:inline">スカウト</span>
+          </button>
+          <button
+            onClick={() => setShowInventory(true)}
+            className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-all"
+            style={{ background: 'var(--bg-surface-elevated)', color: 'var(--fg-2)', border: '1px solid var(--border-default)' }}
+          >
+            🗃️ <span className="hidden sm:inline">倉庫</span>
+            {(state.inventory ?? []).length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center"
+                style={{ background: '#ef4444', color: '#fff' }}>
+                {Math.min((state.inventory ?? []).length, 99)}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4">
         <div>
           <StatsPanel state={state} />

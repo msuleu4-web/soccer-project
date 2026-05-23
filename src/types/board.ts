@@ -64,7 +64,7 @@ export interface PostDetailResponse    { post: PostDetail; comments: BoardCommen
 export interface CreatePostResponse    { post: { id: string } }
 export interface CreateCommentResponse { comment: { id: string } }
 export interface VoteResponse {
-  vote_type: 'like' | 'dislike'
+  vote_type: 'like' | 'dislike' | null
   likes: number
   dislikes: number
 }

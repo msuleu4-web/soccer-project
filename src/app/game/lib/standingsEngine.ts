@@ -64,6 +64,7 @@ export function updateStandings(
   standings: StandingEntry[],
   result: MatchResult,
   playerTeamId: string,
+  otherTeamMatchProb = 0.65,
 ): StandingEntry[] {
   const updated = standings.map(entry => {
     if (entry.teamId === playerTeamId) {
@@ -82,8 +83,7 @@ export function updateStandings(
       };
     }
 
-    // 他チームはランダムに試合を進める（週1試合の確率）
-    if (Math.random() < 0.65) {
+    if (Math.random() < otherTeamMatchProb) {
       const otherWin  = Math.random() < 0.45;
       const otherDraw = !otherWin && Math.random() < 0.25;
       return {

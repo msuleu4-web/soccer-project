@@ -365,7 +365,7 @@ export const GAME_EVENTS: GameEvent[] = [
         effect: { morale: 20, shooting: 3 },
       },
     ],
-    condition: (state: GameState) => state.seasonGoals >= 10,
+    condition: (state: GameState) => (state.seasonHatTricks ?? 0) >= 1,
   },
   {
     id: 'captain_offer',
@@ -950,6 +950,58 @@ export const GAME_EVENTS: GameEvent[] = [
     ],
     condition: (state: GameState) => state.ovr >= 75,
   },
+  // ── キャバクラ・遊興系イベント ─────────────────────────────
+
+  {
+    id: 'cabaret_invite',
+    title: 'チームメイトから夜の誘い',
+    description: 'チームメイトが「今夜一緒にどうだ？」と誘ってきた。新しい店ができたらしい。',
+    choices: [
+      { label: '行く（気分転換になりそう）', effect: { morale: 15, fatigue: -10, conductScore: -10, cabaretVisit: true } },
+      { label: '断って早めに休む', effect: { stamina: 3, morale: 5 } },
+    ],
+  },
+  {
+    id: 'cabaret_hooked',
+    title: '常連になりつつある夜',
+    description: 'いつの間にかその店の常連になっていた。指名嬢ができ、毎週行くのが習慣になりつつある。',
+    choices: [
+      { label: 'このまま通い続ける', effect: { morale: 20, fatigue: -15, conductScore: -20, stamina: -5, cabaretVisit: true } },
+      { label: '距離を置くことにする', effect: { morale: -10, stamina: 2 } },
+    ],
+    condition: (s: GameState) => (s.cabaretCount ?? 0) >= 5,
+  },
+  {
+    id: 'cabaret_debt_warning',
+    title: '使いすぎ警告',
+    description: 'カードの明細を見て青ざめた。先月だけで夜の出費が桁違いだ。エージェントから「このままでは…」と警告が来た。',
+    choices: [
+      { label: '「問題ない」と言い聞かせ続ける', effect: { morale: 5, conductScore: -15, stamina: -8 } },
+      { label: '少し自制することにした', effect: { morale: -5, conductScore: 10 } },
+    ],
+    condition: (s: GameState) => (s.cabaretCount ?? 0) >= 15,
+  },
+  {
+    id: 'cabaret_scandal_risk',
+    title: '週刊誌記者の影',
+    description: '店の外で見慣れない男がカメラを持っていた。スキャンダル記事にされる可能性がある。',
+    choices: [
+      { label: 'もう通うのをやめる', effect: { morale: -10, conductScore: 15, stamina: 3 } },
+      { label: '気にせず続ける（今さら変えられない）', effect: { morale: 10, conductScore: -20, stamina: -10, cabaretVisit: true } },
+    ],
+    condition: (s: GameState) => (s.cabaretCount ?? 0) >= 25,
+  },
+  {
+    id: 'cabaret_health_collapse',
+    title: '体が限界を訴えている',
+    description: '夜遊びが続き、練習中に倒れそうになった。医師から「このままでは選手生命が危ない」と告げられた。',
+    choices: [
+      { label: '真剣に考え直す', effect: { morale: -15, conductScore: 20, stamina: 10, speed: 5 } },
+      { label: '「まだ大丈夫」と無視する', effect: { morale: 10, stamina: -20, speed: -10, conductScore: -25 } },
+    ],
+    condition: (s: GameState) => (s.cabaretPenaltyLevel ?? 0) >= 3,
+  },
+
   {
     id: 'hometown_ambassador',
     title: '生まれ故郷の観光親善大使',

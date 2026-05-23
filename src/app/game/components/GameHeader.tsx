@@ -31,6 +31,9 @@ export default function GameHeader({ state }: Props) {
             <span className={`font-bold ${state.money < 0 ? 'text-red-400' : 'text-text-primary'}`}>
               {state.money.toLocaleString()}万円
             </span>
+            <span className="text-xs text-green-500 font-semibold">
+              +{Math.round(state.currentTeam.salary / 4)}万/週
+            </span>
             {state.money < 0 && (
               <span className="text-xs text-red-400 font-semibold">借金中</span>
             )}
