@@ -2,14 +2,11 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
 
-/* ============================================================
-   Goal Labo Design System v2
-   Light mode (default) + Dark mode support
-   ============================================================ */
+/* Goal Labo Design System v2 — Light/Dark mode */
 
 @layer base {
   
-  /* ─── Light Mode (Default) ──────────────────────────────── */
+  /* Light Mode (Default) */
   :root {
     
     /* Backgrounds */
@@ -152,7 +149,7 @@
     --transition-slow: 0.3s ease;
   }
   
-  /* ─── Dark Mode ─────────────────────────────────────────── */
+  /* Dark Mode */
   [data-theme="dark"] {
     --color-card-bg:          #101827;
     --color-surface-elevated: #1a2535;
@@ -198,7 +195,7 @@
     --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.6);
   }
   
-  /* ─── Base Styles ───────────────────────────────────────── */
+  /* Base Styles */
   * {
     box-sizing: border-box;
   }
@@ -232,9 +229,7 @@
   }
 }
 
-/* ============================================================
-   Goal Labo Component Classes
-   ============================================================ */
+/* Component Classes */
 
 @layer components {
   
@@ -486,4 +481,9 @@
   .gl-hero-subtitle {
     color: var(--fg-2);
   }
+}
+
+@keyframes story-btn-glow {
+  0%, 100% { box-shadow: 0 4px 16px rgba(124,58,237,0.45); }
+  50%       { box-shadow: 0 4px 28px rgba(124,58,237,0.75), 0 0 0 4px rgba(168,85,247,0.2); }
 }
