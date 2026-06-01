@@ -30,7 +30,6 @@ const BASE_SUCCESS_RATE: Record<TrainingType, number> = {
   rest:      1.00,
 };
 
-/** 現在の状態から訓練成功率を計算（0〜1） */
 export function getTrainingSuccessRate(fatigue: number, morale: number, trainingType: TrainingType): number {
   if (trainingType === 'rest') return 1;
   const base      = BASE_SUCCESS_RATE[trainingType];
@@ -164,8 +163,9 @@ export function applyTraining(state: GameState, trainingType: TrainingType): Tra
 
 // ランダムな分を重複なしで生成
 function uniqueMinutes(count: number): number[] {
+  const clamped = Math.min(count, 90);
   const mins = new Set<number>();
-  while (mins.size < count) mins.add(rand(1, 90));
+  while (mins.size < clamped) mins.add(rand(1, 90));
   return Array.from(mins).sort((a, b) => a - b);
 }
 
@@ -312,28 +312,28 @@ export function simulateMatch(state: GameState): MatchResult {
 
   // 選手ゴール
   for (let i = 0; i < playerGoals; i++) {
-    const min = allMinutes[minIdx++];
+    const min = allMinutes[minIdx++] ?? rand(1, 90);
     const tpl = PLAYER_GOAL_TEXTS[rand(0, PLAYER_GOAL_TEXTS.length - 1)];
     events.push({ minute: min, type: 'player_goal', text: tpl(state.playerName, min) });
   }
 
   // 選手アシスト（このイベント自体が味方の1ゴールを意味する）
   for (let i = 0; i < playerAssists; i++) {
-    const min = allMinutes[minIdx++];
+    const min = allMinutes[minIdx++] ?? rand(1, 90);
     const tpl = PLAYER_ASSIST_TEXTS[rand(0, PLAYER_ASSIST_TEXTS.length - 1)];
     events.push({ minute: min, type: 'player_assist', text: tpl(state.playerName, min) });
   }
 
   // アシスト以外のチームメイトゴール
   for (let i = 0; i < extraTeammatGoals; i++) {
-    const min = allMinutes[minIdx++];
+    const min = allMinutes[minIdx++] ?? rand(1, 90);
     const tpl = TEAMMATE_GOAL_TEXTS[rand(0, TEAMMATE_GOAL_TEXTS.length - 1)];
     events.push({ minute: min, type: 'teammate_goal', text: tpl(opponent.name, min) });
   }
 
   // 相手ゴール
   for (let i = 0; i < opponentScore; i++) {
-    const min = allMinutes[minIdx++];
+    const min = allMinutes[minIdx++] ?? rand(1, 90);
     const tpl = OPPONENT_GOAL_TEXTS[rand(0, OPPONENT_GOAL_TEXTS.length - 1)];
     events.push({ minute: min, type: 'opponent_goal', text: tpl(opponent.name, min) });
   }

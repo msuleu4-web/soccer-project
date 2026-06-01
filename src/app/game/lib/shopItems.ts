@@ -642,7 +642,7 @@ export const SHOP_ITEMS: ShopItem[] = [
   },
 
   // ══ 遊興 (Entertainment) ══════════════════════════════════
-  // ⚠️ 繰り返し利用でペナルティが累積する
+  // 繰り返し利用でペナルティが累積する
 
   {
     id: 'ent_cabaret',

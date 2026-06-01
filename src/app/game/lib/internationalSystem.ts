@@ -31,7 +31,6 @@ const WC_FINAL_OPPONENT  = 'ブラジル代表 — WCファイナル';
 
 // ── CL参加条件 ─────────────────────────────────────────
 
-/** player's team が top3 かどうか判定 */
 export function isTeamInTop3(standings: GameState['leagueStandings']): boolean {
   if (!standings || standings.length === 0) return false;
   const sorted = [...standings].sort((a, b) => b.points - a.points);
@@ -39,7 +38,6 @@ export function isTeamInTop3(standings: GameState['leagueStandings']): boolean {
   return idx !== -1 && idx < 3;      // 0-indexed → 1〜3位
 }
 
-/** 欧州リーグ（CL資格対象）かどうか */
 export function isEuropeanLeague(league: string): boolean {
   return league === 'premier_league' || league === 'champions_league';
 }

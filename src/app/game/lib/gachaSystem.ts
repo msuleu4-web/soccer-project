@@ -284,8 +284,8 @@ const STAR3_ITEMS: GachaItem[] = [
   {
     id: 's3_legend',  name: '伝説の血統',
     rarity: '★3', isPickupEligible: false, icon: '🌌',
-    flavorText: '神話の域。全スタット+200、引退年齢上限+5の究極強化。',
-    effect: { allStats: 200, retireAgeBonus: 5 },
+    flavorText: '神話の域。全スタット+80、引退年齢上限+5の究極強化。',
+    effect: { allStats: 80, retireAgeBonus: 5 },
   },
 ];
 
@@ -333,7 +333,6 @@ function star3Rate(pity: number): number {
 
 // ── ピックアップアイテム取得 ────────────────────────
 
-/** プレイヤーのポジション・シーズンに応じたピックアップアイテムIDを返す */
 export function getPickupItemId(position: Position, _season: number): string {
   switch (position) {
     case 'FW': return 's3_fw';
@@ -404,7 +403,7 @@ export function pullSingle(
   return rollSingle(type, pity, pickupId);
 }
 
-/** 10連: 最終枠で★2以上を保証 */
+// 10連: 最終枠で★2以上を保証
 export function pullMulti(
   type: GachaType,
   pity: number,
@@ -441,8 +440,12 @@ export function applyGachaItem(state: GameState, item: GachaItem): GameState {
   const newStats = { ...state.stats };
   const statKeys = ['shooting','passing','dribbling','speed','stamina','defense'] as (keyof PlayerStats)[];
 
+  // 훈련과 동일하게 상한에 가까울수록 효과 감소 (최소 15% 보장)
   const addStat = (k: keyof PlayerStats, v: number) => {
-    newStats[k] = Math.min(mx[k], Math.max(0, newStats[k] + v));
+    const ratio = newStats[k] / mx[k];
+    const scale = Math.max(0.15, Math.pow(1 - ratio, 1.5));
+    const effective = Math.max(1, Math.round(v * scale));
+    newStats[k] = Math.min(mx[k], Math.max(0, newStats[k] + effective));
   };
 
   if (effect.shooting)  addStat('shooting',  effect.shooting);
@@ -460,7 +463,10 @@ export function applyGachaItem(state: GameState, item: GachaItem): GameState {
     if (locked.length > 0) newSkills = [...newSkills, locked[Math.floor(Math.random() * locked.length)]];
   }
 
-  const newAge          = effect.ageReduce ? Math.max(18, state.age - effect.ageReduce) : state.age;
+  const currentAgeReduceUsed = state.ageReduceUsed ?? 0;
+  const canAgeReduce    = effect.ageReduce && currentAgeReduceUsed < 2;
+  const newAge          = canAgeReduce ? Math.max(18, state.age - effect.ageReduce!) : state.age;
+  const newAgeReduceUsed = canAgeReduce ? currentAgeReduceUsed + 1 : currentAgeReduceUsed;
   const newCabaretCount = effect.cabaretCountReduce ? Math.max(0, (state.cabaretCount ?? 0) - effect.cabaretCountReduce) : (state.cabaretCount ?? 0);
   const newPenalty      = effect.cabaretPenaltyReduce ? Math.max(0, (state.cabaretPenaltyLevel ?? 0) - effect.cabaretPenaltyReduce) : (state.cabaretPenaltyLevel ?? 0);
   const baseConductScore = state.conductScore ?? 100;
@@ -484,6 +490,7 @@ export function applyGachaItem(state: GameState, item: GachaItem): GameState {
     ballonDorFlag:       effect.ballonDorFlag ? true : (state.ballonDorFlag ?? false),
     wcWinBonus:          effect.wcWinBonus ? true : (state.wcWinBonus ?? false),
     skills:              newSkills,
+    ageReduceUsed:       newAgeReduceUsed,
   };
 }
 
