@@ -12,7 +12,6 @@ function generateUUID(): string {
   })
 }
 
-/** anon_id を取得。未生成なら UUID v4 を生成して localStorage に保存。 */
 export function getAnonId(): string {
   const stored = localStorage.getItem(ANON_KEY)
   if (stored) return stored
@@ -21,7 +20,6 @@ export function getAnonId(): string {
   return id
 }
 
-/** フォロー中チームの slug 一覧を取得。 */
 export function getFollowedTeams(): string[] {
   const stored = localStorage.getItem(FOLLOW_KEY)
   try {
@@ -31,7 +29,6 @@ export function getFollowedTeams(): string[] {
   }
 }
 
-/** チームのフォロー状態をトグル。フォロー後の状態 (true=フォロー中) を返す。 */
 export function toggleFollowTeam(slug: string): boolean {
   const teams = getFollowedTeams()
   const idx = teams.indexOf(slug)
@@ -45,7 +42,6 @@ export function toggleFollowTeam(slug: string): boolean {
   return false
 }
 
-/** 指定チームをフォロー中か確認。 */
 export function isFollowingTeam(slug: string): boolean {
   return getFollowedTeams().includes(slug)
 }
