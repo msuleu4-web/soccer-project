@@ -239,7 +239,7 @@ export function simulateMatch(state: GameState): MatchResult {
   const moraleFactor = state.morale / 100;
   const effectiveOvr = ovr * (1 - fatiguePenalty * 0.3) * (0.7 + moraleFactor * 0.3);
 
-  // 個人ゴール確率 — ステータス比率で非線形スケーリング（高スペック支配力の極大化）
+  // 個人ゴール確率：ステータス比率で非線形スケーリング
   const mx = STAT_MAX[position];
   const shootRatio  = Math.min(1.0, stats.shooting  / mx.shooting);
   const dribRatio   = Math.min(1.0, stats.dribbling / mx.dribbling);
@@ -283,7 +283,7 @@ export function simulateMatch(state: GameState): MatchResult {
   const teamScore = Math.max(playerGoals + playerAssists, baseTeamScore);
   const win = teamScore > opponentScore;
 
-  // 評価点 — 高ドミナンス選手はほぼ毎試合高評価を独占
+  // 評価点（高ドミナンス選手ほど高評価）
   const ratingBase = 4.0 + ovrDom * 5.5;
   let rating = ratingBase + playerGoals * 0.8 + playerAssists * 0.4;
   if (win) rating += 0.4;

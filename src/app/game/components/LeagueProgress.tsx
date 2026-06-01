@@ -25,7 +25,6 @@ export default function LeagueProgress({ state }: Props) {
         リーグ進捗
       </h3>
 
-      {/* Current League */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-xl">{getLeagueIcon(state.currentLeague)}</span>
         <div>
@@ -34,7 +33,6 @@ export default function LeagueProgress({ state }: Props) {
         </div>
       </div>
 
-      {/* League Path */}
       <div className="flex items-center gap-1 mb-3 flex-wrap">
         {LEAGUE_ORDER.map((lid, idx) => (
           <div key={lid} className="flex items-center gap-1">
@@ -55,7 +53,6 @@ export default function LeagueProgress({ state }: Props) {
         ))}
       </div>
 
-      {/* Next League Progress */}
       {nextLeague && nextThreshold ? (
         <div>
           <div className="flex items-center justify-between text-xs mb-1">

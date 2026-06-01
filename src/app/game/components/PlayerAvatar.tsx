@@ -108,16 +108,16 @@ function FWBody({ kit, stage, skin, uid, stageColor }: {
       {/* ショーツ */}
       <rect x="23" y="95" width="54" height="15" rx="3" fill={kit.bottom} />
       <line x1="50" y1="95" x2="50" y2="110" stroke={kit.top} strokeWidth="1.5" />
-      {/* 左足：蹴り足 — 前に出ている */}
+      {/* 左足（蹴り足） */}
       <rect x="26" y="110" width="16" height="22" rx="2" fill={kit.sock} />
       <path d="M22,130 L40,130 L44,138 L20,138 Z" fill="#111" />
-      {/* 右足：軸足 — 少し後ろ */}
+      {/* 右足（軸足） */}
       <rect x="57" y="112" width="16" height="22" rx="2" fill={kit.sock} transform="rotate(4,65,120)" />
       <path d="M54,132 L72,132 L76,140 L52,140 Z" fill="#111" transform="rotate(4,65,136)" />
-      {/* ボール — 左足の前 */}
+      {/* ボール */}
       <circle cx="22" cy="135" r="9" fill="white" stroke="#333" strokeWidth="0.8" />
       <path d="M22,126 l3,3 l-1,6 l-5,1 l-4,-3 l1,-5 Z" fill="#1a1a1a" />
-      {/* シュートエフェクト — 星 */}
+      {/* シュートエフェクト */}
       {stage >= 3 && (
         <g fill={stageColor} opacity="0.8">
           <polygon points={starPoints(8, 122, 5)} filter={`url(#${uid}_gf)`} />
@@ -159,7 +159,7 @@ function MFBody({ kit, stage, skin, uid, stageColor }: {
       {/* 右足 */}
       <rect x="57" y="109" width="16" height="25" rx="2" fill={kit.sock} />
       <path d="M54,132 L73,132 L77,141 L52,141 Z" fill="#111" />
-      {/* ボール — 右足横 */}
+      {/* ボール */}
       <circle cx="76" cy="138" r="9" fill="white" stroke="#333" strokeWidth="0.8" />
       <path d="M76,129 l3,3 l-1,6 l-5,1 l-4,-3 l1,-5 Z" fill="#1a1a1a" />
       {/* パス軌跡エフェクト */}
@@ -179,7 +179,7 @@ function DFBody({ kit, stage, skin, uid, stageColor }: {
 }) {
   return (
     <g>
-      {/* ジャージ — 少しがっしり */}
+      {/* ジャージ */}
       <path d="M22,63 L78,63 L80,95 L20,95 Z" fill={kit.top} />
       {/* アーマー風サイドライン */}
       <path d="M22,63 L30,63 L31,95 L20,95 Z" fill={kit.bottom} />
@@ -240,7 +240,7 @@ function GKBody({ kit, stage, skin, uid, stageColor }: {
       {stage >= 2 && (
         <text x="50" y="82" textAnchor="middle" fontSize="10" fontWeight="bold" fill="rgba(255,255,255,0.75)" fontFamily="Arial,sans-serif">{}</text>
       )}
-      {/* 左腕 — 長袖 */}
+      {/* 左腕（長袖） */}
       <path d="M25,65 L7,83 L12,87 L29,69 Z" fill={kit.top} />
       {/* 左グローブ */}
       <g>
@@ -252,7 +252,7 @@ function GKBody({ kit, stage, skin, uid, stageColor }: {
         <line x1="9" y1="83" x2="8.5" y2="79" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
         <line x1="12" y1="84" x2="12" y2="80" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
       </g>
-      {/* 右腕 — 長袖 */}
+      {/* 右腕（長袖） */}
       <path d="M75,65 L93,83 L88,87 L71,69 Z" fill={kit.top} />
       {/* 右グローブ */}
       <g>
@@ -266,7 +266,7 @@ function GKBody({ kit, stage, skin, uid, stageColor }: {
       {/* ショーツ */}
       <rect x="24" y="94" width="52" height="15" rx="3" fill={kit.bottom} />
       <line x1="50" y1="94" x2="50" y2="109" stroke={kit.top} strokeWidth="1.5" />
-      {/* 左足 — 少し腰を落とした構え */}
+      {/* 左足 */}
       <rect x="26" y="109" width="17" height="24" rx="2" fill={kit.sock} transform="rotate(3,34,121)" />
       <path d="M22,131 L42,131 L46,140 L20,140 Z" fill="#111" transform="rotate(3,33,135)" />
       {/* 右足 */}

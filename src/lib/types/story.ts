@@ -1,5 +1,5 @@
 // ストーリーシステム全体で使用する型定義
-// as any 禁止 — すべての型は明示的に定義する
+// as any 禁止：すべての型は明示的に定義する
 
 export type SceneType       = 'dialogue' | 'choice' | 'match_event' | 'reflection';
 export type ContentType     = 'scene' | 'route' | 'ending' | 'extra_choice';

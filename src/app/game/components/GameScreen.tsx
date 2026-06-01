@@ -192,7 +192,7 @@ export default function GameScreen() {
     return <div className="fixed inset-0" style={{ background: 'var(--bg-base)' }} />;
   }
 
-  // Setup screen - Step 1: Name & Position
+  // セットアップ: 名前・ポジション
   if (state.gamePhase === 'setup' && setupStep === 'basic') {
     return (
       <div className="gl-card max-w-lg mx-auto">
@@ -201,7 +201,6 @@ export default function GameScreen() {
           無名の選手を育ててバロンドールを目指せ！地域リーグからチャンピオンズリーグまでの頂点へ。
         </p>
 
-        {/* Name Input */}
         <div className="mb-5">
           <label className="block text-sm font-semibold text-text-secondary mb-1.5">
             選手名
@@ -219,7 +218,6 @@ export default function GameScreen() {
           {setupError && <p className="text-red-400 text-xs mt-1">{setupError}</p>}
         </div>
 
-        {/* Position Selection */}
         <div className="mb-6">
           <label className="block text-sm font-semibold text-text-secondary mb-2">
             ポジション
@@ -261,7 +259,7 @@ export default function GameScreen() {
     );
   }
 
-  // Setup screen - Step 2: Team Selection (regional only)
+  // セットアップ: チーム選択
   if (state.gamePhase === 'setup' && setupStep === 'team') {
     return (
       <div className="gl-card max-w-lg mx-auto">
@@ -308,12 +306,10 @@ export default function GameScreen() {
     );
   }
 
-  // Ending screen
   if (state.gamePhase === 'ending') {
     return <EndingScreen state={state} onRestart={game.restartGame} />;
   }
 
-  // Match day screen
   if (state.gamePhase === 'match_day' && game.lastMatchResult) {
     return (
       <div>
@@ -332,7 +328,6 @@ export default function GameScreen() {
     );
   }
 
-  // Transfer screen
   if (state.gamePhase === 'transfer') {
     return (
       <div>
@@ -348,7 +343,6 @@ export default function GameScreen() {
     );
   }
 
-  // Achievement/Skill unlock toast
   const UnlockToast = () => {
     if (game.newUnlocks.length === 0) return null;
     return (
@@ -363,7 +357,6 @@ export default function GameScreen() {
     );
   };
 
-  // Training result toast
   const TrainingToast = () => {
     const fb = game.trainingFeedback;
     if (!fb) return null;
@@ -386,7 +379,6 @@ export default function GameScreen() {
     );
   };
 
-  // Main playing screen
   return (
     <div>
       <UnlockToast />
@@ -559,7 +551,6 @@ export default function GameScreen() {
         </div>
       </div>
 
-      {/* Career totals */}
       <div className="gl-card mb-4">
         <h3 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wide">通算成績</h3>
         <div className="grid grid-cols-3 gap-2 text-center">
@@ -608,7 +599,6 @@ export default function GameScreen() {
         </div>
       )}
 
-      {/* Skills section */}
       {(state.skills ?? []).length > 0 && (
         <div className="gl-card mb-4">
           <h3 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wide">特技</h3>
@@ -627,7 +617,6 @@ export default function GameScreen() {
         </div>
       )}
 
-      {/* Achievements section */}
       <div className="gl-card mb-4">
         <h3 className="text-sm font-bold text-text-secondary mb-2 uppercase tracking-wide">
           実績 ({(state.achievements ?? []).length}/{ACHIEVEMENTS.length})
@@ -652,7 +641,6 @@ export default function GameScreen() {
         </div>
       </div>
 
-      {/* Reset button */}
       <div className="text-center mb-4">
         <button
           onClick={() => {
@@ -666,7 +654,6 @@ export default function GameScreen() {
         </button>
       </div>
 
-      {/* Event Modal */}
       {game.pendingEvent && (
         <EventModal
           event={game.pendingEvent}

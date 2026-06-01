@@ -264,7 +264,6 @@ export default function GachaModal({ state, onPull, onClose }: Props) {
                 </p>
               )}
 
-              {/* GC獲得方法→money獲得方法に変更 */}
               <div className="rounded-lg p-3" style={{ background: 'var(--bg-surface-elevated)' }}>
                 <p className="text-xs font-bold text-text-secondary mb-2">💰 万円獲得方法</p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-text-secondary">

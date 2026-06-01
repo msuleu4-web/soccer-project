@@ -195,12 +195,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex overflow-hidden" style={{ background: "#FAFAF7" }}>
 
-      {/* LEFT — analytics visual area */}
+      {/* 左パネル */}
       <div
         className="hidden lg:block relative overflow-hidden"
         style={{ flex: "0 0 42%", minHeight: "100vh" }}
       >
-        {/* Stadium photo simulation — layered gradients */}
+        {/* スタジアム背景 */}
         <div style={{
           position: "absolute", inset: 0,
           background: "linear-gradient(160deg, #0d2b1a 0%, #1a4a2e 30%, #0f3a22 55%, #071a0e 100%)",
@@ -267,7 +267,6 @@ export default function LoginPage() {
         {/* ── floating analytics panels ── */}
         <div style={{ position: "absolute", inset: 0, zIndex: 5 }}>
 
-          {/* Match overview — top left area */}
           <div style={{
             position: "absolute", top: "13%", left: "6%",
             opacity: 0.92, transform: "rotate(-1.5deg)",
@@ -275,7 +274,6 @@ export default function LoginPage() {
             <MatchOverviewPanel />
           </div>
 
-          {/* Heatmap — top right area */}
           <div style={{
             position: "absolute", top: "10%", right: "6%",
             opacity: 0.88, transform: "rotate(1.2deg)",
@@ -283,7 +281,6 @@ export default function LoginPage() {
             <HeatmapPanel />
           </div>
 
-          {/* Key metrics — bottom right */}
           <div style={{
             position: "absolute", bottom: "18%", right: "4%",
             opacity: 0.85, transform: "rotate(-0.8deg)",
@@ -317,7 +314,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* RIGHT — login form panel */}
+      {/* 右パネル */}
       <div
         className="flex-1 flex flex-col justify-between overflow-y-auto"
         style={{ background: "#FAFAF7", minHeight: "100vh" }}
@@ -331,7 +328,6 @@ export default function LoginPage() {
 
           {/* heading */}
           <div style={{ marginBottom: "32px" }}>
-            {/* desktop: no logo — it's shown on left panel */}
             <div className="hidden lg:block mb-8">
               <Logo />
             </div>
@@ -343,7 +339,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Google button */}
           <button
             onClick={handleSignInWithGoogle}
             style={{

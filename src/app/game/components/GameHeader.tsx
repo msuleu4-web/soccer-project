@@ -46,7 +46,6 @@ export default function GameHeader({ state }: Props) {
           </span>
         </div>
       </div>
-      {/* Fatigue / Injury / Morale bars */}
       <div className="mt-2 flex gap-4 flex-wrap">
         <div className="flex items-center gap-1.5 text-xs text-text-secondary">
           <span>疲労</span>

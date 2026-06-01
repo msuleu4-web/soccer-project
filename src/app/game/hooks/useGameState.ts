@@ -509,7 +509,7 @@ export function useGameState(): GameStateExtended & GameActions {
         return { ...newState, gamePhase: 'ending', endingId: ending.id };
       }
 
-      // 'playing'フェーズを維持 — SeasonSummaryModalが表示される
+      // 'playing'フェーズを維持（SeasonSummaryModalが表示されるため）
       // dismissSeasonSummaryが'transfer'フェーズへ移行する
       return { ...newState, gamePhase: 'playing' };
     }

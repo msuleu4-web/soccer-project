@@ -9,10 +9,7 @@ const noStoreOptions = {
   },
 }
 
-/**
- * 掲示板 API ルート専用 — anon キー使用、RLS が適用される。
- * SELECT / INSERT に使用。
- */
+// 掲示板 API ルート専用：anon キー使用、RLS が適用される。SELECT / INSERT に使用。
 export const createAnonClient = () =>
   createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,11 +17,8 @@ export const createAnonClient = () =>
     noStoreOptions
   )
 
-/**
- * 掲示板 API ルート専用 — service_role キー使用、RLS をバイパスする。
- * ソフトデリート (UPDATE deleted_at) にのみ使用。
- * このファイル以外で SUPABASE_SERVICE_ROLE_KEY を参照禁止。
- */
+// 掲示板 API ルート専用：service_role キー使用、RLS をバイパスする。
+// ソフトデリート (UPDATE deleted_at) にのみ使用。このファイル以外で SUPABASE_SERVICE_ROLE_KEY を参照禁止。
 export const createServiceClient = () =>
   createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
