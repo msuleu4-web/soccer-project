@@ -1,7 +1,7 @@
 import type { GameState, MatchResult, MatchEvent, MatchCompetition } from '../types/game';
 import { STAT_MAX } from './gameConfig';
 
-// ── 対戦相手リスト ──────────────────────────────────────
+// 対戦相手リスト
 
 const CL_GROUP_OPPONENTS = [
   'ガラタサライ CF', 'FCポルト', 'アヤックス', 'ベンフィカ',
@@ -29,7 +29,7 @@ const WC_GROUP_OPPONENTS = [
 const WC_SF_OPPONENTS    = ['フランス代表', 'スペイン代表', 'ドイツ代表', 'イングランド代表'];
 const WC_FINAL_OPPONENT  = 'ブラジル代表 — WCファイナル';
 
-// ── CL参加条件 ─────────────────────────────────────────
+// CL参加条件
 
 export function isTeamInTop3(standings: GameState['leagueStandings']): boolean {
   if (!standings || standings.length === 0) return false;
@@ -42,7 +42,7 @@ export function isEuropeanLeague(league: string): boolean {
   return league === 'premier_league' || league === 'champions_league';
 }
 
-// ── CL マッチ週の判定 ─────────────────────────────────
+// CL マッチ週の判定
 
 const CL_GROUP_WEEKS    = [6, 13, 20] as const;
 const CL_R16_WEEK       = 25;
@@ -63,19 +63,19 @@ export function isNationalWeek(week: number, season: number) {
   return false;
 }
 
-// ── WC条件 ────────────────────────────────────────────
+// WC条件
 
 export function isWCYear(season: number)       { return season > 0 && season % 4 === 0; }
 export function qualifiesForWC(state: GameState) {
   return state.ovr >= 72 && (state.nationalCaps ?? 0) >= 3;
 }
 
-// ── ランダム選択ユーティリティ ─────────────────────────
+// ランダム選択ユーティリティ
 
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 function rand(min: number, max: number) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-// ── 国際試合シミュレーション ──────────────────────────
+// 国際試合シミュレーション
 
 export type IntlMatchType =
   | 'cl_group' | 'cl_r16' | 'cl_qf' | 'cl_sf' | 'cl_final'
@@ -179,7 +179,7 @@ export function simulateIntlMatch(state: GameState, type: IntlMatchType): MatchR
   };
 }
 
-// ── CLラウンドテキスト ────────────────────────────────
+// CLラウンドテキスト
 
 export function getCLRoundLabel(knockoutRound: number): string {
   switch (knockoutRound) {

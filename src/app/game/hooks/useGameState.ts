@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { GameState, Position, PlayerStats, TransferOffer, SeasonSummary, SaveSlot } from '../types/game';
-import { SLOT_IDS, type SlotId } from '../types/game';
+import type { GameState, Position, PlayerStats, TransferOffer, SeasonSummary } from '../types/game';
 import { GAME_CONFIG, STAT_MAX } from '../lib/gameConfig';
 import { calculateOVR, applyTraining, simulateMatch, generateTransferOffers, shouldMatchOccur, generateHighlights } from '../lib/gameEngine';
 import type { TrainingType, TrainingOutcome } from '../lib/gameEngine';
@@ -10,10 +9,9 @@ import { getRandomEvent } from '../lib/eventSystem';
 import { TEAMS, LEAGUES } from '../lib/leagueData';
 import {
   saveGame as saveGameFn, loadGame as loadGameFn, resetGame as resetGameFn,
-  saveGameToSupabase, loadGameFromSupabase, resetGameFromSupabase,
-  getAllSlotPreviews, loadAllSlotsFromSupabase,
-  getCurrentSlotId, setCurrentSlotId,
+  checkAndResetForUser,
 } from '../lib/saveManager';
+import { createClient } from '../../../lib/supabase/client';
 import { checkAchievements, ACHIEVEMENTS } from '../lib/achievements';
 import { checkSeasonAwards } from '../lib/awardsSystem';
 import { checkNewSkills, SKILLS } from '../lib/skills';
@@ -168,15 +166,12 @@ function buildInitialState(name: string, position: Position, startTeam?: import(
     gachaTotalPulls: 0,
     retireAgeBonus: 0,
     ballonDorFlag: false,
+    storySeenWeeks: [],
   };
 }
 
 export interface GameActions {
   trainingFeedback: TrainingFeedback | null;
-  currentSlotId: SlotId | null;
-  allSlots: SaveSlot[];
-  selectSlot: (slotId: SlotId) => Promise<void>;
-  returnToSlotSelect: () => void;
   startNewGame: (name: string, position: Position, teamId?: string) => void;
   selectTraining: (type: TrainingType) => void;
   skipWeek: () => void;
@@ -196,6 +191,8 @@ export interface GameActions {
   lastGachaResults: PullResult[];
   useInventoryItem: (uid: string) => void;
   discardInventoryItem: (uid: string) => void;
+  applyStoryBonus: (bonus: Record<string, number>) => void;
+  markStoryWeekSeen: (week: number) => void;
 }
 
 export interface TrainingFeedback {
@@ -212,23 +209,13 @@ export interface GameStateExtended {
   notification: string | null;
   newUnlocks: string[];
   trainingFeedback: TrainingFeedback | null;
-  currentSlotId: SlotId | null;
-  allSlots: SaveSlot[];
+  isInitializing: boolean;
 }
 
 export function useGameState(): GameStateExtended & GameActions {
-  // useState の遅延初期化で loadGame() をレンダーごとに呼ばないようにする
-  // ── スロット管理 ──────────────────────────────────────
-  const activeSlotRef = useRef<SlotId>('slot1');
-  const [currentSlotId, setCurrentSlotIdState] = useState<SlotId | null>(null);
-  const [allSlots, setAllSlots] = useState<SaveSlot[]>(
-    SLOT_IDS.map(s => ({ slotId: s, isEmpty: true }))
-  );
-
-  // スロット対応の saveGame ラッパー（ref を使うので常に最新スロットに書き込む）
-  const saveGame = useCallback((s: GameState) => saveGameFn(s, activeSlotRef.current), []);
-  const loadGame  = useCallback((slotId: SlotId) => loadGameFn(slotId), []);
-  const resetGame = useCallback((slotId: SlotId) => resetGameFn(slotId), []);
+  const saveGame = useCallback((s: GameState) => saveGameFn(s), []);
+  const loadGame  = useCallback(() => loadGameFn(), []);
+  const resetGame = useCallback(() => resetGameFn(), []);
 
   const EMPTY_STATE: GameState = {
     playerName: '',
@@ -296,33 +283,29 @@ export function useGameState(): GameStateExtended & GameActions {
     gachaTotalPulls: 0,
     retireAgeBonus: 0,
     ballonDorFlag: false,
+    storySeenWeeks: [],
   };
 
-  const [state, setState] = useState<GameState>(() => {
-    // 初期表示はスロット選択画面を出すのでsetupに戻す
-    // （実際のロードはselectSlotで行う）
-    return EMPTY_STATE;
-  });
+  const [state, setState] = useState<GameState>(EMPTY_STATE);
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  // 起動時: スロットプレビュー読み込み
-  // ※ 自動ロードは Supabase のみ使用（localStorageは他ユーザーのデータが混入するため参照しない）
+  // 起動時: ユーザー確認 → 異なるユーザーならリセット → localStorage ロード
   useEffect(() => {
-    setAllSlots(getAllSlotPreviews());
-    loadAllSlotsFromSupabase().then(slots => setAllSlots(slots));
-
     if (typeof window === 'undefined') return;
-    const lastSlot = getCurrentSlotId();
-
-    // Supabase のデータがある場合のみ自動ロード
-    loadGameFromSupabase(lastSlot).then(cloudState => {
-      if (cloudState && cloudState.gamePhase !== 'setup' && cloudState.playerName) {
-        activeSlotRef.current = lastSlot;
-        setCurrentSlotIdState(lastSlot);
-        setState(cloudState);
-        saveGameFn(cloudState, lastSlot); // ローカルにも同期
-      }
-      // Supabase にデータなし → スロット選択画面のまま (EMPTY_STATE)
-    });
+    createClient().auth.getUser()
+      .then(({ data: { user } }) => {
+        checkAndResetForUser(user?.id ?? null);
+      })
+      .catch(() => {
+        checkAndResetForUser(null);
+      })
+      .finally(() => {
+        const saved = loadGameFn();
+        if (saved && saved.gamePhase !== 'setup' && saved.playerName) {
+          setState(saved);
+        }
+        setIsInitializing(false);
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -342,40 +325,8 @@ export function useGameState(): GameStateExtended & GameActions {
     });
   }, []);
 
-  const selectSlot = useCallback(async (slotId: SlotId) => {
-    activeSlotRef.current = slotId;
-    setCurrentSlotId(slotId);
-    setCurrentSlotIdState(slotId);
-
-    const cloudState = await loadGameFromSupabase(slotId);
-    if (cloudState && cloudState.gamePhase !== 'setup' && cloudState.playerName) {
-      // Supabase にデータあり → 使用してローカルにも同期
-      setState(cloudState);
-      saveGameFn(cloudState, slotId);
-    } else {
-      // Supabase にデータなし = 新規ユーザー → 必ず EMPTY_STATE
-      // localStorage は他ユーザーのデータが残っている可能性があるため参照しない
-      setState(EMPTY_STATE);
-      resetGameFn(slotId); // 万が一残っているローカルデータもクリア
-    }
-    setPendingEvent(null);
-    setPendingTransferOffers([]);
-    setLastMatchResult(null);
-    setHighlights([]);
-    setNotification(null);
-    setNewUnlocks([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const returnToSlotSelect = useCallback(() => {
-    setCurrentSlotIdState(null);
-    setAllSlots(getAllSlotPreviews());
-    loadAllSlotsFromSupabase().then(slots => setAllSlots(slots));
-  }, []);
-
   const startNewGame = useCallback((name: string, position: Position, teamId?: string) => {
-    resetGame(activeSlotRef.current);
-    resetGameFromSupabase(activeSlotRef.current);
+    resetGame();
     const selectedTeam = teamId ? TEAMS.regional.find(t => t.id === teamId) : undefined;
     const newState = buildInitialState(name, position, selectedTeam);
     newState.leagueStandings = generateStandings(newState);
@@ -417,12 +368,12 @@ export function useGameState(): GameStateExtended & GameActions {
         });
       }
 
-      // ── CL出場権判定 ──────────────────────────────────
+      // CL出場権判定
       const wonCLQual =
         isEuropeanLeague(currentState.currentLeague) &&
         isTeamInTop3(currentState.leagueStandings);
 
-      // ── シーズン終了: 年齢加算・スタット減少・シーズン成績リセット ──
+      // シーズン終了: 年齢加算・スタット減少・シーズン成績リセット
       const nextSeason = currentState.currentSeason + 1;
       const newState: GameState = {
         ...currentState,
@@ -449,6 +400,8 @@ export function useGameState(): GameStateExtended & GameActions {
         wcActive: isWCYear(nextSeason) && qualifiesForWC(currentState),
         wcRound: 0,
         wcGroupWins: 0,
+        // ストーリー週はシーズンごとにリセット
+        storySeenWeeks: [],
       };
 
       // シーズン個人賞チェック（awardsSystemで一括管理）
@@ -564,7 +517,8 @@ export function useGameState(): GameStateExtended & GameActions {
     // 週次処理：給料支払い + 負債ペナルティ
     const weeklySalary = Math.round(currentState.currentTeam.salary / 4);
     let weeklyMoney = currentState.money + weeklySalary;
-    let weeklyMorale = currentState.morale;
+    // 自然モラル減少: -2/週 (休息で +2 と相殺、トレーニングは純減)
+    let weeklyMorale = Math.max(0, currentState.morale - 2);
 
     if (weeklyMoney < 0) {
       // 借金額に応じてモラル減少（最大-10/週）
@@ -717,11 +671,11 @@ export function useGameState(): GameStateExtended & GameActions {
         }
       }
 
-      // ── 国際大会マッチチェック（リーグ試合がない週に発生） ──────
+      // 国際大会マッチチェック（リーグ試合がない週に発生）
       if (newState.gamePhase === 'playing' && !newState.showSeasonSummary) {
         const wk = newState.currentWeek;
 
-        // ── WCトリガー（シーズン初週: wcActiveセット済み）──
+        // WCトリガー（シーズン初週: wcActiveセット済み）
         if (newState.wcActive && newState.wcRound === 0 && wk === 1) {
           const wcResult = simulateIntlMatch(newState, 'wc_group');
           setLastMatchResult(wcResult);
@@ -733,7 +687,7 @@ export function useGameState(): GameStateExtended & GameActions {
           };
         }
 
-        // ── CLグループステージ ──────────────────────────
+        // CLグループステージ
         else if (newState.clActive && !newState.clEliminated && newState.clGroupStage < 3 && isCLGroupWeek(wk)) {
           const clResult = simulateIntlMatch(newState, 'cl_group');
           setLastMatchResult(clResult);
@@ -747,7 +701,7 @@ export function useGameState(): GameStateExtended & GameActions {
           };
         }
 
-        // ── CLノックアウト ─────────────────────────────
+        // CLノックアウト
         else if (newState.clActive && !newState.clEliminated && newState.clGroupStage >= 3 && newState.clGroupWins >= 2) {
           let clIntlType: Parameters<typeof simulateIntlMatch>[1] | null = null;
           if (isCLR16Week(wk) && newState.clKnockoutRound === 0) clIntlType = 'cl_r16';
@@ -784,7 +738,7 @@ export function useGameState(): GameStateExtended & GameActions {
           }
         }
 
-        // ── 国際親善・代表試合 ─────────────────────────
+        // 国際親善・代表試合
         else if (!newState.clActive && newState.ovr >= 65 && isNationalWeek(wk, newState.currentSeason)) {
           const ntResult = simulateIntlMatch(newState, 'national');
           setLastMatchResult(ntResult);
@@ -917,7 +871,7 @@ export function useGameState(): GameStateExtended & GameActions {
   const continueFromMatch = useCallback(() => {
     const comp = lastMatchResult?.competition;
 
-    // ── WC連続進行 ───────────────────────────────────
+    // WC連続進行
     if (comp?.startsWith('wc_')) {
       const won = lastMatchResult!.win;
       setState(prev => {
@@ -1029,7 +983,7 @@ export function useGameState(): GameStateExtended & GameActions {
     advanceMatch();
   }, [advanceMatch, lastMatchResult]);
 
-  // ── ガチャプル ──────────────────────────────────────
+  // ガチャプル
   const [lastGachaResults, setLastGachaResults] = useState<PullResult[]>([]);
 
   const pullGacha = useCallback((type: GachaType, isMulti: boolean): PullResult[] => {
@@ -1074,7 +1028,7 @@ export function useGameState(): GameStateExtended & GameActions {
     return results;
   }, []);
 
-  // ── アイテム倉庫 ──────────────────────────────────────
+  // アイテム倉庫
   const useInventoryItem = useCallback((uid: string) => {
     setState(prev => {
       const slot = (prev.inventory ?? []).find(i => i.uid === uid);
@@ -1102,6 +1056,37 @@ export function useGameState(): GameStateExtended & GameActions {
       return ns;
     });
   }, []);
+
+  // ストーリー選択肢から受け取ったボーナスをゲームに反映
+  const applyStoryBonus = useCallback((bonus: Record<string, number>) => {
+    setState(prev => {
+      const statKeys: (keyof PlayerStats)[] = ['shooting', 'passing', 'dribbling', 'speed', 'stamina', 'defense'];
+      const newStats = { ...prev.stats };
+      for (const key of statKeys) {
+        if (key in bonus) {
+          const max = STAT_MAX[prev.position][key];
+          newStats[key] = Math.min(newStats[key] + bonus[key], max);
+        }
+      }
+      const newMorale = 'morale' in bonus
+        ? Math.min(100, Math.max(0, prev.morale + bonus['morale']))
+        : prev.morale;
+      const newOvr = calculateOVR(newStats, prev.position);
+      const ns = { ...prev, stats: newStats, morale: newMorale, ovr: newOvr };
+      saveGame(ns);
+      return ns;
+    });
+  }, []);
+
+  const markStoryWeekSeen = useCallback((week: number) => {
+    setState(prev => {
+      const already = prev.storySeenWeeks ?? [];
+      if (already.includes(week)) return prev;
+      const ns = { ...prev, storySeenWeeks: [...already, week] };
+      saveGame(ns);
+      return ns;
+    });
+  }, [saveGame]);
 
   const dismissPendingAwards = useCallback(() => {
     setState(prev => {
@@ -1249,7 +1234,7 @@ export function useGameState(): GameStateExtended & GameActions {
         currentTeam: offer.team,
         currentLeague: nextLeagueForOffer,
         money: prev.money + offer.salary,
-        morale: Math.min(100, prev.morale + 15),
+        morale: Math.min(100, prev.morale + 10),
         gamePhase: 'playing',
         fans: (prev.fans ?? 0) + promotionFans,
         leagueStandings: [], // 移籍後は新リーグで再生成
@@ -1277,7 +1262,7 @@ export function useGameState(): GameStateExtended & GameActions {
     setState(prev => {
       const newState: GameState = {
         ...prev,
-        morale: Math.min(100, prev.morale + 10),
+        morale: Math.min(100, prev.morale + 5),
         gamePhase: 'playing',
       };
       saveGame(newState);
@@ -1304,8 +1289,7 @@ export function useGameState(): GameStateExtended & GameActions {
   }, []);
 
   const restartGame = useCallback(() => {
-    resetGame(activeSlotRef.current);
-    resetGameFromSupabase(activeSlotRef.current);
+    resetGame();
     setState({
       playerName: '',
       position: 'FW',
@@ -1372,6 +1356,7 @@ export function useGameState(): GameStateExtended & GameActions {
       gachaTotalPulls: 0,
       retireAgeBonus: 0,
       ballonDorFlag: false,
+      storySeenWeeks: [],
     });
     setPendingEvent(null);
     setPendingTransferOffers([]);
@@ -1408,10 +1393,9 @@ export function useGameState(): GameStateExtended & GameActions {
     lastGachaResults,
     useInventoryItem,
     discardInventoryItem,
+    applyStoryBonus,
+    markStoryWeekSeen,
     trainingFeedback,
-    currentSlotId,
-    allSlots,
-    selectSlot,
-    returnToSlotSelect,
+    isInitializing,
   };
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Position } from '../types/game';
 import { useGameState } from '../hooks/useGameState';
 import { useAutoSave } from '../hooks/useAutoSave';
@@ -26,8 +27,9 @@ import { SKILLS } from '../lib/skills';
 import ShopModal from './ShopModal';
 import GachaModal from './GachaModal';
 import InventoryModal from './InventoryModal';
-import SaveSlotScreen from './SaveSlotScreen';
-import { resetGame, resetGameFromSupabase, getAllSlotPreviews } from '../lib/saveManager';
+import HeroineReactionBubble from './HeroineReactionBubble';
+import { getTrainingReaction, getInjuryReaction } from '../lib/heroineReactions';
+import type { HeroineReaction } from '../lib/heroineReactions';
 
 const POSITIONS: { value: Position; label: string; desc: string; icon: string }[] = [
   { value: 'FW', label: 'フォワード', desc: '点取り屋として活躍する攻撃的なポジション', icon: '⚽' },
@@ -39,9 +41,126 @@ const POSITIONS: { value: Position; label: string; desc: string; icon: string }[
 const REGIONAL_TEAMS = TEAMS.regional;
 
 export default function GameScreen() {
-  const game = useGameState();
+  const game   = useGameState();
+  const router = useRouter();
   const { state } = game;
-  useAutoSave(state, game.currentSlotId ?? 'slot1');
+  useAutoSave(state);
+
+  // ヒロイン反応バブル
+  const [heroineReaction, setHeroineReaction] = useState<HeroineReaction | null>(null);
+  const prevTrainingFeedback = useRef(game.trainingFeedback);
+  const prevInjury = useRef(state.injury);
+
+  // トレーニング完了時の反応
+  useEffect(() => {
+    if (game.trainingFeedback && !prevTrainingFeedback.current) {
+      const r = getTrainingReaction(game.trainingFeedback);
+      if (r) setHeroineReaction(r);
+    }
+    prevTrainingFeedback.current = game.trainingFeedback;
+  }, [game.trainingFeedback]);
+
+  // 怪我発生 / 回復時の反応
+  useEffect(() => {
+    const r = getInjuryReaction(prevInjury.current, state.injury);
+    if (r) setHeroineReaction(r);
+    prevInjury.current = state.injury;
+  }, [state.injury]);
+
+  // ストーリーから戻ってきた時: ボーナス適用
+  useEffect(() => {
+    if (!state.playerName) return;
+
+    const bonusRaw = sessionStorage.getItem('storyBonus');
+    if (bonusRaw) {
+      sessionStorage.removeItem('storyBonus');
+      try {
+        const bonus = JSON.parse(bonusRaw) as Record<string, number>;
+        game.applyStoryBonus(bonus);
+      } catch { /* ignore */ }
+    }
+
+    const weekStr = sessionStorage.getItem('pendingStoryWeek');
+    if (weekStr) {
+      sessionStorage.removeItem('pendingStoryWeek');
+      game.markStoryWeekSeen(parseInt(weekStr, 10));
+      return;
+    }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.playerName]);
+
+  // 解禁されているストーリー週を取得 (5,10,15,20,25,30,35,38)
+  const STORY_WEEKS = [5, 10, 15, 20, 25, 30, 35, 38] as const;
+  const availableStoryWeek = STORY_WEEKS.find(
+    w => state.currentWeek >= w && !(state.storySeenWeeks ?? []).includes(w)
+  );
+
+  const [isStoryLoading, setIsStoryLoading] = useState(false);
+  const [storyLoadFailed, setStoryLoadFailed] = useState(false);
+
+  const handleStoryButtonClick = useCallback(async () => {
+    if (!availableStoryWeek || isStoryLoading) return;
+    setIsStoryLoading(true);
+    setStoryLoadFailed(false);
+
+    const winRate     = state.seasonRating > 0 ? Math.min(1, state.seasonRating / 10) : 0.5;
+    const goalRate    = state.matchesPlayed > 0 ? state.seasonGoals / state.matchesPlayed : 0;
+    const hadTransfer = (game.pendingTransferOffers?.length ?? 0) > 0;
+    const recentWin   = state.matchesPlayed > 0 && state.seasonRating >= 7.5;
+
+    try {
+      const res  = await fetch('/api/story/game-event', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          event_type:     'match_cycle',
+          win:            recentWin,
+          win_rate:       winRate,
+          goal_rate:      goalRate,
+          had_transfer:   hadTransfer,
+          has_injury:     state.injury > 0,
+          morale:         state.morale,
+          current_league: state.currentLeague,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json() as { scene_id?: string | null };
+        if (data.scene_id) {
+          sessionStorage.setItem('pendingStoryWeek', String(availableStoryWeek));
+          router.push(`/story/play/${data.scene_id}?returnTo=/game`);
+          return; // ページ遷移するのでここで終了
+        }
+        // 200だがシーンなし → このWeekのストーリーは設定なし、スキップ扱い
+        game.markStoryWeekSeen(availableStoryWeek);
+        setIsStoryLoading(false);
+        return;
+      }
+      if (res.status === 401) {
+        setStoryLoadFailed(true);
+        setIsStoryLoading(false);
+        return;
+      }
+      // 500 など → 失敗表示（ボタンは消さない）
+      setStoryLoadFailed(true);
+    } catch {
+      // ネットワークエラー → 失敗表示
+      setStoryLoadFailed(true);
+    }
+
+    setIsStoryLoading(false);
+  }, [availableStoryWeek, isStoryLoading, state, game, router]);
+
+  const handleStorySkip = useCallback(() => {
+    if (!availableStoryWeek) return;
+    game.markStoryWeekSeen(availableStoryWeek);
+    setStoryLoadFailed(false);
+  }, [availableStoryWeek, game]);
+
+  const handleMatchContinue = useCallback(() => {
+    game.continueFromMatch();
+  }, [game]);
 
   const [setupName, setSetupName] = useState('');
   const [setupPosition, setSetupPosition] = useState<Position>('FW');
@@ -69,22 +188,8 @@ export default function GameScreen() {
     game.startNewGame(setupName.trim(), setupPosition, setupTeamId);
   };
 
-  // スロット選択画面（スロット未選択 or 新規セットアップ前）
-  if (game.currentSlotId === null) {
-    return (
-      <SaveSlotScreen
-        slots={game.allSlots}
-        onSelect={game.selectSlot}
-        onDelete={async (slotId) => {
-          resetGame(slotId);
-          await resetGameFromSupabase(slotId);
-          const updated = getAllSlotPreviews();
-          game.returnToSlotSelect();
-          // allSlots は returnToSlotSelect 内で更新される
-          void updated;
-        }}
-      />
-    );
+  if (game.isInitializing) {
+    return <div className="fixed inset-0" style={{ background: 'var(--bg-base)' }} />;
   }
 
   // Setup screen - Step 1: Name & Position
@@ -221,7 +326,7 @@ export default function GameScreen() {
           league={LEAGUES[state.currentLeague].name}
           age={state.age}
           ovr={state.ovr}
-          onContinue={game.continueFromMatch}
+          onContinue={handleMatchContinue}
         />
       </div>
     );
@@ -287,6 +392,14 @@ export default function GameScreen() {
       <UnlockToast />
       <TrainingToast />
 
+      {/* ヒロイン反応フローティングバブル */}
+      {heroineReaction && (
+        <HeroineReactionBubble
+          reaction={heroineReaction}
+          onDismiss={() => setHeroineReaction(null)}
+        />
+      )}
+
       {/* ショップモーダル */}
       {showShop && (
         <ShopModal
@@ -339,15 +452,62 @@ export default function GameScreen() {
       <GameHeader state={state} />
       <PlayerCard state={state} />
 
-      {/* ショップ + スロット変更ボタン */}
-      <div className="mb-4 flex justify-between items-center gap-2">
-        <button
-          onClick={game.returnToSlotSelect}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all"
-          style={{ background: 'var(--bg-surface-elevated)', color: 'var(--fg-2)', border: '1px solid var(--color-border)' }}
-        >
-          👤 スロット変更
-        </button>
+      {/* ストーリーボタン（解禁週に表示・必須） */}
+      {availableStoryWeek && (
+        <div className="mb-3">
+          <button
+            onClick={handleStoryButtonClick}
+            disabled={isStoryLoading}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+              color: '#fff',
+              boxShadow: '0 4px 16px rgba(124,58,237,0.45)',
+              animation: isStoryLoading ? 'none' : 'story-btn-glow 2s ease-in-out infinite',
+              opacity: isStoryLoading ? 0.7 : 1,
+            }}
+          >
+            <span className="flex items-center gap-2">
+              <span className="text-xl">💬</span>
+              <span>
+                <span className="text-xs font-normal opacity-80 block leading-none mb-0.5">
+                  Week {availableStoryWeek} ストーリー（必須）
+                </span>
+                <span className="text-sm">ストーリーを見る</span>
+              </span>
+            </span>
+            <span className="text-xs opacity-80">
+              {isStoryLoading ? '読み込み中…' : 'タップ →'}
+            </span>
+          </button>
+
+          {storyLoadFailed && (
+            <div className="mt-2 p-2 rounded-lg text-xs flex items-center justify-between gap-2"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
+              <span className="text-red-400">⚠️ ストーリーを読み込めませんでした</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleStoryButtonClick}
+                  className="px-2 py-1 rounded text-xs font-bold"
+                  style={{ background: 'rgba(124,58,237,0.15)', color: '#a855f7' }}
+                >
+                  再試行
+                </button>
+                <button
+                  onClick={handleStorySkip}
+                  className="px-2 py-1 rounded text-xs font-bold"
+                  style={{ background: 'rgba(107,114,128,0.15)', color: '#9ca3af' }}
+                >
+                  スキップ
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ショップ・ガチャ・倉庫ボタン */}
+      <div className="mb-4 flex justify-end items-center gap-2">
         <div className="flex gap-2">
           <button
             onClick={() => setShowShop(true)}
@@ -391,6 +551,7 @@ export default function GameScreen() {
             state={state}
             onTraining={game.selectTraining}
             onSkip={game.skipWeek}
+            storyBlocked={!!availableStoryWeek}
           />
           {(state.leagueStandings?.length ?? 0) > 0 && (
             <LeagueStandingsPanel state={state} />

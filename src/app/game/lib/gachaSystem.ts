@@ -2,12 +2,10 @@ import type { GameState, PlayerStats, Position } from '../types/game';
 import { STAT_MAX } from './gameConfig';
 import { calculateOVR } from './gameEngine';
 
-// ══════════════════════════════════════════════════════════════════
 // レアリティ体系
 // ★3 World Class    3.00% (ピックアップ 0.70% / 通常 ★3 2.30%)
 // ★2 Pro League    18.50%
 // ★1 ユース        78.50%
-// ══════════════════════════════════════════════════════════════════
 
 export type GachaRarity = '★1' | '★2' | '★3';
 export type GachaType   = 'standard' | 'pickup';
@@ -39,7 +37,7 @@ export const RARITY_GLOW: Record<GachaRarity, string> = {
 export const PICKUP_COLOR = '#ef4444';
 export const PICKUP_GLOW  = '0 0 32px #ef444490';
 
-// ── アイテム定義 ──────────────────────────────────────
+// アイテム定義
 
 export interface GachaItemEffect {
   shooting?: number;
@@ -76,9 +74,7 @@ export interface GachaItem {
   effect: GachaItemEffect;
 }
 
-// ════════════════════════════════════════
 // ★1 ユース (12種)
-// ════════════════════════════════════════
 const STAR1_ITEMS: GachaItem[] = [
   {
     id: 's1_energy',   name: 'エナジーゼリー',
@@ -154,9 +150,7 @@ const STAR1_ITEMS: GachaItem[] = [
   },
 ];
 
-// ════════════════════════════════════════
 // ★2 プロリーグ (11種)
-// ════════════════════════════════════════
 const STAR2_ITEMS: GachaItem[] = [
   {
     id: 's2_shoot',   name: 'プロシュート強化剤',
@@ -226,10 +220,8 @@ const STAR2_ITEMS: GachaItem[] = [
   },
 ];
 
-// ════════════════════════════════════════
 // ★3 ワールドクラス (8種)
 // ピックアップ対象はプレイヤーのポジションに応じて決まる
-// ════════════════════════════════════════
 const STAR3_ITEMS: GachaItem[] = [
   {
     id: 's3_fw',      name: 'レジェンドFW覚醒',
@@ -295,7 +287,7 @@ export const GACHA_ITEMS: GachaItem[] = [
   ...STAR3_ITEMS,
 ];
 
-// ── ガチャ種別設定 ──────────────────────────────────
+// ガチャ種別設定
 
 export const GACHA_COST: Record<GachaType, { single: number; multi: number }> = {
   standard: { single: 50,  multi: 450 },
@@ -317,7 +309,7 @@ export const GACHA_META: Record<GachaType, { label: string; emoji: string; color
   },
 };
 
-// ── 確率テーブル ──────────────────────────────────
+// 確率テーブル
 
 // 天井
 export const PITY_CAP = 90;
@@ -331,7 +323,7 @@ function star3Rate(pity: number): number {
   return Math.min(1.0, 0.030 + (pity - SOFT_PITY_START + 1) * 0.060);
 }
 
-// ── ピックアップアイテム取得 ────────────────────────
+// ピックアップアイテム取得
 
 export function getPickupItemId(position: Position, _season: number): string {
   switch (position) {
@@ -350,7 +342,7 @@ function pickFrom(items: GachaItem[]): GachaItem {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-// ── 抽選ロジック ──────────────────────────────────
+// 抽選ロジック
 
 export interface PullResult {
   item: GachaItem;
@@ -432,7 +424,7 @@ export function pullMulti(
   return { results, newPity: currentPity };
 }
 
-// ── アイテム効果適用 ──────────────────────────────
+// アイテム効果適用
 
 export function applyGachaItem(state: GameState, item: GachaItem): GameState {
   const { effect } = item;
@@ -494,7 +486,7 @@ export function applyGachaItem(state: GameState, item: GachaItem): GameState {
   };
 }
 
-// ── GC獲得計算 ────────────────────────────────────────
+// GC獲得計算
 
 export function calcMatchGC(goals: number, win: boolean, isHatTrick: boolean, competition?: string): number {
   let gc = goals * 5 + (win ? 10 : 0) + (isHatTrick ? 30 : 0);

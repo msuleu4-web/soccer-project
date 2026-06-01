@@ -76,7 +76,7 @@ export function applyTraining(state: GameState, trainingType: TrainingType): Tra
   const { stats, morale, fatigue, position } = state;
   const skills = state.skills ?? [];
 
-  // ── 成功率・成否判定 ──────────────────────────────────
+  // 成功率・成否判定
   const successRate = getTrainingSuccessRate(fatigue, morale, trainingType);
   let outcome: TrainingOutcome = 'success';
   if (trainingType !== 'rest') {
@@ -266,7 +266,7 @@ export function simulateMatch(state: GameState): MatchResult {
   const assistChance = position === 'MF' ? 0.28 : position === 'FW' ? 0.18 : 0.10;
   const playerAssists = Math.random() < assistChance ? 1 : 0;
 
-  // ─── 現実的なチームスコア計算 ───
+  // 現実的なチームスコア計算
   // チーム同士の強さ比率：同リーグなら互角、OVRで微調整
   const teamEffective = currentTeam.prestige * 10 + rand(-3, 3);
   const oppEffective  = leagueLevel * 10 + rand(-3, 3);
@@ -298,7 +298,7 @@ export function simulateMatch(state: GameState): MatchResult {
     ? opponentPool[rand(0, opponentPool.length - 1)]
     : { id: 'unknown', name: '対戦相手', league: state.currentLeague, prestige: 1, salary: 0 };
 
-  // ──── 分単位イベント生成 ────
+  // 分単位イベント生成
   const events: MatchEvent[] = [];
   // アシストイベント自体が「味方ゴール」を表すため、
   // 追加の teammate_goal は (teamScore - playerGoals - playerAssists) 個だけ生成する
@@ -367,7 +367,7 @@ export function generateTransferOffers(state: GameState): TransferOffer[] {
   const currentLevel = LEAGUES[state.currentLeague].level;
   const thresholds = GAME_CONFIG.TRANSFER_THRESHOLDS;
 
-  // ── パフォーマンスボーナス計算 ─────────────────────────
+  // パフォーマンスボーナス計算
   // 順位が上位3位以内かどうか
   const sorted = [...state.leagueStandings].sort((a, b) => b.points - a.points);
   const rank   = sorted.findIndex(e => e.isPlayer) + 1;

@@ -30,7 +30,7 @@ export interface ShopItem {
 
 export const SHOP_ITEMS: ShopItem[] = [
 
-  // ══ 装備 ══════════════════════════════════════════════════════
+  // 装備
 
   {
     id: 'basic_boots',
@@ -223,7 +223,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     forPosition: ['DF', 'GK'],
   },
 
-  // ══ 回復 ══════════════════════════════════════════════════════
+  // 回復
 
   {
     id: 'energy_drink',
@@ -295,7 +295,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     requireOvr: 88,
   },
 
-  // ══ トレーニング ═══════════════════════════════════════════════
+  // トレーニング
 
   {
     id: 'protein',
@@ -445,7 +445,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     requireOvr: 97,
   },
 
-  // ══ スペシャル ═════════════════════════════════════════════════
+  // スペシャル
 
   {
     id: 'fan_event',
@@ -517,7 +517,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     consumable: false,
     requireOvr: 92,
   },
-  // ══ 不動産 (Real Estate) ═══════════════════════════════════
+  // 不動産 (Real Estate)
 
   {
     id: 're_myhome',
@@ -579,7 +579,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     requireOvr: 95,
   },
 
-  // ══ 車両 (Vehicle) ═══════════════════════════════════════
+  // 車両 (Vehicle)
 
   {
     id: 'car_sedan',
@@ -641,7 +641,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     requireOvr: 95,
   },
 
-  // ══ 遊興 (Entertainment) ══════════════════════════════════
+  // 遊興 (Entertainment)
   // 繰り返し利用でペナルティが累積する
 
   {

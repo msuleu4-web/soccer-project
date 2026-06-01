@@ -195,9 +195,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex overflow-hidden" style={{ background: "#FAFAF7" }}>
 
-      {/* ════════════════════════════════════════
-          LEFT — analytics visual area
-          ════════════════════════════════════════ */}
+      {/* LEFT — analytics visual area */}
       <div
         className="hidden lg:block relative overflow-hidden"
         style={{ flex: "0 0 42%", minHeight: "100vh" }}
@@ -319,9 +317,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════
-          RIGHT — login form panel
-          ════════════════════════════════════════ */}
+      {/* RIGHT — login form panel */}
       <div
         className="flex-1 flex flex-col justify-between overflow-y-auto"
         style={{ background: "#FAFAF7", minHeight: "100vh" }}

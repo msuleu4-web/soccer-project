@@ -84,9 +84,7 @@ function Head({ stage, skin, hair, uid, cx = 50, cy = 43 }: {
   );
 }
 
-/* ════════════════════════════════════
-   FW: 攻撃的シュートポーズ
-   ════════════════════════════════════ */
+// FW: 攻撃的シュートポーズ
 function FWBody({ kit, stage, skin, uid, stageColor }: {
   kit: typeof KIT[LeagueId]; stage: number; skin: string; uid: string; stageColor: string;
 }) {
@@ -129,9 +127,7 @@ function FWBody({ kit, stage, skin, uid, stageColor }: {
   );
 }
 
-/* ════════════════════════════════════
-   MF: パスポーズ、腕を広げた司令塔
-   ════════════════════════════════════ */
+// MF: パスポーズ、腕を広げた司令塔
 function MFBody({ kit, stage, skin, uid, stageColor }: {
   kit: typeof KIT[LeagueId]; stage: number; skin: string; uid: string; stageColor: string;
 }) {
@@ -177,9 +173,7 @@ function MFBody({ kit, stage, skin, uid, stageColor }: {
   );
 }
 
-/* ════════════════════════════════════
-   DF: 守備ブロックポーズ、腕を広げ
-   ════════════════════════════════════ */
+// DF: 守備ブロックポーズ、腕を広げ
 function DFBody({ kit, stage, skin, uid, stageColor }: {
   kit: typeof KIT[LeagueId]; stage: number; skin: string; uid: string; stageColor: string;
 }) {
@@ -225,9 +219,7 @@ function DFBody({ kit, stage, skin, uid, stageColor }: {
   );
 }
 
-/* ════════════════════════════════════
-   GK: 構えポーズ、両腕広げ、グローブ
-   ════════════════════════════════════ */
+// GK: 構えポーズ、両腕広げ、グローブ
 function GKBody({ kit, stage, skin, uid, stageColor }: {
   kit: typeof KIT[LeagueId]; stage: number; skin: string; uid: string; stageColor: string;
 }) {

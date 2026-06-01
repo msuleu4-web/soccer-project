@@ -30,7 +30,7 @@ interface AwardCheck {
 }
 
 const AWARD_DEFS: AwardCheck[] = [
-  // ── ルーキー系 ─────────────────────────────────
+  // ルーキー系
   {
     id: 'rookie_of_year',
     name: '新人王',
@@ -57,7 +57,7 @@ const AWARD_DEFS: AwardCheck[] = [
       (s.ovr - (s.seasonStartOvr ?? s.ovr)) >= 8,
   },
 
-  // ── 個人タイトル系 ──────────────────────────────
+  // 個人タイトル系
   {
     id: 'top_scorer',
     name: '得点王',
@@ -90,7 +90,7 @@ const AWARD_DEFS: AwardCheck[] = [
       s.matchesPlayed >= 20,
   },
 
-  // ── MVP系 ────────────────────────────────────
+  // MVP系
   {
     id: 'league_mvp',
     name: 'リーグMVP',
@@ -136,7 +136,7 @@ const AWARD_DEFS: AwardCheck[] = [
       s.matchesPlayed >= 25,
   },
 
-  // ── ベストイレブン系 ──────────────────────────────
+  // ベストイレブン系
   {
     id: 'best_eleven',
     name: 'ベストイレブン',
@@ -159,7 +159,7 @@ const AWARD_DEFS: AwardCheck[] = [
       s.matchesPlayed >= 20,
   },
 
-  // ── ポジション賞 ─────────────────────────────────
+  // ポジション賞
   {
     id: 'best_gk',
     name: 'ベストGK賞',
@@ -206,7 +206,7 @@ const AWARD_DEFS: AwardCheck[] = [
       s.matchesPlayed >= 15,
   },
 
-  // ── 世界個人賞 ──────────────────────────────────
+  // 世界個人賞
   {
     id: 'world_player',
     name: 'FIFA ワールドプレイヤー・オブ・ザ・イヤー',
@@ -234,7 +234,7 @@ const AWARD_DEFS: AwardCheck[] = [
     unique: true,
   },
 
-  // ── プスカシュ賞 ──────────────────────────────────
+  // プスカシュ賞
   {
     id: 'puskas_award',
     name: 'プスカシュ賞',
@@ -249,7 +249,7 @@ const AWARD_DEFS: AwardCheck[] = [
       (s.position === 'FW' || s.position === 'MF'),
   },
 
-  // ── 特別賞 ─────────────────────────────────────
+  // 特別賞
   {
     id: 'iron_player',
     name: 'フル出場賞',

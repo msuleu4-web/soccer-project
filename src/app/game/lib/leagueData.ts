@@ -15,7 +15,7 @@ export const LEAGUE_ORDER: LeagueId[] = [
 
 export const TEAMS: Record<LeagueId, Team[]> = {
 
-  // ── 地域リーグ：東北・北海道・山陰の小都市
+  // 地域リーグ：東北・北海道・山陰の小都市
   regional: [
     { id: 'aomori_sol',   name: 'FC青森ソルジャーズ',      league: 'regional', prestige: 1, salary: 10 },
     { id: 'iwate_frt',    name: '岩手フロンティアFC',       league: 'regional', prestige: 1, salary: 11 },
@@ -26,7 +26,7 @@ export const TEAMS: Record<LeagueId, Team[]> = {
     { id: 'kochi_pio',    name: '高知パイオニアーズ',       league: 'regional', prestige: 1, salary: 10 },
   ],
 
-  // ── J3リーグ：地方中核都市
+  // J3リーグ：地方中核都市
   j3: [
     { id: 'toyama_van',   name: '富山ヴァンガード',         league: 'j3', prestige: 2, salary: 22 },
     { id: 'ishikawa_swn', name: '石川スワンズ',             league: 'j3', prestige: 2, salary: 24 },
@@ -38,7 +38,7 @@ export const TEAMS: Record<LeagueId, Team[]> = {
     { id: 'yamaguchi_wv', name: '山口ウェーブ',             league: 'j3', prestige: 2, salary: 21 },
   ],
 
-  // ── J2リーグ：中規模都市
+  // J2リーグ：中規模都市
   j2: [
     { id: 'niigata_alb',  name: '新潟アルビス',             league: 'j2', prestige: 3, salary: 55 },
     { id: 'nagano_alp',   name: '長野アルパインズ',         league: 'j2', prestige: 3, salary: 50 },
@@ -51,7 +51,7 @@ export const TEAMS: Record<LeagueId, Team[]> = {
     { id: 'tokushima_vs', name: '徳島ヴォルティスタ',       league: 'j2', prestige: 3, salary: 51 },
   ],
 
-  // ── J1リーグ：主要都市
+  // J1リーグ：主要都市
   j1: [
     { id: 'tokyo_vic',    name: '東京ヴィクトリア',         league: 'j1', prestige: 4, salary: 130 },
     { id: 'osaka_grd',    name: '大阪グランデ',             league: 'j1', prestige: 4, salary: 120 },
@@ -67,7 +67,7 @@ export const TEAMS: Record<LeagueId, Team[]> = {
     { id: 'chiba_sea',    name: '千葉シーガルズ',           league: 'j1', prestige: 4, salary: 107 },
   ],
 
-  // ── ブンデスリーガ：ドイツ架空クラブ
+  // ブンデスリーガ：ドイツ架空クラブ
   premier_league: [
     { id: 'berlin_sturm',   name: 'ベルリン・シュトルム',       league: 'premier_league', prestige: 5, salary: 280 },
     { id: 'munich_rotw',    name: 'ミュンヘン・ロートヴァイス', league: 'premier_league', prestige: 5, salary: 320 },
@@ -79,7 +79,7 @@ export const TEAMS: Record<LeagueId, Team[]> = {
     { id: 'leipzig_bull',   name: 'ライプツィヒ・ブルシュタイン',league: 'premier_league', prestige: 5, salary: 300 },
   ],
 
-  // ── プレミアリーグ / ラ・リーガ：英西最高峰
+  // プレミアリーグ/ ラ・リーガ：英西最高峰
   champions_league: [
     { id: 'london_royals',  name: 'ロンドン・ロイヤルズ',       league: 'champions_league', prestige: 6, salary: 650 },
     { id: 'manchester_stm', name: 'マンチェスター・ストーム',   league: 'champions_league', prestige: 6, salary: 680 },

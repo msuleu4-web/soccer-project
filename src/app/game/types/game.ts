@@ -116,28 +116,6 @@ export interface SeasonSummary {
 
 export type AwardRarity = 'bronze' | 'silver' | 'gold' | 'legendary';
 
-// ── セーブスロット ─────────────────────────────────────
-export const SLOT_IDS = ['slot1', 'slot2', 'slot3'] as const;
-export type SlotId = typeof SLOT_IDS[number];
-
-export interface SaveSlotPreview {
-  slotId: SlotId;
-  isEmpty: false;
-  playerName: string;
-  position: Position;
-  ovr: number;
-  age: number;
-  currentSeason: number;
-  currentLeague: LeagueId;
-  currentTeam: string;
-  totalGoals: number;
-  updatedAt: string;
-}
-export interface EmptySaveSlot {
-  slotId: SlotId;
-  isEmpty: true;
-}
-export type SaveSlot = SaveSlotPreview | EmptySaveSlot;
 
 export interface SeasonAward {
   id: string;
@@ -207,7 +185,7 @@ export interface GameState {
   pendingAwards: SeasonAward[];      // 今シーズン受賞（表示待ち）
   purchasedItems: string[];          // 購入済み一回限りアイテムID
 
-  // ── ライフスタイル・資産 ────────────────────────────────
+  // ライフスタイル・資産
   realEstate: string[];              // 所有不動産アイテムID
   vehicles: string[];                // 所有車両アイテムID
   cabaretCount: number;              // キャリア通算キャバクラ訪問回数
@@ -217,7 +195,7 @@ export interface GameState {
   isDrugEvent: boolean;              // 麻薬事件フラグ（即エンディング）
   endingId: string | null;           // 到達したエンディングID
 
-  // ── チャンピオンズリーグ ────────────────────────────────
+  // チャンピオンズリーグ
   clQualified: boolean;              // 来季CL出場権獲得
   clActive: boolean;                 // 今季CL参加中
   clGroupStage: number;              // GSマッチ消化数（0-3）
@@ -226,11 +204,11 @@ export interface GameState {
   clEliminated: boolean;             // CL敗退済み
   clTrophies: number;                // CLトロフィー数
 
-  // ── 国際大会 ─────────────────────────────────────────
+  // 国際大会
   nationalCaps: number;              // 代表キャップ数
   nationalGoals: number;             // 代表ゴール数
 
-  // ── ワールドカップ ────────────────────────────────────
+  // ワールドカップ
   wcWins: number;                    // WC優勝回数
   wcActive: boolean;                 // WC開催中
   wcRound: number;                   // 0=GS1 1=GS2 2=GS3 3=SF 4=Final
@@ -239,14 +217,18 @@ export interface GameState {
 
   showSeasonReview: boolean;           // シーズン評価モーダル表示フラグ
 
-  // ── アイテム倉庫（Supabaseに自動保存） ─────────────────
+  // アイテム倉庫（Supabaseに自動保存）
   inventory: InventoryItem[];
 
-  // ── ガチャシステム ────────────────────────────────────
+  // ガチャシステム
   gachaCoins: number;                // 所持GC（廃止 → 互換保持のみ）
   gachaPityStandard: number;         // スタンダード天井カウンター
   gachaPityPickup: number;           // ピックアップ天井カウンター
   gachaTotalPulls: number;           // 累計ガチャ回数
   retireAgeBonus: number;            // ガチャ由来の引退年齢ボーナス
+  ageReduceUsed?: number;            // 時の巻き戻し使用回数（最大2回）
   ballonDorFlag: boolean;            // バロンドール特別フラグ（ガチャ）
+
+  // ストーリー週連動
+  storySeenWeeks?: number[];         // 今シーズン中にストーリーボタンを押した週（5,10,15…）
 }

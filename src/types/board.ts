@@ -1,4 +1,4 @@
-// ── DB から取得する型 ────────────────────────────────────────
+// DB から取得する型
 export interface Team {
   id: string
   name: string
@@ -30,7 +30,7 @@ export interface BoardComment {
   created_at: string
 }
 
-// ── API Request 型 ───────────────────────────────────────────
+// API Request 型
 export interface CreatePostBody {
   team_id: string
   title: string
@@ -48,7 +48,7 @@ export interface VoteBody {
   anon_id: string
 }
 
-// ── API Response 型 ──────────────────────────────────────────
+// API Response 型
 export interface ApiError {
   error: string
   code:

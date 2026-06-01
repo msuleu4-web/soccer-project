@@ -382,7 +382,7 @@ export const GAME_EVENTS: GameEvent[] = [
       },
     ],
   },
-  // ── 追加イベント ──────────────────────────────────────
+  // 追加イベント
 
   {
     id: 'secret_training',
@@ -752,7 +752,7 @@ export const GAME_EVENTS: GameEvent[] = [
     ],
   },
 
-  // ── 他AIとの協力イベント ──────────────────────────────────────
+  // 他AIとの協力イベント
 
   {
     id: 'position_change_proposal',
@@ -950,7 +950,7 @@ export const GAME_EVENTS: GameEvent[] = [
     ],
     condition: (state: GameState) => state.ovr >= 75,
   },
-  // ── キャバクラ・遊興系イベント ─────────────────────────────
+  // キャバクラ・遊興系イベント
 
   {
     id: 'cabaret_invite',

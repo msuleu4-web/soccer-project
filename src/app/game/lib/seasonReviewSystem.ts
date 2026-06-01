@@ -12,8 +12,7 @@ export interface SeasonReviewEntry {
   grade: ReviewGrade;
 }
 
-// ── ゴール基準（リーグ別「平均的なゴール数」） ────────────────
-
+// ゴール基準（リーグ別「平均的なゴール数」）
 const GOAL_BASELINE: Record<string, number> = {
   regional:         4,
   j3:               6,
@@ -23,8 +22,7 @@ const GOAL_BASELINE: Record<string, number> = {
   champions_league: 16,
 };
 
-// ── 総合グレード算出 ──────────────────────────────────────
-
+// 総合グレード算出
 function gradePerformance(
   goals: number,
   assists: number,
@@ -49,19 +47,17 @@ function gradePerformance(
   return 'D';
 }
 
-// ── ランダム選択 ──────────────────────────────────────────
-
+// ランダム選択
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// ── コメントテンプレート ──────────────────────────────────
+// コメントテンプレート
 // ${name}, ${goals}, ${assists}, ${rating}, ${matches}, ${age}, ${league} を置換
 
 type Template = { text: string; sentiment: ReviewSentiment };
 
 function tmpl(text: string, sentiment: ReviewSentiment): Template { return { text, sentiment }; }
 
-// ── 監督 城戸敏雄 ─────────────────────────────────────────
-
+// 監督 城戸敏雄
 const MANAGER_COMMENTS: Record<ReviewGrade, Template[]> = {
   S: [
     tmpl('${name}、今シーズンは申し分なかった。${goals}ゴール${assists}アシスト、評価点${rating}――私が監督としてこれ以上何を求める？チームの宝だ。', 'praise'),
@@ -90,8 +86,7 @@ const MANAGER_COMMENTS: Record<ReviewGrade, Template[]> = {
   ],
 };
 
-// ── スポーツ記者 田辺純一 ─────────────────────────────────
-
+// スポーツ記者 田辺純一
 const JOURNALIST_COMMENTS: Record<ReviewGrade, Template[]> = {
   S: [
     tmpl('今シーズンの${name}は別格だった。${goals}ゴール、評価点${rating}――リーグでも指折りの数字だ。バロンドール候補として名前を挙げるのは時期尚早ではない。', 'praise'),
@@ -120,8 +115,7 @@ const JOURNALIST_COMMENTS: Record<ReviewGrade, Template[]> = {
   ],
 };
 
-// ── ライバル選手 ──────────────────────────────────────────
-
+// ライバル選手
 const RIVAL_COMMENTS: Record<ReviewGrade, Template[]> = {
   S: [
     tmpl('……認めたくないけど、今シーズンは完全にやられた。あのゴールは俺には決められない。来年は俺が上を行く。待ってろよ。', 'praise'),
@@ -150,8 +144,7 @@ const RIVAL_COMMENTS: Record<ReviewGrade, Template[]> = {
   ],
 };
 
-// ── サポーター代表 鈴木健二 ──────────────────────────────
-
+// サポーター代表 鈴木健二
 const FAN_COMMENTS: Record<ReviewGrade, Template[]> = {
   S: [
     tmpl('もう最高！！${goals}ゴール！スタジアムで何度泣きそうになったか。今シーズンはずっと応援してて本当に良かったと思えるシーズンだった。来年も絶対応援する！', 'praise'),
@@ -180,8 +173,7 @@ const FAN_COMMENTS: Record<ReviewGrade, Template[]> = {
   ],
 };
 
-// ── 解説者 前川由貴 ──────────────────────────────────────
-
+// 解説者 前川由貴
 const ANALYST_COMMENTS: Record<ReviewGrade, Template[]> = {
   S: [
     tmpl('データを分析すると、今シーズンの${name}はほぼ全ての指標でリーグ上位に位置している。評価点${rating}はモデル予測値を大きく上回る。次世代のスタープレイヤーとして注目すべき存在だ。', 'praise'),
@@ -210,8 +202,7 @@ const ANALYST_COMMENTS: Record<ReviewGrade, Template[]> = {
   ],
 };
 
-// ── 特殊コンディション追加コメント ───────────────────────
-
+// 特殊コンディション追加コメント
 const CONDUCT_LINES: Template[] = [
   tmpl('……個人的なことには触れたくないが、ピッチ外での噂が耳に入っている。プロとして自分を律することも義務の一つだ。', 'criticism'),
   tmpl('スポーツ紙の一面に載るのはゴールであってほしい。そうでない記事が増えたのが心配だ。', 'criticism'),
@@ -232,14 +223,12 @@ const CL_LINES: Template[] = [
   tmpl('欧州の舞台でも戦った経験は大きい。そのプレッシャーの中でどう動くかが、今後の成長に直結する。', 'neutral'),
 ];
 
-// ── テンプレート文字列置換 ────────────────────────────────
-
+// テンプレート文字列置換
 function resolve(template: string, vars: Record<string, string | number>): string {
   return template.replace(/\$\{(\w+)\}/g, (_, key) => String(vars[key] ?? ''));
 }
 
-// ── メインジェネレーター ──────────────────────────────────
-
+// メインジェネレーター
 export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
   const summary = state.lastSeasonSummary;
   if (!summary) return [];
@@ -271,7 +260,7 @@ export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
 
   const reviews: SeasonReviewEntry[] = [];
 
-  // ── 監督
+  // 監督
   const mgrTemplate = pick(MANAGER_COMMENTS[grade]);
   let mgrComment = resolve(mgrTemplate.text, vars);
   if (isInjuryPlagued) mgrComment += ' ' + resolve(pick(INJURY_LINES).text, vars);
@@ -284,7 +273,7 @@ export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
     grade,
   });
 
-  // ── 記者
+  // 記者
   const jrnTemplate = pick(JOURNALIST_COMMENTS[grade]);
   let jrnComment = resolve(jrnTemplate.text, vars);
   if (hasConductIssue) jrnComment += ' ' + resolve(pick(CONDUCT_LINES).text, vars);
@@ -297,7 +286,7 @@ export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
     grade,
   });
 
-  // ── ライバル
+  // ライバル
   const rivTemplate = pick(RIVAL_COMMENTS[grade]);
   reviews.push({
     reviewerName:  '謎の選手',
@@ -308,7 +297,7 @@ export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
     grade,
   });
 
-  // ── サポーター
+  // サポーター
   const fanTemplate = pick(FAN_COMMENTS[grade]);
   reviews.push({
     reviewerName:  '鈴木 健二',
@@ -319,7 +308,7 @@ export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
     grade,
   });
 
-  // ── 解説者
+  // 解説者
   const anlTemplate = pick(ANALYST_COMMENTS[grade]);
   let anlComment = resolve(anlTemplate.text, vars);
   if (isYoung)  anlComment += ' ' + resolve(pick(YOUNG_LINES).text, vars);
@@ -336,8 +325,7 @@ export function generateSeasonReviews(state: GameState): SeasonReviewEntry[] {
   return reviews;
 }
 
-// ── グレード表示用 ────────────────────────────────────────
-
+// グレード表示用
 export const GRADE_LABEL: Record<ReviewGrade, string> = {
   S: '傑出',
   A: '優秀',

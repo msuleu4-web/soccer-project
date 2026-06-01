@@ -35,9 +35,7 @@ const carCount      = (s: GameState) => (s.vehicles ?? []).length;
 
 export const ENDINGS: GameEnding[] = [
 
-  // ════════════════════════════════════════════════════════
   // 強制終了 (即エンディング)
-  // ════════════════════════════════════════════════════════
   {
     id: 'drug_arrest',
     emoji: '🚨',
@@ -50,9 +48,7 @@ export const ENDINGS: GameEnding[] = [
     condition: s => s.isDrugEvent === true,
   },
 
-  // ════════════════════════════════════════════════════════
   // レジェンドルート (5種)
-  // ════════════════════════════════════════════════════════
   {
     id: 'goat_ending',
     emoji: '🐐',
@@ -109,9 +105,7 @@ export const ENDINGS: GameEnding[] = [
     condition: s => s.age >= 43 && s.ovr >= 70 && conduct(s) >= 75 && cabaret(s) <= 10,
   },
 
-  // ════════════════════════════════════════════════════════
   // 資産家/ビジネスルート (5種)
-  // ════════════════════════════════════════════════════════
   {
     id: 'property_tycoon',
     emoji: '🏠',
@@ -168,9 +162,7 @@ export const ENDINGS: GameEnding[] = [
     condition: s => s.money >= 80000 && conduct(s) >= 70 && reCount(s) >= 2,
   },
 
-  // ════════════════════════════════════════════════════════
   // 監督/指導者ルート (5種)
-  // ════════════════════════════════════════════════════════
   {
     id: 'legendary_manager',
     emoji: '📋',
@@ -227,9 +219,7 @@ export const ENDINGS: GameEnding[] = [
     condition: s => s.money >= 30000 && conduct(s) >= 70 && s.ovr >= 70 && s.currentSeason >= 7,
   },
 
-  // ════════════════════════════════════════════════════════
   // 凡戦/低迷ルート (5種)
-  // ════════════════════════════════════════════════════════
   {
     id: 'journeyman',
     emoji: '🗺️',
@@ -286,9 +276,7 @@ export const ENDINGS: GameEnding[] = [
     condition: () => true, // フォールバック
   },
 
-  // ════════════════════════════════════════════════════════
   // 遊興/破滅ルート (10種)
-  // ════════════════════════════════════════════════════════
   {
     id: 'alcoholism_ending',
     emoji: '🍶',
@@ -400,9 +388,7 @@ export const ENDINGS: GameEnding[] = [
     condition: s => s.money < 1000 && s.age <= 32 && cabaret(s) >= 30,
   },
 
-  // ════════════════════════════════════════════════════════
   // スペシャルエンディング (5種)
-  // ════════════════════════════════════════════════════════
   {
     id: 'perfect_gentleman',
     emoji: '🎩',
@@ -460,14 +446,14 @@ export const ENDINGS: GameEnding[] = [
   },
 ];
 
-// ── エンディング判定 ─────────────────────────────────────
+// エンディング判定
 
 export function determineEnding(state: GameState): GameEnding {
   const sorted = [...ENDINGS].sort((a, b) => b.priority - a.priority);
   return sorted.find(e => e.condition(state)) ?? ENDINGS[ENDINGS.length - 1];
 }
 
-// ── エンディングカテゴリ表示 ──────────────────────────────
+// エンディングカテゴリ表示
 
 export const ENDING_CATEGORY_LABEL: Record<EndingCategory, string> = {
   legend:  'レジェンド',
