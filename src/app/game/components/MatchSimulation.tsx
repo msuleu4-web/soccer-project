@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { MatchResult, MatchEventType } from '../types/game';
+import { getMatchReaction, CHAR_COLOR, CHAR_NAME, EMOTION_ICON } from '../lib/heroineReactions';
 
 interface Props {
   result: MatchResult;
@@ -65,6 +66,7 @@ function eventBorder(type: MatchEventType): string {
 
 export default function MatchSimulation({ result, playerName, highlights: _, position, league, age, ovr, onContinue }: Props) {
   const compCfg = result.competition ? COMPETITION_CONFIG[result.competition] : null;
+  const heroineReaction = useMemo(() => getMatchReaction(result), [result]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [countdown, setCountdown] = useState(3);
   const [shownCount, setShownCount] = useState(0);
@@ -302,6 +304,46 @@ export default function MatchSimulation({ result, playerName, highlights: _, pos
               </div>
             )}
           </div>
+
+          {/* ヒロインの反応 */}
+          {(() => {
+            const color   = CHAR_COLOR[heroineReaction.character];
+            const charSrc = heroineReaction.character === 'misaki'
+              ? '/images/characters/misaki.png'
+              : '/images/characters/rin.png';
+            const bgColor = heroineReaction.character === 'misaki' ? '#0a0f1c' : '#ffffff';
+            const blend   = heroineReaction.character === 'misaki' ? 'screen' : 'multiply';
+            return (
+              <div
+                className="mb-4 rounded-xl p-3 border flex items-start gap-3"
+                style={{ background: `${color}0d`, borderColor: `${color}40` }}
+              >
+                {/* ポートレート */}
+                <div
+                  className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden"
+                  style={{ border: `1.5px solid ${color}`, background: bgColor, boxShadow: `0 0 8px ${color}50` }}
+                >
+                  <img
+                    src={charSrc}
+                    alt={CHAR_NAME[heroineReaction.character]}
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: 'top center', mixBlendMode: blend as 'screen' | 'multiply' }}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                  />
+                </div>
+                {/* 吹き出し */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[11px] font-bold" style={{ color }}>{CHAR_NAME[heroineReaction.character]}</span>
+                    <span className="text-xs">{EMOTION_ICON[heroineReaction.emotion]}</span>
+                  </div>
+                  <p className="text-sm text-text-primary leading-relaxed">
+                    「{heroineReaction.line}」
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           <button
             onClick={onContinue}

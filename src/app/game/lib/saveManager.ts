@@ -1,15 +1,11 @@
-import type { GameState, SaveSlot, SaveSlotPreview, EmptySaveSlot } from '../types/game';
-import { SLOT_IDS, type SlotId } from '../types/game';
+import type { GameState } from '../types/game';
 import { generateStandings } from './standingsEngine';
 import { TEAMS } from './leagueData';
-import { createClient } from '../../../lib/supabase/client';
 
-// ── キー定義 ──────────────────────────────────────────
-const SLOT_KEY    = (id: SlotId) => `goal-labo-save-${id}`;
-const CURRENT_KEY = 'goal-labo-current-slot';
-const LEGACY_KEY  = 'goal-labo-player-game'; // 旧データ後方互換
+const SAVE_KEY  = 'goal-labo-save-slot1';
+const LEGACY_KEY = 'goal-labo-player-game';
+const USER_KEY   = 'goal-labo-user-id';
 
-// ── 後方互換・フィールド補完 ──────────────────────────
 function applyCompat(parsed: GameState): GameState {
   const state: GameState = {
     ...parsed,
@@ -65,7 +61,6 @@ function applyCompat(parsed: GameState): GameState {
     awards:            parsed.awards            ?? [],
   };
 
-  // 順位表がリーグと一致しているか検証
   const leagueTeamIds = new Set((TEAMS[state.currentLeague] ?? []).map(t => t.id));
   const standingsMatchLeague =
     state.leagueStandings.length > 0 &&
@@ -74,11 +69,9 @@ function applyCompat(parsed: GameState): GameState {
   if (!standingsMatchLeague && state.gamePhase !== 'setup') {
     state.leagueStandings = generateStandings(state);
   }
-  // match_dayのままlastMatchResultなしで保存されたデータをリカバリー
   if (state.gamePhase === 'match_day') {
     state.gamePhase = 'playing';
   }
-
   if (state.showSeasonSummary && !state.lastSeasonSummary) {
     state.showSeasonSummary = false;
     if (state.gamePhase !== 'transfer' && state.gamePhase !== 'ending') {
@@ -91,132 +84,52 @@ function applyCompat(parsed: GameState): GameState {
   return state;
 }
 
-// ── 現在アクティブなスロット ──────────────────────────
-export function getCurrentSlotId(): SlotId {
+// 通常プレイでは絶対に到達できない値を検出してリセットする
+// 最大給与(CL想定)×20シーズン×12ヶ月 ≈ 480,000万円 → 1,000,000万以上は不正確定
+function isSuspiciousSave(state: GameState): boolean {
+  if (state.money > 1_000_000) return true;
+  if (state.ovr > 99) return true;
+  if (state.age < 17) return true;
+  // シーズン1・17歳なのにOVR80超 = 初期値改ざん
+  if (state.currentSeason <= 1 && state.age <= 17 && state.ovr >= 80) return true;
+  // 試合数に対してゴールが異常 (1試合10点以上の平均)
+  if (state.matchesPlayed > 0 && state.totalGoals > state.matchesPlayed * 10) return true;
+  return false;
+}
+
+export function saveGame(state: GameState): void {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch {}
+}
+
+export function loadGame(): GameState | null {
   try {
-    const v = localStorage.getItem(CURRENT_KEY);
-    if (v && (SLOT_IDS as readonly string[]).includes(v)) return v as SlotId;
-  } catch {}
-  return 'slot1';
-}
-
-export function setCurrentSlotId(slotId: SlotId): void {
-  try { localStorage.setItem(CURRENT_KEY, slotId); } catch {}
-}
-
-// ── localStorage（同期・即時） ────────────────────────
-export function saveGame(state: GameState, slotId: SlotId): void {
-  try { localStorage.setItem(SLOT_KEY(slotId), JSON.stringify(state)); } catch {}
-}
-
-export function loadGame(slotId: SlotId): GameState | null {
-  try {
-    const raw = localStorage.getItem(SLOT_KEY(slotId))
-      ?? (slotId === 'slot1' ? localStorage.getItem(LEGACY_KEY) : null);
+    const raw = localStorage.getItem(SAVE_KEY) ?? localStorage.getItem(LEGACY_KEY);
     if (!raw) return null;
-    return applyCompat(JSON.parse(raw) as GameState);
-  } catch { return null; }
-}
-
-export function resetGame(slotId: SlotId): void {
-  try {
-    localStorage.removeItem(SLOT_KEY(slotId));
-    if (slotId === 'slot1') localStorage.removeItem(LEGACY_KEY);
-  } catch {}
-}
-
-/** ローカルの全スロットプレビューを取得 */
-export function getAllSlotPreviews(): SaveSlot[] {
-  return SLOT_IDS.map(slotId => {
-    const state = loadGame(slotId);
-    if (!state || state.gamePhase === 'setup' || !state.playerName) {
-      return { slotId, isEmpty: true } as EmptySaveSlot;
+    const state = applyCompat(JSON.parse(raw) as GameState);
+    if (isSuspiciousSave(state)) {
+      resetGame();
+      return null;
     }
-    return {
-      slotId,
-      isEmpty: false,
-      playerName:    state.playerName,
-      position:      state.position,
-      ovr:           state.ovr,
-      age:           state.age,
-      currentSeason: state.currentSeason,
-      currentLeague: state.currentLeague,
-      currentTeam:   state.currentTeam.name,
-      totalGoals:    state.totalGoals,
-      updatedAt:     new Date().toISOString(),
-    } as SaveSlotPreview;
-  });
-}
-
-// ── Supabase（非同期・永続化） ────────────────────────
-export async function saveGameToSupabase(state: GameState, slotId: SlotId): Promise<void> {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from('game_saves').upsert(
-      { user_id: user.id, slot_id: slotId, state, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id,slot_id' }
-    );
-  } catch {}
-}
-
-export async function loadGameFromSupabase(slotId: SlotId): Promise<GameState | null> {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data, error } = await supabase
-      .from('game_saves').select('state')
-      .eq('user_id', user.id).eq('slot_id', slotId).single();
-    if (error || !data) return null;
-    return applyCompat(data.state as GameState);
+    return state;
   } catch { return null; }
 }
 
-export async function loadAllSlotsFromSupabase(): Promise<SaveSlot[]> {
+export function resetGame(): void {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return SLOT_IDS.map(s => ({ slotId: s, isEmpty: true } as EmptySaveSlot));
-
-    const { data, error } = await supabase
-      .from('game_saves').select('slot_id, state, updated_at')
-      .eq('user_id', user.id);
-
-    if (error || !data) return SLOT_IDS.map(s => ({ slotId: s, isEmpty: true } as EmptySaveSlot));
-
-    return SLOT_IDS.map(slotId => {
-      const row = data.find(d => d.slot_id === slotId);
-      if (!row) return { slotId, isEmpty: true } as EmptySaveSlot;
-      const state = applyCompat(row.state as GameState);
-      if (!state || state.gamePhase === 'setup' || !state.playerName) {
-        return { slotId, isEmpty: true } as EmptySaveSlot;
-      }
-      return {
-        slotId, isEmpty: false,
-        playerName:    state.playerName,
-        position:      state.position,
-        ovr:           state.ovr,
-        age:           state.age,
-        currentSeason: state.currentSeason,
-        currentLeague: state.currentLeague,
-        currentTeam:   state.currentTeam.name,
-        totalGoals:    state.totalGoals,
-        updatedAt:     row.updated_at ?? new Date().toISOString(),
-      } as SaveSlotPreview;
-    });
-  } catch {
-    return SLOT_IDS.map(s => ({ slotId: s, isEmpty: true } as EmptySaveSlot));
-  }
+    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(LEGACY_KEY);
+  } catch {}
 }
 
-export async function resetGameFromSupabase(slotId: SlotId): Promise<void> {
+// 異なるユーザーがログインしたらセーブをリセットする
+// userId が null = 未ログイン（匿名）として扱う
+export function checkAndResetForUser(userId: string | null): void {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from('game_saves').delete()
-      .eq('user_id', user.id).eq('slot_id', slotId);
+    const stored = localStorage.getItem(USER_KEY);
+    const current = userId ?? '';
+    if (stored !== null && stored !== current) {
+      resetGame();
+    }
+    localStorage.setItem(USER_KEY, current);
   } catch {}
 }

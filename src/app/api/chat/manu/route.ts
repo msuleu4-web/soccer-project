@@ -20,25 +20,57 @@ export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
 
+        if (!process.env.GROQ_API_KEY) {
+            console.error('GROQ_API_KEY is not set');
+            return new Response(
+                JSON.stringify({ error: 'GROQ_API_KEY not configured' }),
+                { status: 500 }
+            );
+        }
+
         const conversationHistory = messages.map((msg: {role: 'user' | 'model', content: string}) => ({
             role: msg.role === 'model' ? 'assistant' : msg.role,
             content: msg.content,
         }));
 
-        const completion = await groq.chat.completions.create({
-            model: 'openai/gpt-oss-120b',
-            messages: [
-                { role: 'system', content: SYSTEM_PROMPT },
-                ...conversationHistory,
-            ],
-            temperature: 0.8,
-            max_tokens: 500,
-        });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒のタイムアウト
 
-        const reply = completion.choices[0].message.content;
-        return new Response(JSON.stringify({ role: 'model', content: reply }), { status: 200 });
+        try {
+            const completion = await groq.chat.completions.create({
+                model: 'openai/gpt-oss-120b',
+                messages: [
+                    { role: 'system', content: SYSTEM_PROMPT },
+                    ...conversationHistory,
+                ],
+                temperature: 0.8,
+                max_tokens: 500,
+            });
+
+            clearTimeout(timeoutId);
+
+            const reply = completion.choices[0]?.message?.content;
+            if (!reply) {
+                return new Response(
+                    JSON.stringify({ error: 'No response from API' }),
+                    { status: 500 }
+                );
+            }
+
+            return new Response(JSON.stringify({ role: 'model', content: reply }), { status: 200 });
+        } catch (timeoutError) {
+            clearTimeout(timeoutId);
+            console.error('Groq API timeout or error:', timeoutError);
+            return new Response(
+                JSON.stringify({ error: 'API response timeout' }),
+                { status: 504 }
+            );
+        }
     } catch (error) {
         console.error('Error in Groq API route:', error);
-        return new Response('Internal Server Error', { status: 500 });
+        return new Response(
+            JSON.stringify({ error: 'Internal Server Error' }),
+            { status: 500 }
+        );
     }
 }

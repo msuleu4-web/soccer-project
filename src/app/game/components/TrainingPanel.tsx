@@ -9,6 +9,7 @@ interface Props {
   state: GameState;
   onTraining: (type: TrainingType) => void;
   onSkip: () => void;
+  storyBlocked?: boolean;
 }
 
 interface TrainingOption {
@@ -42,7 +43,7 @@ function rateLabel(rate: number): string {
   return '危険';
 }
 
-export default function TrainingPanel({ state, onTraining, onSkip }: Props) {
+export default function TrainingPanel({ state, onTraining, onSkip, storyBlocked }: Props) {
   const isInjured   = state.injury > 0;
   const isExhausted = state.fatigue >= 100;
   const streak      = state.trainingStreak ?? { type: '', count: 0 };
@@ -60,6 +61,13 @@ export default function TrainingPanel({ state, onTraining, onSkip }: Props) {
         )}
       </div>
 
+      {storyBlocked && (
+        <div className="mb-3 p-3 rounded-lg text-xs border text-center"
+          style={{ background: 'rgba(124,58,237,0.08)', borderColor: 'rgba(124,58,237,0.4)', color: '#a855f7' }}>
+          💬 ストーリーを見てから次の週に進めます
+        </div>
+      )}
+
       {isInjured && (
         <div className="mb-3 p-2 rounded-lg text-xs border"
           style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}>
@@ -75,9 +83,9 @@ export default function TrainingPanel({ state, onTraining, onSkip }: Props) {
 
       <div className="grid grid-cols-2 gap-2">
         {TRAINING_OPTIONS.map(opt => {
-          const isDisabled = isInjured
+          const isDisabled = storyBlocked || (isInjured
             ? opt.type !== 'rest'
-            : isExhausted && opt.type !== 'rest';
+            : isExhausted && opt.type !== 'rest');
 
           const isHighFatigue =
             !isInjured && !isExhausted &&
@@ -167,7 +175,8 @@ export default function TrainingPanel({ state, onTraining, onSkip }: Props) {
 
       <button
         onClick={onSkip}
-        className="mt-3 w-full py-2 text-sm text-text-secondary hover:text-text-primary border border-[var(--color-border)] rounded-lg hover:border-[var(--color-accent-green)] transition-colors"
+        disabled={!!storyBlocked}
+        className="mt-3 w-full py-2 text-sm text-text-secondary hover:text-text-primary border border-[var(--color-border)] rounded-lg hover:border-[var(--color-accent-green)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ minHeight: '44px' }}
       >
         週をスキップ（疲労回復）

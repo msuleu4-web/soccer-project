@@ -107,7 +107,6 @@ export default function InventoryModal({ state, onUse, onDiscard, onClose }: Pro
             </h2>
             <p className="text-xs text-text-secondary mt-0.5">
               所持 <span className="font-bold text-text-primary">{inventory.length}</span> 個
-              （Supabase 自動保存）
             </p>
           </div>
           <button onClick={onClose}
@@ -165,6 +164,8 @@ export default function InventoryModal({ state, onUse, onDiscard, onClose }: Pro
             const glow  = RARITY_GLOW[item.rarity];
             const stars = RARITY_STARS[item.rarity];
             const date  = new Date(inv.obtainedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+            const ageReduceUsed = state.ageReduceUsed ?? 0;
+            const isAgeReduceDisabled = item.id === 's3_age' && ageReduceUsed >= 2;
 
             return (
               <div key={inv.uid}
@@ -191,15 +192,27 @@ export default function InventoryModal({ state, onUse, onDiscard, onClose }: Pro
                       </span>
                     </div>
                     <EffectText item={item} />
+                    {isAgeReduceDisabled && (
+                      <p className="text-[10px] font-bold mt-1" style={{ color: '#ef4444' }}>
+                        ※ 使用済 (上限2回)
+                      </p>
+                    )}
                     <p className="text-[10px] text-text-secondary mt-0.5">{date} 取得</p>
                   </div>
 
                   {/* アクション */}
                   <div className="flex flex-col gap-1.5 flex-shrink-0">
                     <button
-                      onClick={() => onUse(inv.uid)}
+                      onClick={() => !isAgeReduceDisabled && onUse(inv.uid)}
+                      disabled={isAgeReduceDisabled}
                       className="px-3 py-1.5 rounded-lg text-xs font-black transition-all"
-                      style={{ background: color, color: '#fff', boxShadow: item.rarity === '★3' ? glow : 'none' }}
+                      style={{
+                        background: isAgeReduceDisabled ? 'var(--bg-surface-elevated)' : color,
+                        color: isAgeReduceDisabled ? 'var(--fg-muted)' : '#fff',
+                        boxShadow: (!isAgeReduceDisabled && item.rarity === '★3') ? glow : 'none',
+                        cursor: isAgeReduceDisabled ? 'not-allowed' : 'pointer',
+                        opacity: isAgeReduceDisabled ? 0.6 : 1,
+                      }}
                     >
                       使う
                     </button>
@@ -219,7 +232,7 @@ export default function InventoryModal({ state, onUse, onDiscard, onClose }: Pro
 
         <div className="px-5 py-3 border-t text-center" style={{ borderColor: 'var(--border-default)' }}>
           <p className="text-[10px] text-text-secondary">
-            ※ アイテムはゲームセーブと同時にSupabaseに保存されます
+            ※ アイテムはゲームセーブと同時に保存されます
           </p>
         </div>
       </div>
