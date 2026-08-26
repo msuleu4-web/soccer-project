@@ -150,7 +150,7 @@ ${formatPlayerStats(awayPlayers)}
 上記データに基づき、詳細な試合分析レビューをJSON形式で生成してください。`;
 
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },

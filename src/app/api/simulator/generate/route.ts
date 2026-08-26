@@ -210,7 +210,7 @@ OVR差を考慮した現実的な勝敗結果にしてください。
 JSON形式のみで応答してください。`;
 
     const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
