@@ -160,11 +160,15 @@ export function useSpeechRecognition({ onFinalResult, onSilence }: UseSpeechReco
     };
   }, []);
 
-  const start = useCallback(() => {
+  const start = useCallback((options?: { continuous?: boolean }) => {
     const recognition = recognitionRef.current;
     if (!recognition) return;
     setError(null);
     heardAnythingRef.current = false;
+    // ハンズフリー用の continuous モードでは、この start() 呼び出し（＝ユーザーの
+    // タップ）以降は二度と start() を呼ばずに済ませる。モバイルブラウザはジェスチャー
+    // なしの start() を無視することがあり、それがハンズフリーで声を拾えない主因だった。
+    recognition.continuous = options?.continuous ?? false;
     try {
       recognition.start();
       setListening(true);

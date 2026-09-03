@@ -54,6 +54,8 @@ export default function GambaPage() {
   messagesRef.current = messages;
 
   const { supported: ttsSupported, speaking, speak, cancel, japaneseVoiceCount } = useSpeechSynthesis();
+  const speakingRef = useRef(speaking);
+  speakingRef.current = speaking;
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -123,6 +125,10 @@ export default function GambaPage() {
     stop: stopListening,
   } = useSpeechRecognition({
     onFinalResult: (transcript) => {
+      // ハンズフリー中はマイクを止めずに喋らせているので、ボット自身の読み上げ声を
+      // 拾ってしまわないよう、喋っている間の認識結果はここで捨てる。
+      if (speakingRef.current) return;
+
       // 認識結果が空・極端に短いときは API に投げず、その場で聞き返す。
       if (transcript.trim().length < 2) {
         setMessages((prev) => [...prev, { role: 'model', content: ASK_AGAIN }]);
@@ -144,12 +150,17 @@ export default function GambaPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, interimText]);
 
-  // ハンズフリー中は、喋り終わったら自動でマイクに戻る。
+  // ハンズフリーは「ユーザーがボタンを押した一度だけ」recognition.start() を呼び、
+  // あとは continuous モードでマイクを開けっぱなしにする。モバイルブラウザの多くは
+  // ユーザー操作を伴わない start() を無視するため、以前のように毎ターン setTimeout
+  // で再開しようとすると（＝ユーザー操作を伴わない start()）スマホで声を拾えなくなる。
+  // 何らかの理由でセッションが途中で切れてしまった場合だけ、最後の望みとして
+  // 自動再開を一度だけ試みる。それでもダメなら手動でタップし直してもらうしかない。
   useEffect(() => {
-    if (!handsFree || loading || speaking || listening) return;
-    const timer = setTimeout(startListening, 400);
+    if (!handsFree || listening) return;
+    const timer = setTimeout(() => startListening({ continuous: true }), 500);
     return () => clearTimeout(timer);
-  }, [handsFree, loading, speaking, listening, startListening]);
+  }, [handsFree, listening, startListening]);
 
   // 自動再生はブラウザに止められるので、最初の挨拶はユーザー操作のときに読み上げる。
   const speakGreetingOnce = useCallback(() => {
@@ -232,8 +243,15 @@ export default function GambaPage() {
             <button
               onClick={() =>
                 setHandsFree((prev) => {
-                  if (prev) stopListening();
-                  else speakGreetingOnce();
+                  if (prev) {
+                    stopListening();
+                  } else {
+                    // このクリックがユーザー操作そのものなので、ここで一度だけ
+                    // start() すれば、以降はマイクを開けっぱなしにできる。
+                    speakGreetingOnce();
+                    cancel();
+                    startListening({ continuous: true });
+                  }
                   return !prev;
                 })
               }
