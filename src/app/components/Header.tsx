@@ -45,6 +45,7 @@ const Header = () => {
       <Link href="/board" className="gl-nav-link">掲示板</Link>
       <Link href="/simulator" className="gl-nav-link">監督AI</Link>
       <Link href="/manu" className="gl-nav-link">マンUくん</Link>
+      <Link href="/gamba" className="gl-nav-link">ガンバくん</Link>
       <Link href="/game" className="gl-nav-link">育成ゲーム</Link>
     </>
   );
