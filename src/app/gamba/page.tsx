@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useMicLevel, useSpeechRecognition, useSpeechSynthesis } from './useSpeech';
+import { useSpeechRecognition, useSpeechSynthesis } from './useSpeech';
 
 interface Message {
   role: 'user' | 'model';
@@ -57,10 +57,16 @@ export default function GambaPage() {
   const speakingRef = useRef(speaking);
   speakingRef.current = speaking;
 
+  // loading（state）だけで連打を防ごうとすると、React の再描画が間に合わない
+  // 一瞬の間に同じクロージャが2回呼ばれてリクエストが二重に飛ぶことがある。
+  // ref なら同期的に読み書きできるので、この隙間を作らない。
+  const sendingRef = useRef(false);
+
   const sendMessage = useCallback(
     async (content: string) => {
       const trimmed = content.trim();
-      if (!trimmed || loading) return;
+      if (!trimmed || sendingRef.current) return;
+      sendingRef.current = true;
 
       cancel();
 
@@ -110,10 +116,11 @@ export default function GambaPage() {
         setMessages([...nextMessages, { role: 'model', content: fallback }]);
         if (voiceEnabled) speak(fallback);
       } finally {
+        sendingRef.current = false;
         setLoading(false);
       }
     },
-    [cancel, loading, speak, voiceEnabled],
+    [cancel, speak, voiceEnabled],
   );
 
   const {
@@ -143,8 +150,6 @@ export default function GambaPage() {
       if (voiceEnabled) speak(NO_MIC_INPUT);
     },
   });
-
-  const { level: micLevel, deviceError: micDeviceError } = useMicLevel(listening);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -312,23 +317,6 @@ export default function GambaPage() {
               </p>
             )}
             {sttError && <p className="text-xs text-red-500 leading-relaxed">{sttError}</p>}
-            {micDeviceError && <p className="text-xs text-red-500 leading-relaxed">{micDeviceError}</p>}
-            {listening && (
-              <div>
-                <p className="text-xs text-text-muted mb-1">マイクの音量</p>
-                <div className="w-full h-2 rounded-full bg-background overflow-hidden border border-border">
-                  <div
-                    className="h-full bg-[var(--color-gamba-blue)] transition-[width] duration-100"
-                    style={{ width: `${Math.round(micLevel * 100)}%` }}
-                  />
-                </div>
-                {micLevel < 0.03 && (
-                  <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                    バーが動いてへんなら、マイクに声が届いてへんで。デバイスの選択とミュートを確認してや。
-                  </p>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="gl-card">

@@ -70,8 +70,10 @@ export function correctVocabulary(text: string): string {
 /** 読み上げやすい形に整える。表示テキストではなく TTS に渡す直前だけに使う。 */
 export function toSpokenForm(text: string): string {
   return text
+    // "9/8" のような裸の m/d は「3/4」等の分数・比率と区別がつかず誤爆するので変換しない。
+    // システムプロンプト側でモデルにスラッシュ日付を使わせない指示済みなので、
+    // 年付き "yyyy/m/d" のような曖昧さのない形だけを対象にする。
     .replace(/(\d{4})[/年](\d{1,2})[/月](\d{1,2})日?/g, '$2月$3日')
-    .replace(/(\d{1,2})\/(\d{1,2})/g, '$1月$2日')
     .replace(/(\d)\s*[-–—ー~〜]\s*(\d)/g, '$1対$2')
     .replace(/\bGK\b/g, 'ゴールキーパー')
     .replace(/\bDF\b/g, 'ディフェンダー')
@@ -194,81 +196,6 @@ export function useSpeechRecognition({ onFinalResult, onSilence }: UseSpeechReco
   }, []);
 
   return { supported, listening, interimText, error, start, stop };
-}
-
-/**
- * マイクに実際に音が届いているかを可視化するための音量メーター。
- * SpeechRecognition のエラーコードだけでは「マイクが無音」なのか
- * 「認識エンジンが拾えていない」のか区別できないので、getUserMedia で直接見る。
- */
-export function useMicLevel(active: boolean) {
-  const [level, setLevel] = useState(0);
-  const [deviceError, setDeviceError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!active) {
-      setLevel(0);
-      return;
-    }
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) return;
-
-    let cancelled = false;
-    let stream: MediaStream | null = null;
-    let audioCtx: AudioContext | null = null;
-    let rafId: number | null = null;
-
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then((s) => {
-        if (cancelled) {
-          s.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        stream = s;
-        const AudioContextCtor =
-          window.AudioContext ??
-          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        audioCtx = new AudioContextCtor();
-        const source = audioCtx.createMediaStreamSource(s);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 512;
-        source.connect(analyser);
-        const data = new Uint8Array(analyser.frequencyBinCount);
-
-        const tick = () => {
-          analyser.getByteTimeDomainData(data);
-          let sumSquares = 0;
-          for (let i = 0; i < data.length; i++) {
-            const v = (data[i] - 128) / 128;
-            sumSquares += v * v;
-          }
-          const rms = Math.sqrt(sumSquares / data.length);
-          setLevel(Math.min(1, rms * 4));
-          rafId = requestAnimationFrame(tick);
-        };
-        tick();
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        console.error('getUserMedia error:', err);
-        const name = err instanceof DOMException ? err.name : '';
-        const messages: Record<string, string> = {
-          NotAllowedError: 'マイクの許可がブロックされてるわ。ブラウザのアドレスバーの鍵マークから許可してくれるか。',
-          NotFoundError: 'マイクが見つからへん。パソコンにマイクが繋がってるか確認してや。',
-          NotReadableError: '他のアプリがマイクを使ってて掴めへんみたいや。他のビデオ通話とか閉じてみて。',
-        };
-        setDeviceError(messages[name] ?? 'マイクにアクセスできへんかったわ。');
-      });
-
-    return () => {
-      cancelled = true;
-      if (rafId) cancelAnimationFrame(rafId);
-      audioCtx?.close().catch(() => {});
-      stream?.getTracks().forEach((t) => t.stop());
-    };
-  }, [active]);
-
-  return { level, deviceError };
 }
 
 export function useSpeechSynthesis() {

@@ -82,9 +82,14 @@ export async function POST(req: Request) {
         }
 
         // 音声認識が空振りしたときは API を叩かずに聞き返す。
+        // クライアントはこのレスポンスをストリーミング応答と同じ「本文＝そのまま話す
+        // テキスト」として読むため、JSON ではなくプレーンテキストで返す必要がある。
         const lastUser = [...messages].reverse().find((m) => m.role === 'user');
         if (!lastUser || lastUser.content.trim().length < 2) {
-            return Response.json({ role: 'model', content: FALLBACK_REPLY }, { status: 200 });
+            return new Response(FALLBACK_REPLY, {
+                status: 200,
+                headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+            });
         }
 
         const older = messages.slice(0, Math.max(0, messages.length - RECENT_TURNS));
