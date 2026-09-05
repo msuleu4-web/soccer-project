@@ -30,6 +30,7 @@ interface SpeechRecognitionLike extends EventTarget {
   start(): void;
   stop(): void;
   abort(): void;
+  onstart: (() => void) | null;
   onresult: ((event: SpeechRecognitionEventLike) => void) | null;
   onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
   onend: (() => void) | null;
@@ -114,6 +115,14 @@ export function useSpeechRecognition({ onFinalResult, onSilence }: UseSpeechReco
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
+    recognition.onstart = () => {
+      // start() を呼んだ直後ではなく、ブラウザが実際に聞き取りを始めた
+      // このタイミングで listening を true にする。モバイルブラウザは
+      // ユーザー操作を伴わない start() を無視して onstart が来ないことがあり、
+      // そのズレを検知できるようにするため。
+      setListening(true);
+    };
+
     recognition.onresult = (event) => {
       heardAnythingRef.current = true;
       let interim = '';
@@ -152,6 +161,7 @@ export function useSpeechRecognition({ onFinalResult, onSilence }: UseSpeechReco
     setSupported(true);
 
     return () => {
+      recognition.onstart = null;
       recognition.onresult = null;
       recognition.onerror = null;
       recognition.onend = null;
@@ -171,9 +181,9 @@ export function useSpeechRecognition({ onFinalResult, onSilence }: UseSpeechReco
     recognition.continuous = options?.continuous ?? false;
     try {
       recognition.start();
-      setListening(true);
+      // listening は onstart が発火してから true にする（下記参照）。
     } catch {
-      // すでに開始済みのときは start() が例外を投げる。状態を合わせるだけでよい。
+      // すでに開始済みのときは start() が例外を投げる。その場合は実際に動いているので true でよい。
       setListening(true);
     }
   }, []);

@@ -152,15 +152,43 @@ export default function GambaPage() {
 
   // ハンズフリーは「ユーザーがボタンを押した一度だけ」recognition.start() を呼び、
   // あとは continuous モードでマイクを開けっぱなしにする。モバイルブラウザの多くは
-  // ユーザー操作を伴わない start() を無視するため、以前のように毎ターン setTimeout
-  // で再開しようとすると（＝ユーザー操作を伴わない start()）スマホで声を拾えなくなる。
-  // 何らかの理由でセッションが途中で切れてしまった場合だけ、最後の望みとして
-  // 自動再開を一度だけ試みる。それでもダメなら手動でタップし直してもらうしかない。
+  // ユーザー操作を伴わない start() を無視するため、セッションが途中で切れたときに
+  // 何度も黙って再試行し続けると「ハンズフリーは ON のまま実際は聞こえていない」
+  // という一番分かりにくい状態になる。なので再試行の回数に上限を設け、それでも
+  // 実際に聞き取りが始まった証拠（listening）が取れなければ諦めて、
+  // ハンズフリーを OFF にした上でユーザーに手動での再開を促す。
+  const handsFreeRef = useRef(handsFree);
+  handsFreeRef.current = handsFree;
+  const listeningRef = useRef(listening);
+  listeningRef.current = listening;
+
+  const attemptHandsFreeResume = useCallback(
+    (attempt: number) => {
+      if (!handsFreeRef.current) return;
+
+      if (attempt > 3) {
+        setHandsFree(false);
+        const msg = 'マイクが切れてもうて、繋ぎ直されへんかったわ。ハンズフリーをもう一回押して再開してくれるか。';
+        setMessages((prev) => [...prev, { role: 'model', content: msg }]);
+        if (voiceEnabled) speak(msg);
+        return;
+      }
+
+      startListening({ continuous: true });
+      setTimeout(() => {
+        if (handsFreeRef.current && !listeningRef.current) {
+          attemptHandsFreeResume(attempt + 1);
+        }
+      }, 1200);
+    },
+    [startListening, voiceEnabled, speak],
+  );
+
   useEffect(() => {
     if (!handsFree || listening) return;
-    const timer = setTimeout(() => startListening({ continuous: true }), 500);
+    const timer = setTimeout(() => attemptHandsFreeResume(1), 500);
     return () => clearTimeout(timer);
-  }, [handsFree, listening, startListening]);
+  }, [handsFree, listening, attemptHandsFreeResume]);
 
   // 自動再生はブラウザに止められるので、最初の挨拶はユーザー操作のときに読み上げる。
   const speakGreetingOnce = useCallback(() => {
