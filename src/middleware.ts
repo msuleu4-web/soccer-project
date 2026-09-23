@@ -49,6 +49,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
+  // ログアウト後にブラウザの戻る/bfcache で認証済みページが
+  // サーバーへ再検証されずそのまま表示されてしまうのを防ぐ
+  if (!publicPath) {
+    response.headers.set('Cache-Control', 'no-store, must-revalidate');
+  }
+
   return response;
 }
 
