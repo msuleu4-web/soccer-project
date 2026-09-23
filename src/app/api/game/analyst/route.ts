@@ -91,15 +91,21 @@ export async function POST(req: Request) {
 
 この試合についてコメントしてください。`;
 
-    const completion = await groq.chat.completions.create({
+    // gpt-oss は推論モデルなので、reasoning_effort を下げないと reasoning トークンが
+    // max_tokens を食い潰して content が空文字で返ってくる（chat/gamba で見つかったのと同じ不具合）。
+    // groq-sdk の型定義に reasoning_effort が無いので as unknown で補う。
+    const completion = (await groq.chat.completions.create({
       model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
       ],
       temperature: 1.0,
-      max_tokens: 200,
-    });
+      max_tokens: 300,
+      reasoning_effort: 'low',
+    } as unknown as Parameters<typeof groq.chat.completions.create>[0])) as {
+      choices: { message: { content: string | null } }[];
+    };
 
     const comment = completion.choices[0].message.content ?? '';
 
