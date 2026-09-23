@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Session } from "@supabase/supabase-js";
@@ -13,7 +12,6 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const supabase = createClient();
-  const router = useRouter();
 
   useEffect(() => {
     const getSession = async () => {
@@ -35,7 +33,7 @@ const Header = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   const NavLinks = () => (
